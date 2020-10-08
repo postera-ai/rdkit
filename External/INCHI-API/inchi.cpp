@@ -73,6 +73,9 @@
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <RDGeneral/BoostEndInclude.h>
+// #if RDK_BUILD_THREADSAFE_SSS
+#include <mutex>
+// #endif
 
 //#define DEBUG 1
 namespace RDKit {
@@ -1701,10 +1704,21 @@ void fixOptionSymbol(const char* in, char* out) {
 
 /*! "reverse" clean up: prepare a molecule to be used with InChI sdk */
 void rCleanUp(RWMol& mol) {
-  RWMol* q = SmilesToMol("[O-][Cl+3]([O-])([O-])O");
+  static RWMol* q;
+
+  // Note: before upstreaming to RDKit, we'll likely need to add a compilation guard like
+  // #if RDK_BUILD_THREADSAFE_SSS
+  static std::once_flag q_init_once;
+  std::call_once(q_init_once, [&]() {q = SmilesToMol("[O-][Cl+3]([O-])([O-])O"); });
+  // #else
+  //   if (!q) {
+  //     q = SmilesToMol("[O-][Cl+3]([O-])([O-])O");
+  //   }
+  // #endif
+  // and also guard the #include<mutex> at the top.
+
   std::vector<MatchVectType> fgpMatches;
   SubstructMatch(mol, *q, fgpMatches);
-  delete q;
   // replace all matches
   for (auto match : fgpMatches) {
     // collect matching atoms
