@@ -14,6 +14,7 @@
 #include <sstream>
 #include <set>
 #include <algorithm>
+#include <numeric>
 #include <RDGeneral/utils.h>
 #include <RDGeneral/Invariant.h>
 #include <RDGeneral/RDLog.h>
@@ -483,17 +484,18 @@ void buildCIPInvariants(const ROMol &mol, DOUBLE_VECT &res) {
   }
 }
 
-void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
-                     bool seedWithInvars) {
+void iterateCIPRanks(const ROMol &mol, const DOUBLE_VECT &invars,
+                     UINT_VECT &ranks, bool seedWithInvars) {
   PRECONDITION(invars.size() == mol.getNumAtoms(), "bad invars size");
   PRECONDITION(ranks.size() >= mol.getNumAtoms(), "bad ranks size");
 
   unsigned int numAtoms = mol.getNumAtoms();
   CIP_ENTRY_VECT cipEntries(numAtoms);
-  INT_LIST allIndices;
-  for (unsigned int i = 0; i < numAtoms; ++i) {
-    allIndices.push_back(i);
+  for (auto& vec : cipEntries) {
+    vec.reserve(16);
   }
+  INT_LIST allIndices(numAtoms);
+  std::iota(allIndices.begin(), allIndices.end(), 0);
 #ifdef VERBOSE_CANON
   BOOST_LOG(rdDebugLog) << "invariants:" << std::endl;
   for (unsigned int i = 0; i < numAtoms; i++) {
@@ -513,11 +515,11 @@ void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
   //  Note: in general one should avoid the temptation to
   //  use invariants here, those lead to incorrect answers
   for (unsigned int i = 0; i < numAtoms; i++) {
-    if (!seedWithInvars) {
+    if (seedWithInvars) {
+      cipEntries[i].push_back(static_cast<int>(invars[i]));
+    } else {
       cipEntries[i].push_back(mol[i]->getAtomicNum());
       cipEntries[i].push_back(static_cast<int>(ranks[i]));
-    } else {
-      cipEntries[i].push_back(static_cast<int>(invars[i]));
     }
   }
 
@@ -535,6 +537,10 @@ void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
   unsigned int numIts = 0;
   int lastNumRanks = -1;
   unsigned int numRanks = *std::max_element(ranks.begin(), ranks.end()) + 1;
+  std::vector<unsigned int> counts(ranks.size());
+  std::vector<unsigned int> updated_nbr_idxs;
+  updated_nbr_idxs.reserve(8);
+
   while (numRanks < numAtoms && numIts < maxIts &&
          (lastNumRanks < 0 ||
           static_cast<unsigned int>(lastNumRanks) < numRanks)) {
@@ -544,8 +550,8 @@ void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
     // for each atom, get a sorted list of its neighbors' ranks:
     //
     for (int &index : allIndices) {
-      CIP_ENTRY localEntry;
-      localEntry.reserve(16);
+      // Note: counts is cleaned up when we drain into cipEntries.
+      updated_nbr_idxs.clear();
 
       // start by pushing on our neighbors' ranks:
       ROMol::OEDGE_ITER beg, end;
@@ -554,49 +560,62 @@ void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
         const Bond *bond = mol[*beg];
         ++beg;
         unsigned int nbrIdx = bond->getOtherAtomIdx(index);
-        const Atom *nbr = mol[nbrIdx];
+        updated_nbr_idxs.push_back(nbrIdx);
 
-        int rank = ranks[nbrIdx] + 1;
-        // put the neighbor in 2N times where N is the bond order as a double.
+        // put the neighbor in 2N times where N is the bond order.
         // this is to treat aromatic linkages on fair footing. i.e. at least in
-        // the
-        // first iteration --c(:c):c and --C(=C)-C should look the same.
+        // the first iteration --c(:c):c and --C(=C)-C should look the same.
         // this was part of issue 3009911
 
-        unsigned int count;
-        if (bond->getBondType() == Bond::DOUBLE && nbr->getAtomicNum() == 15 &&
-            (nbr->getDegree() == 4 || nbr->getDegree() == 3)) {
-          // a special case for chiral phosphorous compounds
-          // (this was leading to incorrect assignment of
-          // R/S labels ):
-          count = 1;
-
-          // general justification of this is:
-          // Paragraph 2.2. in the 1966 article is "Valence-Bond Conventions:
-          // Multiple-Bond Unsaturation and Aromaticity". It contains several
-          // conventions of which convention (b) is the one applying here:
-          // "(b) Contributions by d orbitals to bonds of quadriligant atoms are
-          // neglected."
-          // FIX: this applies to more than just P
-        } else {
-          count = static_cast<unsigned int>(
-              floor(2. * bond->getBondTypeAsDouble() + .1));
+        // a special case for chiral phosphorous compounds
+        // (this was leading to incorrect assignment of R/S labels ):
+        bool is_chiral_phosphorous_special_case;
+        if (bond->getBondType() != Bond::DOUBLE) {
+          is_chiral_phosphorous_special_case = false;
+        } else {  // double bond
+          const Atom *nbr = mol[nbrIdx];
+          if (nbr->getAtomicNum() != 15) {
+            is_chiral_phosphorous_special_case = false;
+          } else {
+            unsigned int nbr_deg = nbr->getDegree();
+            is_chiral_phosphorous_special_case = nbr_deg == 3 || nbr_deg == 4;
+          }
         }
-        auto ePos =
-            std::lower_bound(localEntry.begin(), localEntry.end(), rank);
-        localEntry.insert(ePos, count, rank);
-        ++nbr;
-      }
-      // add a zero for each coordinated H:
-      // (as long as we're not a query atom)
-      if (!mol[index]->hasQuery()) {
-        localEntry.insert(localEntry.begin(), mol[index]->getTotalNumHs(), 0);
+
+        // general justification of this is:
+        // Paragraph 2.2. in the 1966 article is "Valence-Bond Conventions:
+        // Multiple-Bond Unsaturation and Aromaticity". It contains several
+        // conventions of which convention (b) is the one applying here:
+        // "(b) Contributions by d orbitals to bonds of quadriligant atoms are
+        // neglected."
+        // FIX: this applies to more than just P
+        if (is_chiral_phosphorous_special_case) {
+          counts[nbrIdx] += 1;
+        } else {
+          counts[nbrIdx] += bond->getTwiceBondType();
+        }
       }
 
       // we now have a sorted list of our neighbors' ranks,
       // copy it on in reversed order:
-      cipEntries[index].insert(cipEntries[index].end(), localEntry.rbegin(),
-                               localEntry.rend());
+      if (updated_nbr_idxs.size() > 1) {  // compare vs 1 for performance.
+        std::sort(std::begin(updated_nbr_idxs), std::end(updated_nbr_idxs),
+                 [&ranks](unsigned int idx1, unsigned int idx2) {
+                   return ranks[idx1] > ranks[idx2];
+                  });
+      }
+      for (auto nbrIdx : updated_nbr_idxs) {
+        unsigned int count = counts[nbrIdx];
+        cipEntries[index].insert(
+          cipEntries[index].end(), count, ranks[nbrIdx] + 1);
+        counts[nbrIdx] = 0;
+      }
+      // add a zero for each coordinated H as long as we're not a query atom
+      if (!mol[index]->hasQuery()) {
+        cipEntries[index].insert(
+          cipEntries[index].end(), mol[index]->getTotalNumHs(), 0);
+      }
+
       if (cipEntries[index].size() > longestEntry) {
         longestEntry = rdcast<unsigned int>(cipEntries[index].size());
       }
