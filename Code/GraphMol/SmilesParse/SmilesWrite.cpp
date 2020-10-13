@@ -306,7 +306,7 @@ std::string FragmentSmilesConstruct(
 
   Canon::MolStack molStack;
   // try to prevent excessive reallocation
-  molStack.reserve(mol.getNumAtoms() + mol.getNumBonds());
+  molStack.reserve(2 * mol.getNumAtoms() + 2 * mol.getNumBonds());
   std::stringstream res;
 
   std::map<int, int> ringClosureMap;
