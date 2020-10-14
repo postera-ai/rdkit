@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <numeric>
 
 #include <RDGeneral/BoostStartInclude.h>
 
@@ -432,7 +433,8 @@ std::vector<std::unique_ptr<MolSanitizeException>> detectChemistryProblems(
 std::vector<ROMOL_SPTR> getMolFrags(const ROMol &mol, bool sanitizeFrags,
                                     INT_VECT *frags,
                                     VECT_INT_VECT *fragsMolAtomMapping,
-                                    bool copyConformers) {
+                                    bool copyConformers,
+                                    bool* shortCircuitOnSingle) {
   bool ownIt = false;
   INT_VECT *mapping;
   if (frags) {
@@ -444,16 +446,19 @@ std::vector<ROMOL_SPTR> getMolFrags(const ROMol &mol, bool sanitizeFrags,
   unsigned int nFrags = getMolFrags(mol, *mapping);
   std::vector<ROMOL_SPTR> res;
   if (nFrags == 1) {
+    if (fragsMolAtomMapping) {
+      fragsMolAtomMapping->emplace_back(mol.getNumAtoms());
+      std::iota(fragsMolAtomMapping->back().begin(), fragsMolAtomMapping->back().end(), 0);
+    }
+
+    if (shortCircuitOnSingle != nullptr) {
+      *shortCircuitOnSingle = true;
+      return res;
+    }
+
     auto *tmp = new ROMol(mol);
     ROMOL_SPTR sptr(tmp);
     res.push_back(sptr);
-    if (fragsMolAtomMapping) {
-      INT_VECT comp;
-      for (unsigned int idx = 0; idx < mol.getNumAtoms(); ++idx) {
-        comp.push_back(idx);
-      }
-      (*fragsMolAtomMapping).push_back(comp);
-    }
   } else {
     std::vector<int> ids(mol.getNumAtoms(), -1);
     boost::dynamic_bitset<> copiedAtoms(mol.getNumAtoms(), 0);

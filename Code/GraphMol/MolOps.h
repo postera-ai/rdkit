@@ -104,7 +104,7 @@ RDKIT_GRAPHMOL_EXPORT unsigned int getMolFrags(
 RDKIT_GRAPHMOL_EXPORT std::vector<boost::shared_ptr<ROMol>> getMolFrags(
     const ROMol &mol, bool sanitizeFrags = true, std::vector<int> *frags = 0,
     std::vector<std::vector<int>> *fragsMolAtomMapping = 0,
-    bool copyConformers = true);
+    bool copyConformers = true, bool *shortCircuitOnSingle = nullptr);
 
 //! splits a molecule into pieces based on labels assigned using a query
 /*!
