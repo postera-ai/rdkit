@@ -1464,6 +1464,8 @@ std::pair<bool, bool> assignAtomChiralCodes(ROMol &mol, UINT_VECT &ranks,
                "bad rank vector size");
   bool atomChanged = false;
   unsigned int unassignedAtoms = 0;
+  Chirality::INT_PAIR_VECT nbrs;
+  nbrs.reserve(4);
 
   // ------------------
   // now loop over each atom and, if it's marked as chiral,
@@ -1485,7 +1487,7 @@ std::pair<bool, bool> assignAtomChiralCodes(ROMol &mol, UINT_VECT &ranks,
         //  if we need to, get the "CIP" ranking of each atom:
         assignAtomCIPRanks(mol, ranks);
       }
-      Chirality::INT_PAIR_VECT nbrs;
+      nbrs.clear();
       bool legalCenter, hasDupes;
       boost::tie(legalCenter, hasDupes) =
           isAtomPotentialChiralCenter(atom, mol, ranks, nbrs);
