@@ -277,8 +277,9 @@ void GetBondSmiles(std::ostringstream&out, const Bond *bond, int atomToLeftIdx,
       if (atomToLeftIdx >= 0 &&
           bond->getBeginAtomIdx() == static_cast<unsigned int>(atomToLeftIdx)) {
         out << "->";
+      } else {
+        out << "<-";
       }
-      out << "<-";
       break;
     default:
       out << "~";
