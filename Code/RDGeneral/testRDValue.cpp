@@ -179,6 +179,7 @@ void testProp(T val) {
     RDProps p;
     p.setProp<T>("foo", val);
     TEST_ASSERT(streamWriteProps(ss, p));
+    TEST_ASSERT(p.getProp<T>("foo") == val);
   }
 
   {

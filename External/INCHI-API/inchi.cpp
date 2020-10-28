@@ -60,6 +60,7 @@
 #include <GraphMol/Chirality.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
+#include <RDGeneral/types.h>
 #include <inchi_api.h>
 #include <cstring>
 #include <vector>
@@ -1852,7 +1853,7 @@ std::string MolToInchi(const ROMol& mol, ExtraInchiReturnValues& rv,
 
     // convert tetrahedral chirality info to Stereo0D
     if (atom->getChiralTag() != Atom::CHI_UNSPECIFIED ||
-        atom->hasProp("molParity")) {
+        atom->hasProp(common_properties::molParityKey)) {
       // we ignore the molParity if the number of neighbors are below 3
       atom->calcImplicitValence();
       if (atom->getNumImplicitHs() + atom->getDegree() < 3) {

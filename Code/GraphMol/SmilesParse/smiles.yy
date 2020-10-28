@@ -169,7 +169,7 @@ mol: atomd {
   molList->resize( sz + 1);
   (*molList)[ sz ] = new RWMol();
   RDKit::RWMol *curMol = (*molList)[ sz ];
-  $1->setProp(RDKit::common_properties::_SmilesStart,1);
+  $1->setProp(RDKit::common_properties::_SmilesStartKey,1);
   curMol->addAtom($1, true, true);
   //delete $1;
   $$ = sz;
@@ -215,7 +215,7 @@ mol: atomd {
 
 | mol SEPARATOR_TOKEN atomd {
   RWMol *mp = (*molList)[$$];
-  $3->setProp(RDKit::common_properties::_SmilesStart,1,true);
+  $3->setProp(RDKit::common_properties::_SmilesStartKey,1,true);
   mp->addAtom($3,true,true);
 }
 
@@ -227,14 +227,14 @@ mol: atomd {
   Bond *newB = mp->createPartialBond(atom->getIdx(),
 				     Bond::UNSPECIFIED);
   mp->setBondBookmark(newB,$2);
-  newB->setProp(RDKit::common_properties::_unspecifiedOrder,1);
+  newB->setProp(RDKit::common_properties::_unspecifiedOrderKey,1);
 
   SmilesParseOps::CheckRingClosureBranchStatus(atom,mp);
 
   INT_VECT tmp;
-  atom->getPropIfPresent(RDKit::common_properties::_RingClosures,tmp);
+  atom->getPropIfPresent(RDKit::common_properties::_RingClosuresKey,tmp);
   tmp.push_back(-($2+1));
-  atom->setProp(RDKit::common_properties::_RingClosures,tmp);
+  atom->setProp(RDKit::common_properties::_RingClosuresKey,tmp);
 }
 
 | mol BOND_TOKEN ring_number {
@@ -242,8 +242,8 @@ mol: atomd {
   Atom *atom=mp->getActiveAtom();
   Bond *newB = mp->createPartialBond(atom->getIdx(),
 				     $2->getBondType());
-  if($2->hasProp(RDKit::common_properties::_unspecifiedOrder)){
-    newB->setProp(RDKit::common_properties::_unspecifiedOrder,1);
+  if($2->hasProp(RDKit::common_properties::_unspecifiedOrderKey)){
+    newB->setProp(RDKit::common_properties::_unspecifiedOrderKey,1);
   }
   newB->setBondDir($2->getBondDir());
   mp->setAtomBookmark(atom,$3);
@@ -252,9 +252,9 @@ mol: atomd {
   SmilesParseOps::CheckRingClosureBranchStatus(atom,mp);
 
   INT_VECT tmp;
-  atom->getPropIfPresent(RDKit::common_properties::_RingClosures,tmp);
+  atom->getPropIfPresent(RDKit::common_properties::_RingClosuresKey,tmp);
   tmp.push_back(-($3+1));
-  atom->setProp(RDKit::common_properties::_RingClosures,tmp);
+  atom->setProp(RDKit::common_properties::_RingClosuresKey,tmp);
   delete $2;
 }
 
@@ -269,9 +269,9 @@ mol: atomd {
   SmilesParseOps::CheckRingClosureBranchStatus(atom,mp);
 
   INT_VECT tmp;
-  atom->getPropIfPresent(RDKit::common_properties::_RingClosures,tmp);
+  atom->getPropIfPresent(RDKit::common_properties::_RingClosuresKey,tmp);
   tmp.push_back(-($3+1));
-  atom->setProp(RDKit::common_properties::_RingClosures,tmp);
+  atom->setProp(RDKit::common_properties::_RingClosuresKey,tmp);
 }
 
 | mol GROUP_OPEN_TOKEN atomd {
@@ -337,7 +337,7 @@ atomd:	simple_atom
 {
   $$ = $2;
   $$->setNoImplicit(true);
-  $$->setProp(RDKit::common_properties::molAtomMapNumber,$4);
+  $$->setProp(RDKit::common_properties::molAtomMapNumberKey,$4);
 }
 | ATOM_OPEN_TOKEN charge_element ATOM_CLOSE_TOKEN
 {
@@ -405,14 +405,14 @@ number:  ZERO_TOKEN
 
 /* --------------------------------------------------------------- */
 nonzero_number:  NONZERO_DIGIT_TOKEN
-| nonzero_number digit { 
-  if($1 >= std::numeric_limits<std::int32_t>::max()/10 || 
+| nonzero_number digit {
+  if($1 >= std::numeric_limits<std::int32_t>::max()/10 ||
      $1*10 >= std::numeric_limits<std::int32_t>::max()-$2 ){
      yyerror(input,molList,branchPoints,scanner,start_token,"number too large");
      yyErrorCleanup(molList);
      YYABORT;
   }
-  $$ = $1*10 + $2; 
+  $$ = $1*10 + $2;
   }
 ;
 

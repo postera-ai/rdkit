@@ -500,7 +500,7 @@ std::vector<ROMOL_SPTR> getMolFrags(const ROMol &mol, bool sanitizeFrags,
     for (unsigned int idx = 0; idx < mol.getNumAtoms(); ++idx) {
       const Atom *oAtm = mol.getAtomWithIdx(idx);
       INT_VECT ringStereoAtomsMol;
-      if (oAtm->getPropIfPresent(common_properties::_ringStereoAtoms,
+      if (oAtm->getPropIfPresent(common_properties::_ringStereoAtomsKey,
                                  ringStereoAtomsMol)) {
         INT_VECT ringStereoAtomsCopied;
         for (int rnbr : ringStereoAtomsMol) {
@@ -512,7 +512,7 @@ std::vector<ROMOL_SPTR> getMolFrags(const ROMol &mol, bool sanitizeFrags,
           ringStereoAtomsCopied.push_back(ridx);
         }
         res[(*mapping)[idx]]->getAtomWithIdx(ids[idx])->setProp(
-            common_properties::_ringStereoAtoms, ringStereoAtomsCopied);
+            common_properties::_ringStereoAtomsKey, ringStereoAtomsCopied);
       }
     }
 

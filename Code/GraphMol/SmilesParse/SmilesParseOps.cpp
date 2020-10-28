@@ -219,7 +219,7 @@ void AdjustAtomChiralityFlags(RWMol *mol) {
       // need to insert into the list in a particular order
       //
       INT_VECT ringClosures;
-      atom->getPropIfPresent(common_properties::_RingClosures, ringClosures);
+      atom->getPropIfPresent(common_properties::_RingClosuresKey, ringClosures);
 
 #if 0
       std::cerr << "CLOSURES: ";
@@ -296,7 +296,7 @@ void AdjustAtomChiralityFlags(RWMol *mol) {
       //      those cases by looking for unsaturated atoms
       //
       if (Canon::chiralAtomNeedsTagInversion(
-              *mol, atom, atom->hasProp(common_properties::_SmilesStart),
+              *mol, atom, atom->hasProp(common_properties::_SmilesStartKey),
               ringClosures.size())) {
         ++nSwaps;
       }
@@ -328,7 +328,7 @@ Bond::BondType GetUnspecifiedBondType(const RWMol *mol, const Atom *atom1,
 void SetUnspecifiedBondTypes(RWMol *mol) {
   PRECONDITION(mol, "no molecule");
   for (auto bond : mol->bonds()) {
-    if (bond->hasProp(RDKit::common_properties::_unspecifiedOrder)) {
+    if (bond->hasProp(RDKit::common_properties::_unspecifiedOrderKey)) {
       bond->setBondType(GetUnspecifiedBondType(mol, bond->getBeginAtom(),
                                                bond->getEndAtom()));
       if (bond->getBondType() == Bond::AROMATIC) {
@@ -461,7 +461,7 @@ void CloseMolRings(RWMol *mol, bool toleratePartials) {
           //           << bond2->getBondType() << "("
           //           << bond2->hasProp(common_properties::_unspecifiedOrder)
           //           << "):" << bond2->getBondDir() << std::endl;
-          if (!bond1->hasProp(common_properties::_unspecifiedOrder)) {
+          if (!bond1->hasProp(common_properties::_unspecifiedOrderKey)) {
             matchedBond = bond1;
             if (matchedBond->getBondType() == Bond::DATIVEL) {
               matchedBond->setBeginAtomIdx(atom2->getIdx());
@@ -507,25 +507,25 @@ void CloseMolRings(RWMol *mol, bool toleratePartials) {
           // property:
           if (bondIdx > -1) {
             CHECK_INVARIANT(
-                atom1->hasProp(common_properties::_RingClosures) &&
-                    atom2->hasProp(common_properties::_RingClosures),
+                atom1->hasProp(common_properties::_RingClosuresKey) &&
+                    atom2->hasProp(common_properties::_RingClosuresKey),
                 "somehow atom doesn't have _RingClosures property.");
             INT_VECT closures;
-            atom1->getProp(common_properties::_RingClosures, closures);
+            atom1->getProp(common_properties::_RingClosuresKey, closures);
             auto closurePos = std::find(closures.begin(), closures.end(),
                                         -(bookmark.first + 1));
             CHECK_INVARIANT(closurePos != closures.end(),
                             "could not find bookmark in atom _RingClosures");
             *closurePos = bondIdx - 1;
-            atom1->setProp(common_properties::_RingClosures, closures);
+            atom1->setProp(common_properties::_RingClosuresKey, closures);
 
-            atom2->getProp(common_properties::_RingClosures, closures);
+            atom2->getProp(common_properties::_RingClosuresKey, closures);
             closurePos = std::find(closures.begin(), closures.end(),
                                    -(bookmark.first + 1));
             CHECK_INVARIANT(closurePos != closures.end(),
                             "could not find bookmark in atom _RingClosures");
             *closurePos = bondIdx - 1;
-            atom2->setProp(common_properties::_RingClosures, closures);
+            atom2->setProp(common_properties::_RingClosuresKey, closures);
           }
           bookmarkedAtomsToRemove.push_back(atom1);
           bookmarkedAtomsToRemove.push_back(atom2);
@@ -545,11 +545,11 @@ void CloseMolRings(RWMol *mol, bool toleratePartials) {
 void CleanupAfterParsing(RWMol *mol) {
   PRECONDITION(mol, "no molecule");
   for (auto atom : mol->atoms()) {
-    atom->clearProp(common_properties::_RingClosures);
-    atom->clearProp(common_properties::_SmilesStart);
+    atom->clearProp(common_properties::_RingClosuresKey);
+    atom->clearProp(common_properties::_SmilesStartKey);
   }
   for (auto bond : mol->bonds()) {
-    bond->clearProp(common_properties::_unspecifiedOrder);
+    bond->clearProp(common_properties::_unspecifiedOrderKey);
   }
 }
 

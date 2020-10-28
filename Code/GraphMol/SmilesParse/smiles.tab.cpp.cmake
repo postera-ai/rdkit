@@ -1674,7 +1674,7 @@ yyreduce:
   molList->resize( sz + 1);
   (*molList)[ sz ] = new RWMol();
   RDKit::RWMol *curMol = (*molList)[ sz ];
-  (yyvsp[0].atom)->setProp(RDKit::common_properties::_SmilesStart,1);
+  (yyvsp[0].atom)->setProp(RDKit::common_properties::_SmilesStartKey,1);
   curMol->addAtom((yyvsp[0].atom), true, true);
   //delete $1;
   (yyval.moli) = sz;
@@ -1736,7 +1736,7 @@ yyreduce:
 #line 216 "smiles.yy"
                             {
   RWMol *mp = (*molList)[(yyval.moli)];
-  (yyvsp[0].atom)->setProp(RDKit::common_properties::_SmilesStart,1,true);
+  (yyvsp[0].atom)->setProp(RDKit::common_properties::_SmilesStartKey,1,true);
   mp->addAtom((yyvsp[0].atom),true,true);
 }
 #line 1743 "/scratch/RDKit_git/Code/GraphMol/SmilesParse/smiles.tab.cpp"
@@ -1752,14 +1752,14 @@ yyreduce:
   Bond *newB = mp->createPartialBond(atom->getIdx(),
 				     Bond::UNSPECIFIED);
   mp->setBondBookmark(newB,(yyvsp[0].ival));
-  newB->setProp(RDKit::common_properties::_unspecifiedOrder,1);
+  newB->setProp(RDKit::common_properties::_unspecifiedOrderKey,1);
 
   SmilesParseOps::CheckRingClosureBranchStatus(atom,mp);
 
   INT_VECT tmp;
-  atom->getPropIfPresent(RDKit::common_properties::_RingClosures,tmp);
+  atom->getPropIfPresent(RDKit::common_properties::_RingClosuresKey,tmp);
   tmp.push_back(-((yyvsp[0].ival)+1));
-  atom->setProp(RDKit::common_properties::_RingClosures,tmp);
+  atom->setProp(RDKit::common_properties::_RingClosuresKey,tmp);
 }
 #line 1765 "/scratch/RDKit_git/Code/GraphMol/SmilesParse/smiles.tab.cpp"
     break;
@@ -1771,8 +1771,8 @@ yyreduce:
   Atom *atom=mp->getActiveAtom();
   Bond *newB = mp->createPartialBond(atom->getIdx(),
 				     (yyvsp[-1].bond)->getBondType());
-  if((yyvsp[-1].bond)->hasProp(RDKit::common_properties::_unspecifiedOrder)){
-    newB->setProp(RDKit::common_properties::_unspecifiedOrder,1);
+  if((yyvsp[-1].bond)->hasProp(RDKit::common_properties::_unspecifiedOrderKey)){
+    newB->setProp(RDKit::common_properties::_unspecifiedOrderKey,1);
   }
   newB->setBondDir((yyvsp[-1].bond)->getBondDir());
   mp->setAtomBookmark(atom,(yyvsp[0].ival));
@@ -1781,9 +1781,9 @@ yyreduce:
   SmilesParseOps::CheckRingClosureBranchStatus(atom,mp);
 
   INT_VECT tmp;
-  atom->getPropIfPresent(RDKit::common_properties::_RingClosures,tmp);
+  atom->getPropIfPresent(RDKit::common_properties::_RingClosuresKey,tmp);
   tmp.push_back(-((yyvsp[0].ival)+1));
-  atom->setProp(RDKit::common_properties::_RingClosures,tmp);
+  atom->setProp(RDKit::common_properties::_RingClosuresKey,tmp);
   delete (yyvsp[-1].bond);
 }
 #line 1790 "/scratch/RDKit_git/Code/GraphMol/SmilesParse/smiles.tab.cpp"
@@ -1802,9 +1802,9 @@ yyreduce:
   SmilesParseOps::CheckRingClosureBranchStatus(atom,mp);
 
   INT_VECT tmp;
-  atom->getPropIfPresent(RDKit::common_properties::_RingClosures,tmp);
+  atom->getPropIfPresent(RDKit::common_properties::_RingClosuresKey,tmp);
   tmp.push_back(-((yyvsp[0].ival)+1));
-  atom->setProp(RDKit::common_properties::_RingClosures,tmp);
+  atom->setProp(RDKit::common_properties::_RingClosuresKey,tmp);
 }
 #line 1810 "/scratch/RDKit_git/Code/GraphMol/SmilesParse/smiles.tab.cpp"
     break;
@@ -1890,7 +1890,7 @@ yyreduce:
 {
   (yyval.atom) = (yyvsp[-3].atom);
   (yyval.atom)->setNoImplicit(true);
-  (yyval.atom)->setProp(RDKit::common_properties::molAtomMapNumber,(yyvsp[-1].ival));
+  (yyval.atom)->setProp(RDKit::common_properties::molAtomMapNumberKey,(yyvsp[-1].ival));
 }
 #line 1896 "/scratch/RDKit_git/Code/GraphMol/SmilesParse/smiles.tab.cpp"
     break;
@@ -2062,14 +2062,14 @@ yyreduce:
 
   case 69:
 #line 408 "smiles.yy"
-                       { 
-  if((yyvsp[-1].ival) >= std::numeric_limits<std::int32_t>::max()/10 || 
+                       {
+  if((yyvsp[-1].ival) >= std::numeric_limits<std::int32_t>::max()/10 ||
      (yyvsp[-1].ival)*10 >= std::numeric_limits<std::int32_t>::max()-(yyvsp[0].ival) ){
      yyerror(input,molList,branchPoints,scanner,start_token,"number too large");
      yyErrorCleanup(molList);
      YYABORT;
   }
-  (yyval.ival) = (yyvsp[-1].ival)*10 + (yyvsp[0].ival); 
+  (yyval.ival) = (yyvsp[-1].ival)*10 + (yyvsp[0].ival);
   }
 #line 2075 "/scratch/RDKit_git/Code/GraphMol/SmilesParse/smiles.tab.cpp"
     break;

@@ -52,7 +52,7 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
   bool needsBracket = false;
   std::string symb;
   bool hasCustomSymbol =
-      atom->getPropIfPresent(common_properties::smilesSymbol, symb);
+      atom->getPropIfPresent(common_properties::smilesSymbolKey, symb);
   if (!hasCustomSymbol) {
     symb = PeriodicTable::getTable()->getElementSymbol(num);
   }
@@ -61,9 +61,9 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
   std::string atString = "";
   if (isomericSmiles ||
       (atom->hasOwningMol() &&
-       atom->getOwningMol().hasProp(common_properties::_doIsoSmiles))) {
+       atom->getOwningMol().hasProp(common_properties::_doIsoSmilesKey))) {
     if (atom->getChiralTag() != Atom::CHI_UNSPECIFIED &&
-        !atom->hasProp(common_properties::_brokenChirality)) {
+        !atom->hasProp(common_properties::_brokenChiralityKey)) {
       switch (atom->getChiralTag()) {
         case Atom::CHI_TETRAHEDRAL_CW:
           atString = "@@";
@@ -105,11 +105,11 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
     }
 
     if (fc || nonStandard ||
-        atom->hasProp(common_properties::molAtomMapNumber)) {
+        atom->hasProp(common_properties::molAtomMapNumberKey)) {
       needsBracket = true;
     } else if ((isomericSmiles || (atom->hasOwningMol() &&
                                    atom->getOwningMol().hasProp(
-                                       common_properties::_doIsoSmiles))) &&
+                                       common_properties::_doIsoSmilesKey))) &&
                (isotope || !atString.empty() )) {
       needsBracket = true;
     }
@@ -122,7 +122,7 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
 
   if (isotope && (isomericSmiles || (atom->hasOwningMol() &&
                                      atom->getOwningMol().hasProp(
-                                         common_properties::_doIsoSmiles)))) {
+                                         common_properties::_doIsoSmilesKey)))) {
     out << isotope;
   }
   // this was originally only done for the organic subset,
@@ -154,7 +154,7 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
     }
 
     int mapNum;
-    if (atom->getPropIfPresent(common_properties::molAtomMapNumber, mapNum)) {
+    if (atom->getPropIfPresent(common_properties::molAtomMapNumberKey, mapNum)) {
       out << ":" << mapNum;
     }
     out << "]";
@@ -163,7 +163,7 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
   // If the atom has this property, the contained string will
   // be inserted directly in the SMILES:
   std::string label;
-  if (atom->getPropIfPresent(common_properties::_supplementalSmilesLabel,
+  if (atom->getPropIfPresent(common_properties::_supplementalSmilesLabelKey,
                              label)) {
     out << label;
   }
@@ -197,7 +197,7 @@ void GetBondSmiles(std::ostringstream&out, const Bond *bond, int atomToLeftIdx,
 
   Bond::BondDir dir = bond->getBondDir();
 
-  bond->clearProp(common_properties::_TraversalRingClosureBond);
+  bond->clearProp(common_properties::_TraversalRingClosureBondKey);
 
   switch (bond->getBondType()) {
     case Bond::SINGLE:
@@ -206,14 +206,14 @@ void GetBondSmiles(std::ostringstream&out, const Bond *bond, int atomToLeftIdx,
           case Bond::ENDDOWNRIGHT:
             if (allBondsExplicit || (bond->hasOwningMol() &&
                                      bond->getOwningMol().hasProp(
-                                         common_properties::_doIsoSmiles))) {
+                                         common_properties::_doIsoSmilesKey))) {
               out << "\\";
             }
             break;
           case Bond::ENDUPRIGHT:
             if (allBondsExplicit || (bond->hasOwningMol() &&
                                      bond->getOwningMol().hasProp(
-                                         common_properties::_doIsoSmiles))) {
+                                         common_properties::_doIsoSmilesKey))) {
               out << "/";
             }
             break;
@@ -252,14 +252,14 @@ void GetBondSmiles(std::ostringstream&out, const Bond *bond, int atomToLeftIdx,
           case Bond::ENDDOWNRIGHT:
             if (allBondsExplicit || (bond->hasOwningMol() &&
                                      bond->getOwningMol().hasProp(
-                                         common_properties::_doIsoSmiles))) {
+                                         common_properties::_doIsoSmilesKey))) {
               out << "\\";
             }
             break;
           case Bond::ENDUPRIGHT:
             if (allBondsExplicit || (bond->hasOwningMol() &&
                                      bond->getOwningMol().hasProp(
-                                         common_properties::_doIsoSmiles))) {
+                                         common_properties::_doIsoSmilesKey))) {
               out << "/";
             }
             break;
@@ -324,7 +324,7 @@ std::string FragmentSmilesConstruct(
   std::map<int, int> ringClosureMap;
   int ringIdx, closureVal;
   if (!canonical) {
-    mol.setProp(common_properties::_StereochemDone, 1);
+    mol.setProp(common_properties::_StereochemDoneKey, 1);
   }
   std::list<unsigned int> ringClosuresToErase;
 
@@ -434,8 +434,8 @@ std::vector<unsigned int> processMolToSmilesFragment(
     // clean up the chirality on any atom that is marked as chiral,
     // but that should not be:
     if (doIsomericSmiles) {
-      tmol.setProp(common_properties::_doIsoSmiles, 1);
-      if (!mol.hasProp(common_properties::_StereochemDone)) {
+      tmol.setProp(common_properties::_doIsoSmilesKey, 1);
+      if (!mol.hasProp(common_properties::_StereochemDoneKey)) {
         MolOps::assignStereochemistry(tmol, true);
       }
     }
@@ -458,10 +458,10 @@ std::vector<unsigned int> processMolToSmilesFragment(
     std::vector<unsigned int> atomOrdering;
 
     if (canonical) {
-      if (tmol.hasProp("_canonicalRankingNumbers")) {
+      if (tmol.hasProp(common_properties::_canonicalRankingNumbersKey)) {
         for (const auto atom : tmol.atoms()) {
           unsigned int rankNum = 0;
-          atom->getPropIfPresent("_canonicalRankingNumber", rankNum);
+          atom->getPropIfPresent(common_properties::_canonicalRankingNumbersKey, rankNum);
           ranks[atom->getIdx()] = rankNum;
         }
       } else {

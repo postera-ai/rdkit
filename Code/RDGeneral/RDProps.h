@@ -40,16 +40,21 @@ class RDProps {
   STR_VECT getPropList(bool includePrivate = true,
                        bool includeComputed = true) const {
     const STR_VECT &tmp = d_props.keys();
-    STR_VECT res, computed;
+    STR_VECT res;
+    std::vector<unsigned int> computed;
+    std::vector<std::string> computed_names;
     if (!includeComputed &&
-        getPropIfPresent(RDKit::detail::computedPropName, computed)) {
-      computed.push_back(RDKit::detail::computedPropName);
+        getPropIfPresent(RDKit::detail::computedPropNameKey, computed)) {
+      for (const auto& key : computed) {
+        computed_names.push_back(Dict::get_strkey(key));
+      }
+      computed_names.push_back(RDKit::detail::computedPropName);
     }
 
     auto pos = tmp.begin();
     while (pos != tmp.end()) {
       if ((includePrivate || (*pos)[0] != '_') &&
-          std::find(computed.begin(), computed.end(), *pos) == computed.end()) {
+          std::find(computed_names.begin(), computed_names.end(), *pos) == computed_names.end()) {
         res.push_back(*pos);
       }
       pos++;
@@ -69,13 +74,29 @@ class RDProps {
 
   //! \overload
   template <typename T>
-  void setProp(const std::string &key, T val, bool computed = false) const {
+  void setProp(const std::string &strkey, T val, bool computed = false) const {
+    std::uint16_t key = Dict::get_key(strkey);
     if (computed) {
-      STR_VECT compLst;
-      getPropIfPresent(RDKit::detail::computedPropName, compLst);
+      // STR_VECT compLst;
+      std::vector<unsigned int> compLst;
+      getPropIfPresent(RDKit::detail::computedPropNameKey, compLst);
       if (std::find(compLst.begin(), compLst.end(), key) == compLst.end()) {
         compLst.push_back(key);
-        d_props.setVal(RDKit::detail::computedPropName, compLst);
+        d_props.setVal(RDKit::detail::computedPropNameKey, compLst);
+      }
+    }
+    d_props.setVal(key, val);
+  }
+  template <typename T>
+  void setProp(const std::uint16_t &key, T val, bool computed = false) const {
+    if (computed) {
+      // std::string strkey = d_props.get_strkey(key);
+      // STR_VECT compLst;
+      std::vector<unsigned int> compLst;
+      getPropIfPresent(RDKit::detail::computedPropNameKey, compLst);
+      if (std::find(compLst.begin(), compLst.end(), key) == compLst.end()) {
+        compLst.push_back(key);
+        d_props.setVal(RDKit::detail::computedPropNameKey, compLst);
       }
     }
     d_props.setVal(key, val);
@@ -102,10 +123,18 @@ class RDProps {
   void getProp(const std::string &key, T &res) const {
     d_props.getVal(key, res);
   }
+  template <typename T>
+  void getProp(const std::uint16_t &key, T &res) const {
+    d_props.getVal(key, res);
+  }
 
   //! \overload
   template <typename T>
   T getProp(const std::string &key) const {
+    return d_props.getVal<T>(key);
+  }
+  template <typename T>
+  T getProp(const std::uint16_t &key) const {
     return d_props.getVal<T>(key);
   }
 
@@ -116,9 +145,14 @@ class RDProps {
   bool getPropIfPresent(const std::string &key, T &res) const {
     return d_props.getValIfPresent(key, res);
   }
+  template <typename T>
+  bool getPropIfPresent(const std::uint16_t &key, T &res) const {
+    return d_props.getValIfPresent(key, res);
+  }
 
   //! \overload
   bool hasProp(const std::string &key) const { return d_props.hasVal(key); };
+  bool hasProp(const std::uint16_t &key) const { return d_props.hasVal(key); };
 
   //! clears the value of a \c property
   /*!
@@ -129,13 +163,28 @@ class RDProps {
     from our list of \c computedProperties
   */
   //! \overload
-  void clearProp(const std::string &key) const {
-    STR_VECT compLst;
-    if (getPropIfPresent(RDKit::detail::computedPropName, compLst)) {
+  void clearProp(const std::string &strkey) const {
+    // STR_VECT compLst;
+    std::uint16_t key = Dict::get_key(strkey);
+    std::vector<unsigned int> compLst;
+    if (getPropIfPresent(RDKit::detail::computedPropNameKey, compLst)) {
       auto svi = std::find(compLst.begin(), compLst.end(), key);
       if (svi != compLst.end()) {
         compLst.erase(svi);
-        d_props.setVal(RDKit::detail::computedPropName, compLst);
+        d_props.setVal(RDKit::detail::computedPropNameKey, compLst);
+      }
+    }
+    d_props.clearVal(key);
+  };
+  void clearProp(const std::uint16_t &key) const {
+    // STR_VECT compLst;
+    std::vector<unsigned int> compLst;
+    if (getPropIfPresent(RDKit::detail::computedPropNameKey, compLst)) {
+      // std::string strkey = Dict::get_strkey(key);
+      auto svi = std::find(compLst.begin(), compLst.end(), key);
+      if (svi != compLst.end()) {
+        compLst.erase(svi);
+        d_props.setVal(RDKit::detail::computedPropNameKey, compLst);
       }
     }
     d_props.clearVal(key);
@@ -143,13 +192,14 @@ class RDProps {
 
   //! clears all of our \c computed \c properties
   void clearComputedProps() const {
-    STR_VECT compLst;
-    if (getPropIfPresent(RDKit::detail::computedPropName, compLst)) {
+    // STR_VECT compLst;
+    std::vector<unsigned int> compLst;
+    if (getPropIfPresent(RDKit::detail::computedPropNameKey, compLst)) {
       for (const auto &sv : compLst) {
         d_props.clearVal(sv);
       }
       compLst.clear();
-      d_props.setVal(RDKit::detail::computedPropName, compLst);
+      d_props.setVal(RDKit::detail::computedPropNameKey, compLst);
     }
   }
 

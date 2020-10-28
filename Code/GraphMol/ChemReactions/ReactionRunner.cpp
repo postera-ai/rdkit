@@ -258,14 +258,14 @@ void updateImplicitAtomProperties(Atom *prodAtom, const Atom *reactAtom) {
     // return
     return;
   }
-  if (!prodAtom->hasProp(common_properties::_QueryFormalCharge)) {
+  if (!prodAtom->hasProp(common_properties::_QueryFormalChargeKey)) {
     prodAtom->setFormalCharge(reactAtom->getFormalCharge());
   }
-  if (!prodAtom->hasProp(common_properties::_QueryIsotope)) {
+  if (!prodAtom->hasProp(common_properties::_QueryIsotopeKey)) {
     prodAtom->setIsotope(reactAtom->getIsotope());
   }
-  if (!prodAtom->hasProp(common_properties::_ReactionDegreeChanged)) {
-    if (!prodAtom->hasProp(common_properties::_QueryHCount)) {
+  if (!prodAtom->hasProp(common_properties::_ReactionDegreeChangedKey)) {
+    if (!prodAtom->hasProp(common_properties::_QueryHCountKey)) {
       prodAtom->setNumExplicitHs(reactAtom->getNumExplicitHs());
       prodAtom->setNoImplicit(reactAtom->getNoImplicit());
     }
@@ -302,14 +302,14 @@ RWMOL_SPTR convertTemplateToMol(const ROMOL_SPTR prodTemplateSptr) {
     auto *newAtom = new Atom(*oAtom);
     res->addAtom(newAtom, false, true);
     int mapNum;
-    if (newAtom->getPropIfPresent(common_properties::molAtomMapNumber,
+    if (newAtom->getPropIfPresent(common_properties::molAtomMapNumberKey,
                                   mapNum)) {
       // set bookmarks for the mapped atoms:
       res->setAtomBookmark(newAtom, mapNum);
       // now clear the molAtomMapNumber property so that it doesn't
       // end up in the products (this was bug 3140490):
-      newAtom->clearProp(common_properties::molAtomMapNumber);
-      newAtom->setProp<int>(common_properties::reactionMapNum, mapNum);
+      newAtom->clearProp(common_properties::molAtomMapNumberKey);
+      newAtom->setProp<int>(common_properties::reactionMapNumKey, mapNum);
     }
 
     newAtom->setChiralTag(Atom::CHI_UNSPECIFIED);
@@ -317,7 +317,7 @@ RWMOL_SPTR convertTemplateToMol(const ROMOL_SPTR prodTemplateSptr) {
     // to 4 (=SET), then bring its stereochem over, otherwise we'll
     // ignore it:
     int iFlag;
-    if (oAtom->getPropIfPresent(common_properties::molInversionFlag, iFlag)) {
+    if (oAtom->getPropIfPresent(common_properties::molInversionFlagKey, iFlag)) {
       if (iFlag == 4) {
         newAtom->setChiralTag(oAtom->getChiralTag());
       }
@@ -325,18 +325,18 @@ RWMOL_SPTR convertTemplateToMol(const ROMOL_SPTR prodTemplateSptr) {
 
     // check for properties we need to set:
     int val;
-    if (newAtom->getPropIfPresent(common_properties::_QueryFormalCharge, val)) {
+    if (newAtom->getPropIfPresent(common_properties::_QueryFormalChargeKey, val)) {
       newAtom->setFormalCharge(val);
     }
-    if (newAtom->getPropIfPresent(common_properties::_QueryHCount, val)) {
+    if (newAtom->getPropIfPresent(common_properties::_QueryHCountKey, val)) {
       newAtom->setNumExplicitHs(val);
       newAtom->setNoImplicit(true);  // this was github #1544
     }
-    if (newAtom->getPropIfPresent(common_properties::_QueryMass, val)) {
+    if (newAtom->getPropIfPresent(common_properties::_QueryMassKey, val)) {
       // FIX: technically should do something with this
       // newAtom->setMass(val);
     }
-    if (newAtom->getPropIfPresent(common_properties::_QueryIsotope, val)) {
+    if (newAtom->getPropIfPresent(common_properties::_QueryIsotopeKey, val)) {
       newAtom->setIsotope(val);
     }
   }
@@ -372,7 +372,7 @@ RWMOL_SPTR convertTemplateToMol(const ROMOL_SPTR prodTemplateSptr) {
           newB->setIsAromatic(false);
         }
       } else if (queryDescription == "BondNull") {
-        newB->setProp(common_properties::NullBond, 1);
+        newB->setProp(common_properties::NullBondKey, 1);
       }
     }
 
@@ -429,7 +429,7 @@ ReactantProductAtomMapping *getAtomMappingsReactantProduct(
   for (const auto &i : match) {
     const Atom *templateAtom = reactantTemplate.getAtomWithIdx(i.first);
     int molAtomMapNumber;
-    if (templateAtom->getPropIfPresent(common_properties::molAtomMapNumber,
+    if (templateAtom->getPropIfPresent(common_properties::molAtomMapNumberKey,
                                        molAtomMapNumber)) {
       if (product->hasAtomBookmark(molAtomMapNumber)) {
         RWMol::ATOM_PTR_LIST atomIdxs =
@@ -707,8 +707,8 @@ void setReactantBondPropertiesToProduct(RWMOL_SPTR product,
     Bond *pBond = (*product)[*(bondItP.first)];
     ++bondItP.first;
 
-    if (!pBond->hasProp(common_properties::NullBond) &&
-        !pBond->hasProp(common_properties::_MolFileBondQuery)) {
+    if (!pBond->hasProp(common_properties::NullBondKey) &&
+        !pBond->hasProp(common_properties::_MolFileBondQueryKey)) {
       continue;
     }
 
@@ -730,8 +730,8 @@ void setReactantBondPropertiesToProduct(RWMOL_SPTR product,
     pBond->setBondType(rBond->getBondType());
     pBond->setIsAromatic(rBond->getIsAromatic());
 
-    if (pBond->hasProp(common_properties::NullBond)) {
-      pBond->clearProp(common_properties::NullBond);
+    if (pBond->hasProp(common_properties::NullBondKey)) {
+      pBond->clearProp(common_properties::NullBondKey);
     }
   }
 }
@@ -783,7 +783,7 @@ void setReactantAtomPropertiesToProduct(Atom *productAtom,
                                         bool setImplicitProperties) {
   // which properties need to be set from the reactant?
   if (productAtom->getAtomicNum() <= 0 ||
-      productAtom->hasProp(common_properties::_MolFileAtomQuery)) {
+      productAtom->hasProp(common_properties::_MolFileAtomQueryKey)) {
     productAtom->setAtomicNum(reactantAtom.getAtomicNum());
     productAtom->setIsAromatic(reactantAtom.getIsAromatic());
     // don't copy isotope information over from dummy atoms
@@ -793,13 +793,13 @@ void setReactantAtomPropertiesToProduct(Atom *productAtom,
       productAtom->setIsotope(reactantAtom.getIsotope());
     }
     // remove dummy labels (if present)
-    if (productAtom->hasProp(common_properties::dummyLabel)) {
-      productAtom->clearProp(common_properties::dummyLabel);
+    if (productAtom->hasProp(common_properties::dummyLabelKey)) {
+      productAtom->clearProp(common_properties::dummyLabelKey);
     }
-    if (productAtom->hasProp(common_properties::_MolFileRLabel)) {
-      productAtom->clearProp(common_properties::_MolFileRLabel);
+    if (productAtom->hasProp(common_properties::_MolFileRLabelKey)) {
+      productAtom->clearProp(common_properties::_MolFileRLabelKey);
     }
-    productAtom->setProp<unsigned int>(common_properties::reactantAtomIdx,
+    productAtom->setProp<unsigned int>(common_properties::reactantAtomIdxKey,
                                        reactantAtom.getIdx());
     productAtom->setProp(WAS_DUMMY, true);
   } else {
@@ -808,7 +808,7 @@ void setReactantAtomPropertiesToProduct(Atom *productAtom,
       productAtom->clearProp(WAS_DUMMY);
     }
   }
-  productAtom->setProp<unsigned int>(common_properties::reactantAtomIdx,
+  productAtom->setProp<unsigned int>(common_properties::reactantAtomIdxKey,
                                      reactantAtom.getIdx());
   if (setImplicitProperties) {
     updateImplicitAtomProperties(productAtom, &reactantAtom);
@@ -823,7 +823,7 @@ void setReactantAtomPropertiesToProduct(Atom *productAtom,
   // FIX: this should be free-standing, not in this function.
   if (reactantAtom.getChiralTag() != Atom::CHI_UNSPECIFIED &&
       reactantAtom.getChiralTag() != Atom::CHI_OTHER &&
-      productAtom->hasProp(common_properties::molInversionFlag)) {
+      productAtom->hasProp(common_properties::molInversionFlagKey)) {
     checkProductChirality(reactantAtom.getChiralTag(), productAtom);
   }
 
@@ -854,7 +854,7 @@ void addMissingProductAtom(const Atom &reactAtom, unsigned reactNeighborIdx,
                            ReactantProductAtomMapping *mapping) {
   auto *newAtom = new Atom(reactAtom);
   unsigned reactAtomIdx = reactAtom.getIdx();
-  newAtom->setProp<unsigned int>(common_properties::reactantAtomIdx,
+  newAtom->setProp<unsigned int>(common_properties::reactantAtomIdxKey,
                                  reactAtomIdx);
   unsigned productIdx = product->addAtom(newAtom, false, true);
   mapping->reactProdAtomMap[reactAtomIdx].push_back(productIdx);
@@ -1007,7 +1007,7 @@ void checkAndCorrectChiralityOfMatchingAtomsInProduct(
     Atom *productAtom = product->getAtomWithIdx(productAtomIdx);
 
     int inversionFlag = 0;
-    productAtom->getPropIfPresent(common_properties::molInversionFlag,
+    productAtom->getPropIfPresent(common_properties::molInversionFlagKey,
                                   inversionFlag);
     // if stereochemistry wasn't present in the reactant or if we're
     // either creating or destroying stereo we don't mess with this
@@ -1111,7 +1111,7 @@ void checkAndCorrectChiralityOfMatchingAtomsInProduct(
         invert = true;
       }
       int inversionFlag;
-      if (productAtom->getPropIfPresent(common_properties::molInversionFlag,
+      if (productAtom->getPropIfPresent(common_properties::molInversionFlagKey,
                                         inversionFlag) &&
           inversionFlag == 1) {
         invert = !invert;
@@ -1207,7 +1207,7 @@ void copyEnhancedStereoGroups(const ROMol &reactant, RWMOL_SPTR product,
         }
         // If chirality defined explicitly by the reaction, skip the atom
         int flagVal = 0;
-        productAtom->getPropIfPresent(common_properties::molInversionFlag,
+        productAtom->getPropIfPresent(common_properties::molInversionFlagKey,
                                       flagVal);
         if (flagVal == 4) {
           continue;

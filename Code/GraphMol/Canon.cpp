@@ -268,7 +268,7 @@ void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
       Bond *bond = d_mol.getBondWithIdx(bIdx);
       d_seenFromHere.set(bond->getOtherAtomIdx(atomIdx));
       unsigned int ringIdx;
-      if (bond->getPropIfPresent(common_properties::_TraversalRingClosureBond,
+      if (bond->getPropIfPresent(common_properties::_TraversalRingClosureBondKey,
                                  ringIdx)) {
         // this is end of the ring closure
         // we can just pull the ring index from the bond itself:
@@ -291,7 +291,7 @@ void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
         unsigned int lowestRingIdx = cAIt - d_cyclesAvailable.begin();
         d_cyclesAvailable[lowestRingIdx] = 0;
         ++lowestRingIdx;
-        bond->setProp(common_properties::_TraversalRingClosureBond,
+        bond->setProp(common_properties::_TraversalRingClosureBondKey,
                       lowestRingIdx);
         d_molStack.push_back(MolStackElem(lowestRingIdx));
       }
@@ -370,7 +370,7 @@ void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
     Bond *bond = possiblesIt->get<2>();
     Atom *otherAtom = d_mol.getAtomWithIdx(possibleIdx);
     // ww might have some residual data from earlier calls, clean that up:
-    otherAtom->clearProp(common_properties::_TraversalBondIndexOrder);
+    otherAtom->clearProp(common_properties::_TraversalBondIndexOrderKey);
     travList.push_back(bond->getIdx());
     if (possiblesIt + 1 != possibles.end()) {
       // we're branching
@@ -1044,7 +1044,7 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
   boost::dynamic_bitset<> ringStereoChemAdjusted(nAtoms);
 
   // make sure that we've done the stereo perception:
-  if (!mol.hasProp(common_properties::_StereochemDone)) {
+  if (!mol.hasProp(common_properties::_StereochemDoneKey)) {
     MolOps::assignStereochemistry(mol, false);
   }
 
@@ -1053,7 +1053,7 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
   if (!mol.getRingInfo()->isInitialized()) {
     MolOps::findSSSR(mol);
   }
-  mol.getAtomWithIdx(atomIdx)->setProp(common_properties::_TraversalStartPoint,
+  mol.getAtomWithIdx(atomIdx)->setProp(common_properties::_TraversalStartPointKey,
                                        true);
 
   VECT_INT_VECT atomRingClosures(nAtoms);
@@ -1076,11 +1076,11 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
         for (const auto &bndItr :
              boost::make_iterator_range(mol.getAtomBonds(atom))) {
           if (bondsInPlay && !(*bondsInPlay)[mol[bndItr]->getIdx()]) {
-            atom->setProp(common_properties::_brokenChirality, true);
+            atom->setProp(common_properties::_brokenChiralityKey, true);
             break;
           }
         }
-        if (atom->hasProp(common_properties::_brokenChirality)) {
+        if (atom->hasProp(common_properties::_brokenChiralityKey)) {
           continue;
         }
         const INT_VECT &trueOrder = atomTraversalBondOrder[atom->getIdx()];
@@ -1167,14 +1167,14 @@ void canonicalizeFragment(ROMol &mol, int atomIdx,
     if (doIsomericSmiles) {
       if (msI.type == MOL_STACK_ATOM &&
           msI.obj.atom->getChiralTag() != Atom::CHI_UNSPECIFIED &&
-          !msI.obj.atom->hasProp(common_properties::_brokenChirality)) {
-        if (msI.obj.atom->hasProp(common_properties::_ringStereoAtoms)) {
+          !msI.obj.atom->hasProp(common_properties::_brokenChiralityKey)) {
+        if (msI.obj.atom->hasProp(common_properties::_ringStereoAtomsKey)) {
           if (!ringStereoChemAdjusted[msI.obj.atom->getIdx()]) {
             msI.obj.atom->setChiralTag(Atom::CHI_TETRAHEDRAL_CCW);
             ringStereoChemAdjusted.set(msI.obj.atom->getIdx());
           }
           const INT_VECT &ringStereoAtoms = msI.obj.atom->getProp<INT_VECT>(
-              common_properties::_ringStereoAtoms);
+              common_properties::_ringStereoAtomsKey);
           for (auto nbrV : ringStereoAtoms) {
             int nbrIdx = abs(nbrV) - 1;
             // Adjust the chirality flag of the ring stereo atoms according to
