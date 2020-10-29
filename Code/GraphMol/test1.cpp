@@ -1245,8 +1245,8 @@ void testAtomListLineWithOtherQueries() {
   4  1  1  0  0  0  8
 M  CHG  2   1   1   4  -1
 M  SUB  1   4   1
-M  ALS   2  2 F O   S
-M  ALS   4  2 F O   S
+M  ALS   2  2 F O   S   
+M  ALS   4  2 F O   S   
 M  END
 )MOL",
                                          R"MOL(
@@ -1261,8 +1261,8 @@ M  END
   1  3  1  0  0  0  2
   4  1  1  0  0  0  8
 M  CHG  2   1   1   4  -1
-M  ALS   2  2 F O   S
-M  ALS   4  2 F O   S
+M  ALS   2  2 F O   S   
+M  ALS   4  2 F O   S   
 M  SUB  1   4   1
 M  END
   )MOL"};
