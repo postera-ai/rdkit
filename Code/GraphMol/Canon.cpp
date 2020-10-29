@@ -236,6 +236,7 @@ class DFSStackBuilder {
 
     // reset and reused across all recursive calls
     boost::dynamic_bitset<> d_seenFromHere;
+    std::vector<unsigned int> d_ringsClosed;
 };
 
 void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
@@ -248,21 +249,28 @@ void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
   d_seenFromHere.reset();
 
   d_seenFromHere.set(atomIdx);
-  d_molStack.push_back(MolStackElem(atom));
+  d_molStack.emplace_back(atom);
   d_atomOrders[atom->getIdx()] = rdcast<int>(d_molStack.size());
   d_colors[atomIdx] = GREY_NODE;
 
-  INT_VECT travList;
-  travList.reserve(4);
+  std::vector<PossibleType> possibles;
+  ROMol::OBOND_ITER_PAIR bondsPair = d_mol.getAtomBonds(atom);
+  possibles.reserve(bondsPair.second - bondsPair.first);
+
+  size_t ringClosuresSize = d_atomRingClosures[atomIdx].size();
+  INT_VECT& travList = d_atomTraversalBondOrder[atom->getIdx()];
   if (inBondIdx >= 0) {
+    travList.reserve(ringClosuresSize + possibles.capacity() + 1);
     travList.push_back(inBondIdx);
+  } else {
+    travList.reserve(ringClosuresSize + possibles.capacity());
   }
 
   // ---------------------
   //  Add any ring closures
   // ---------------------
-  if (d_atomRingClosures[atomIdx].size()) {
-    std::vector<unsigned int> ringsClosed;
+  if (ringClosuresSize) {
+    d_ringsClosed.clear();
     for (auto bIdx : d_atomRingClosures[atomIdx]) {
       travList.push_back(bIdx);
       Bond *bond = d_mol.getBondWithIdx(bIdx);
@@ -272,13 +280,13 @@ void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
                                  ringIdx)) {
         // this is end of the ring closure
         // we can just pull the ring index from the bond itself:
-        d_molStack.push_back(MolStackElem(bond, atomIdx));
+        d_molStack.emplace_back(bond, atomIdx);
         d_bondVisitOrders[bIdx] = d_molStack.size();
-        d_molStack.push_back(MolStackElem(ringIdx));
+        d_molStack.emplace_back(ringIdx);
         // don't make the ring digit immediately available again: we don't want
         // to have the same
         // ring digit opening and closing rings on an atom.
-        ringsClosed.push_back(ringIdx - 1);
+        d_ringsClosed.push_back(ringIdx - 1);
       } else {
         // this is the beginning of the ring closure, we need to come up with a
         // ring index:
@@ -293,10 +301,10 @@ void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
         ++lowestRingIdx;
         bond->setProp(common_properties::_TraversalRingClosureBondKey,
                       lowestRingIdx);
-        d_molStack.push_back(MolStackElem(lowestRingIdx));
+        d_molStack.emplace_back(lowestRingIdx);
       }
     }
-    for (auto ringIdx : ringsClosed) {
+    for (auto ringIdx : d_ringsClosed) {
       d_cyclesAvailable[ringIdx] = 1;
     }
   }
@@ -304,10 +312,6 @@ void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
   // ---------------------
   //  Build the list of possible destinations from here
   // ---------------------
-  std::vector<PossibleType> possibles;
-  possibles.resize(0);
-  ROMol::OBOND_ITER_PAIR bondsPair = d_mol.getAtomBonds(atom);
-  possibles.reserve(bondsPair.second - bondsPair.first);
 
   while (bondsPair.first != bondsPair.second) {
     Bond *theBond = d_mol[*(bondsPair.first)];
@@ -315,40 +319,40 @@ void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
     if (d_bondsInPlay && !(*d_bondsInPlay)[theBond->getIdx()]) {
       continue;
     }
-    if (inBondIdx < 0 ||
-        theBond->getIdx() != static_cast<unsigned int>(inBondIdx)) {
-      int otherIdx = theBond->getOtherAtomIdx(atomIdx);
-      // ---------------------
-      // This time we skip the ring-closure atoms (we did them
-      // above); we want to traverse first to atoms outside the ring
-      // then to atoms in the ring that haven't already been visited
-      // (non-ring-closure atoms).
-      //
-      // otherwise it's the same ranking logic as above
-      // ---------------------
-      if (d_colors[otherIdx] != WHITE_NODE || d_seenFromHere[otherIdx]) {
-        // ring closure or finished atom... skip it.
-        continue;
-      }
-      unsigned long rank = d_ranks[otherIdx];
-      if (d_doRandom) {  // randomize the rank
-        rank = getRandomGenerator()();
-      } else {
-        if (theBond->getOwningMol().getRingInfo()->numBondRings(
-                theBond->getIdx())) {
-          if (!d_bondSymbols) {
-            rank += static_cast<int>(MAX_BONDTYPE - theBond->getBondType()) *
-                    MAX_NATOMS * MAX_NATOMS;
-          } else {
-            const std::string &symb = (*d_bondSymbols)[theBond->getIdx()];
-            std::uint32_t hsh = gboost::hash_range(symb.begin(), symb.end());
-            rank += (hsh % MAX_NATOMS) * MAX_NATOMS * MAX_NATOMS;
-          }
+    if (inBondIdx >= 0 && theBond->getIdx() == static_cast<unsigned int>(inBondIdx)) {
+      continue;
+    }
+    int otherIdx = theBond->getOtherAtomIdx(atomIdx);
+    // ---------------------
+    // This time we skip the ring-closure atoms (we did them
+    // above); we want to traverse first to atoms outside the ring
+    // then to atoms in the ring that haven't already been visited
+    // (non-ring-closure atoms).
+    //
+    // otherwise it's the same ranking logic as above
+    // ---------------------
+    if (d_colors[otherIdx] != WHITE_NODE || d_seenFromHere[otherIdx]) {
+      // ring closure or finished atom... skip it.
+      continue;
+    }
+    unsigned long rank = d_ranks[otherIdx];
+    if (d_doRandom) {  // randomize the rank
+      rank = getRandomGenerator()();
+    } else {
+      if (theBond->getOwningMol().getRingInfo()->numBondRings(
+              theBond->getIdx())) {
+        if (!d_bondSymbols) {
+          rank += static_cast<int>(MAX_BONDTYPE - theBond->getBondType()) *
+                  MAX_NATOMS * MAX_NATOMS;
+        } else {
+          const std::string &symb = (*d_bondSymbols)[theBond->getIdx()];
+          std::uint32_t hsh = gboost::hash_range(symb.begin(), symb.end());
+          rank += (hsh % MAX_NATOMS) * MAX_NATOMS * MAX_NATOMS;
         }
       }
-
-      possibles.emplace_back(rank, otherIdx, theBond);
     }
+
+    possibles.emplace_back(rank, otherIdx, theBond);
   }
 
   // ---------------------
@@ -374,19 +378,18 @@ void DFSStackBuilder::build(int atomIdx, int inBondIdx) {
     travList.push_back(bond->getIdx());
     if (possiblesIt + 1 != possibles.end()) {
       // we're branching
-      d_molStack.push_back(
-          MolStackElem("(", rdcast<int>(possiblesIt - possibles.begin())));
+      d_molStack.emplace_back(
+        MOL_STACK_BRANCH_OPEN, rdcast<int>(possiblesIt - possibles.begin()));
     }
-    d_molStack.push_back(MolStackElem(bond, atomIdx));
+    d_molStack.emplace_back(bond, atomIdx);
     d_bondVisitOrders[bond->getIdx()] = d_molStack.size();
     build(possibleIdx, bond->getIdx());
     if (possiblesIt + 1 != possibles.end()) {
-      d_molStack.push_back(
-          MolStackElem(")", rdcast<int>(possiblesIt - possibles.begin())));
+      d_molStack.emplace_back(
+       MOL_STACK_BRANCH_CLOSE, rdcast<int>(possiblesIt - possibles.begin()));
     }
   }
 
-  d_atomTraversalBondOrder[atom->getIdx()].swap(travList);
   d_colors[atomIdx] = BLACK_NODE;
 }
 
