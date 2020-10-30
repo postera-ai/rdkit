@@ -590,11 +590,11 @@ std::string MolToSmiles(const ROMol &mol, bool doIsomericSmiles, bool doKekule,
   return result;
 }  // end of MolToSmiles()
 
-std::string MolToSmilesFast(ROMol &mol, bool doIsomericSmiles, bool doKekule,
+std::vector<std::string> MolToSmilesFast(ROMol &mol, bool doIsomericSmiles, bool doKekule,
                         int rootedAtAtom, bool canonical, bool allBondsExplicit,
                         bool allHsExplicit, bool doRandom) {
   if (!mol.getNumAtoms()) {
-    return "";
+    return {};
   }
   PRECONDITION(rootedAtAtom < 0 ||
                    static_cast<unsigned int>(rootedAtAtom) < mol.getNumAtoms(),
@@ -626,7 +626,8 @@ std::string MolToSmilesFast(ROMol &mol, bool doIsomericSmiles, bool doKekule,
     }
   }
 
-  std::string result;
+  std::vector<std::string> result;
+  result.reserve(vfragsmi.size());
   std::vector<unsigned int> flattenedAtomOrdering;
   flattenedAtomOrdering.reserve(mol.getNumAtoms());
   if (canonical) {
@@ -640,10 +641,7 @@ std::string MolToSmilesFast(ROMol &mol, bool doIsomericSmiles, bool doKekule,
     std::sort(tmp.begin(), tmp.end(), SortBasedOnFirstElement);
 
     for (unsigned int ti = 0; ti < vfragsmi.size(); ++ti) {
-      result += tmp[ti].first;
-      if (ti < vfragsmi.size() - 1) {
-        result += ".";
-      }
+      result.push_back(tmp[ti].first);
       flattenedAtomOrdering.insert(flattenedAtomOrdering.end(),
                                    tmp[ti].second.begin(),
                                    tmp[ti].second.end());
@@ -654,10 +652,7 @@ std::string MolToSmilesFast(ROMol &mol, bool doIsomericSmiles, bool doKekule,
                                    i.end());
     }
     for (unsigned i = 0; i < vfragsmi.size(); ++i) {
-      result += vfragsmi[i];
-      if (i < vfragsmi.size() - 1) {
-        result += ".";
-      }
+      result.push_back(vfragsmi[i]);
     }
   }
   mol.setProp(common_properties::_smilesAtomOutputOrder, flattenedAtomOrdering,
