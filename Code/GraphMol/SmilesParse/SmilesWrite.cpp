@@ -58,18 +58,15 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
   }
 
   // check for atomic stereochemistry
-  std::string atString = "";
-  if (isomericSmiles ||
-      (atom->hasOwningMol() &&
-       atom->getOwningMol().hasProp(common_properties::_doIsoSmilesKey))) {
+  Atom::ChiralType chiral_type = Atom::CHI_UNSPECIFIED;
+  if (isomericSmiles) {
     if (atom->getChiralTag() != Atom::CHI_UNSPECIFIED &&
         !atom->hasProp(common_properties::_brokenChiralityKey)) {
-      switch (atom->getChiralTag()) {
+      auto chiral_tag = atom->getChiralTag();
+      switch (chiral_tag) {
         case Atom::CHI_TETRAHEDRAL_CW:
-          atString = "@@";
-          break;
         case Atom::CHI_TETRAHEDRAL_CCW:
-          atString = "@";
+          chiral_type = chiral_tag;
           break;
         default:
           break;
@@ -107,10 +104,8 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
     if (fc || nonStandard ||
         atom->hasProp(common_properties::molAtomMapNumberKey)) {
       needsBracket = true;
-    } else if ((isomericSmiles || (atom->hasOwningMol() &&
-                                   atom->getOwningMol().hasProp(
-                                       common_properties::_doIsoSmilesKey))) &&
-               (isotope || !atString.empty() )) {
+    } else if (isomericSmiles &&
+               (isotope || chiral_type != Atom::CHI_UNSPECIFIED )) {
       needsBracket = true;
     }
   } else {
@@ -120,9 +115,7 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
     out << "[";
   }
 
-  if (isotope && (isomericSmiles || (atom->hasOwningMol() &&
-                                     atom->getOwningMol().hasProp(
-                                         common_properties::_doIsoSmilesKey)))) {
+  if (isotope && isomericSmiles) {
     out << isotope;
   }
   // this was originally only done for the organic subset,
@@ -130,7 +123,17 @@ void GetAtomSmiles(std::ostringstream& out, const Atom *atom,
   if (!doKekule && atom->getIsAromatic() && symb[0] >= 'A' && symb[0] <= 'Z') {
     symb[0] -= ('A' - 'a');
   }
-  out << symb << atString;
+  out << symb;
+  switch (chiral_type) {
+    case Atom::CHI_TETRAHEDRAL_CW:
+      out << "@@";
+      break;
+    case Atom::CHI_TETRAHEDRAL_CCW:
+      out << "@";
+      break;
+    default:
+      break;
+  }
 
   if (needsBracket) {
     unsigned int totNumHs = atom->getTotalNumHs();
@@ -332,6 +335,11 @@ std::string FragmentSmilesConstruct(
   Canon::canonicalizeFragment(mol, atomIdx, colors, ranks, molStack,
                               bondsInPlay, bondSymbols, doIsomericSmiles,
                               doRandom);
+  bool getAtomSmilesDoIsomericSmiles = doIsomericSmiles;
+  if (!getAtomSmilesDoIsomericSmiles) {
+    getAtomSmilesDoIsomericSmiles = mol.hasProp(common_properties::_doIsoSmilesKey);
+  }
+
   Bond *bond = nullptr;
   for (auto &mSE : molStack) {
     switch (mSE.type) {
@@ -343,7 +351,7 @@ std::string FragmentSmilesConstruct(
         // std::cout<<"\t\tAtom: "<<mSE.obj.atom->getIdx()<<std::endl;
         if (!atomSymbols) {
           GetAtomSmiles(res, mSE.obj.atom, doKekule, bond, allHsExplicit,
-                               doIsomericSmiles);
+                               getAtomSmilesDoIsomericSmiles);
         } else {
           res << (*atomSymbols)[mSE.obj.atom->getIdx()];
         }
