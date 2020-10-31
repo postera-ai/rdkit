@@ -888,8 +888,9 @@ void addReactantNeighborsToProduct(
   // #endif
 
   while (!atomStack.empty()) {
-    const Atom *lReactantAtom = atomStack.pop_front();
+    const Atom *lReactantAtom = atomStack.front();
     // std::cerr << "    front: " << lReactantAtom->getIdx() << std::endl;
+    atomStack.pop_front();
 
     // each atom in the stack is guaranteed to already be in the product:
     CHECK_INVARIANT(mapping->reactProdAtomMap.find(lReactantAtom->getIdx()) !=
