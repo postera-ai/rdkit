@@ -875,7 +875,7 @@ void addReactantNeighborsToProduct(
     boost::dynamic_bitset<> &visitedAtoms,
     std::vector<const Atom *> &chiralAtomsToCheck,
     ReactantProductAtomMapping *mapping) {
-  std::list<const Atom *> atomStack;
+  std::deque<const Atom *> atomStack;
   atomStack.push_back(&reactantAtom);
 
   // std::cerr << "-------------------" << std::endl;
@@ -888,9 +888,8 @@ void addReactantNeighborsToProduct(
   // #endif
 
   while (!atomStack.empty()) {
-    const Atom *lReactantAtom = atomStack.front();
+    const Atom *lReactantAtom = atomStack.pop_front();
     // std::cerr << "    front: " << lReactantAtom->getIdx() << std::endl;
-    atomStack.pop_front();
 
     // each atom in the stack is guaranteed to already be in the product:
     CHECK_INVARIANT(mapping->reactProdAtomMap.find(lReactantAtom->getIdx()) !=
