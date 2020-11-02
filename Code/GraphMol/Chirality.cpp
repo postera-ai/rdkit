@@ -906,6 +906,8 @@ void iterateCIPRanks(const ROMol &mol, const DOUBLE_VECT &invars,
 
   // rank those:
   std::vector<unsigned int> rank_indices(numAtoms);
+  // The dual of rank_indices: rank_indices[i] == j <=> rank_indices_dual[j] == i
+  std::vector<unsigned int> rank_indices_dual(numAtoms);
   Rankers::rankVect(invars, rank_indices, ranks);
 #ifdef VERBOSE_CANON
   BOOST_LOG(rdDebugLog) << "initial ranks:" << std::endl;
@@ -938,7 +940,7 @@ void iterateCIPRanks(const ROMol &mol, const DOUBLE_VECT &invars,
   unsigned int maxIts = numAtoms / 2 + 1;
   unsigned int numIts = 0;
   int lastNumRanks = -1;
-  unsigned int numRanks = rank_indices[numAtoms-1] + 1;
+  unsigned int numRanks = ranks[rank_indices[numAtoms-1]] + 1;
   std::vector<unsigned int> counts(ranks.size());
   std::vector<unsigned int> updatedNbrIdxs;
   updatedNbrIdxs.reserve(8);
@@ -951,15 +953,16 @@ void iterateCIPRanks(const ROMol &mol, const DOUBLE_VECT &invars,
     for (unsigned int index = 0; index < numAtoms; ++index) {
       // If the atom already has a unique rank, then skip processing it.
       if (numIts > 0)  {
-        bool has_unique_rank;
-        if (index == 0) {
-          has_unique_rank = ranks[index] != ranks[index+1];
-        } else if (index == numAtoms-1) {
-          has_unique_rank = ranks[index-1] != ranks[index];
-        } else {
-          has_unique_rank = (ranks[index-1] != ranks[index]) && (ranks[index] != ranks[index+1]);
+        unsigned int rank_index = rank_indices_dual[index];
+        bool has_unique_rank_left = true;
+        bool has_unique_rank_right = true;
+        if (rank_index > 0) {
+          has_unique_rank_left = ranks[index] != ranks[rank_indices[rank_index-1]];
         }
-        if (has_unique_rank) { continue; }
+        if (rank_index < numAtoms-1) {
+          has_unique_rank_right = ranks[index] != ranks[rank_indices[rank_index+1]];
+        }
+        if (has_unique_rank_left && has_unique_rank_right) { continue; }
       }
 
       // Note: counts is cleaned up when we drain into cipEntries.
@@ -1046,7 +1049,10 @@ void iterateCIPRanks(const ROMol &mol, const DOUBLE_VECT &invars,
 
     bool reset_indices = numIts == 0;
     Rankers::rankVect(cipEntries, rank_indices, ranks, reset_indices);
-    numRanks = rank_indices[numAtoms-1] + 1;
+    numRanks = ranks[rank_indices[numAtoms-1]] + 1;
+    for (unsigned i = 0; i < numAtoms; ++i) {
+      rank_indices_dual[rank_indices[i]] = i;
+    }
 
     // now truncate each vector and stick the rank at the end
     for (unsigned int i = 0; i < numAtoms; ++i) {

@@ -83,7 +83,7 @@ void rankVect(const std::vector<T1> &vect, std::vector<unsigned int>& indices, T
         end++;
       }
       if (end != start) {
-        std::sort(indices.begin()+start, indices.begin()+end, argless<std::vector<T1>>(vect));
+        std::sort(indices.begin()+start, indices.begin()+end+1, argless<std::vector<T1>>(vect));
         start = end;
       }
     }
