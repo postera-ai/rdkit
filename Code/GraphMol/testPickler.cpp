@@ -499,8 +499,7 @@ void testQueries() {
   MolPickler::molFromPickle(pickle, *m1);
   TEST_ASSERT(m1->getNumAtoms() == 1);
   TEST_ASSERT(m1->getAtomWithIdx(0)->hasQuery());
-  TEST_ASSERT(m1->getAtomWithIdx(0)->getQuery()->getDescription() ==
-              "RecursiveStructure");
+  TEST_ASSERT(m1->getAtomWithIdx(0)->getQuery()->getDescription() == "RS");
   smi = "C";
   m2 = SmilesToMol(smi);
   TEST_ASSERT(m2);
@@ -661,8 +660,7 @@ void testQueries() {
   MolPickler::molFromPickle(pickle, *m1);
   TEST_ASSERT(m1->getNumAtoms() == 1);
   TEST_ASSERT(m1->getAtomWithIdx(0)->hasQuery());
-  TEST_ASSERT(m1->getAtomWithIdx(0)->getQuery()->getDescription() ==
-              "RecursiveStructure");
+  TEST_ASSERT(m1->getAtomWithIdx(0)->getQuery()->getDescription() == "RS");
   smi = "C";
   m2 = SmilesToMol(smi);
   TEST_ASSERT(m2);
@@ -1378,7 +1376,7 @@ void testEnhancedStereoChemistry() {
 void testCustomPickler() {
   BOOST_LOG(rdInfoLog) << "-----------------------\n";
   BOOST_LOG(rdInfoLog) << "Testing custom pickler (bitvector)"
-                       << std::endl;  
+                       << std::endl;
   const bool bitsSet = false;
   ExplicitBitVect bv(1024, bitsSet);
   bv.setBit(100);
@@ -1445,7 +1443,7 @@ void testGithub2441() {
     TEST_ASSERT(m2->getConformer(12).getProp<int>("foo") == 2);
     TEST_ASSERT(!m2->getConformer().hasProp("bar"));
     TEST_ASSERT(m2->getConformer(12).getProp<int>("bar") == 23);
-    
+
   }
 
   BOOST_LOG(rdErrorLog) << "\tdone" << std::endl;
@@ -1491,19 +1489,19 @@ void testGithubIssue2510() {
   auto *conf = new Conformer(2);
   double test_num = 3.1111124589;
   TEST_ASSERT(static_cast<float>(test_num) != test_num);
-  
+
   RDGeom::Point3D point(3.1111124589,0.0,0.0);
-  
+
   conf->setAtomPos(0, point);
   m1->addConformer(conf);
-  
+
   MolPickler::pickleMol(*m1, pickle, PicklerOps::CoordsAsDouble);
   m3 = new ROMol();
   MolPickler::molFromPickle(pickle, *m3);
   TEST_ASSERT(m1->getNumAtoms() == m3->getNumAtoms());
   TEST_ASSERT(m3->getConformer().getAtomPos(0).x == test_num);
 
-  
+
   delete m1;
   delete m2;
   delete m3;

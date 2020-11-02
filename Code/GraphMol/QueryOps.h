@@ -721,7 +721,7 @@ class RDKIT_GRAPHMOL_EXPORT RecursiveStructureQuery
  public:
   RecursiveStructureQuery() : Queries::SetQuery<int, Atom const *, true>() {
     setDataFunc(getAtIdx);
-    setDescription("RecursiveStructure");
+    setDescription("RS");  // RecursiveSubstructure
   };
   //! initialize from an ROMol pointer
   /*!
@@ -733,7 +733,7 @@ class RDKIT_GRAPHMOL_EXPORT RecursiveStructureQuery
         d_serialNumber(serialNumber) {
     setQueryMol(query);
     setDataFunc(getAtIdx);
-    setDescription("RecursiveStructure");
+    setDescription("RS");  // RecursiveSubstricture
   };
   //! returns the index of an atom
   static inline int getAtIdx(Atom const *at) {

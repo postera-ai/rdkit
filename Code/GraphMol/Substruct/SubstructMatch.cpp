@@ -619,9 +619,7 @@ void MatchSubqueries(const ROMol &mol, QueryAtom::QUERYATOM_QUERY *query,
                      SUBQUERY_MAP &subqueryMap,
                      std::vector<RecursiveStructureQuery *> &locked) {
   PRECONDITION(query, "bad query");
-  // std::cout << "*-*-* MS: " << (int)query << std::endl;
-  // std::cout << "\t\t" << typeid(*query).name() << std::endl;
-  if (query->getDescription() == "RecursiveStructure") {
+  if (query->getDescription() == "RS") {
     auto *rsq = (RecursiveStructureQuery *)query;
 #ifdef RDK_THREADSAFE_SSS
     rsq->d_mutex.lock();
@@ -640,8 +638,6 @@ void MatchSubqueries(const ROMol &mol, QueryAtom::QUERYATOM_QUERY *query,
            ++setIter) {
         rsq->insert(*setIter);
       }
-      // std::cerr<<" copying results for query serial number:
-      // "<<rsq->getSerialNumber()<<std::endl;
     }
 
     if (!matchDone) {
@@ -659,23 +655,16 @@ void MatchSubqueries(const ROMol &mol, QueryAtom::QUERYATOM_QUERY *query,
       }
       if (rsq->getSerialNumber()) {
         subqueryMap[rsq->getSerialNumber()] = query;
-        // std::cerr<<" storing results for query serial number:
-        // "<<rsq->getSerialNumber()<<std::endl;
       }
     }
-  } else {
-    // std::cout << "\tmsq1: ";
   }
 
   // now recurse over our children (these things can be nested)
   Queries::Query<int, Atom const *, true>::CHILD_VECT_CI childIt;
-  // std::cout << query << " " << query->endChildren()-query->beginChildren() <<
-  // std::endl;
   for (childIt = query->beginChildren(); childIt != query->endChildren();
        childIt++) {
     MatchSubqueries(mol, childIt->get(), params, subqueryMap, locked);
   }
-  // std::cout << "<<- back " << (int)query << std::endl;
 }
 
 bool matchCompare(const std::pair<int, int> &a, const std::pair<int, int> &b) {
