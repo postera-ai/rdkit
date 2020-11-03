@@ -513,14 +513,11 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   Dict()  {}
 
   Dict(const Dict &other) : _data(other._data) {
-    _hasNonPodData = other._hasNonPodData;
-    if (other._hasNonPodData) {  // other has non pod data, need to copy
-      InternalDataType data(other._data.size());
-      _data.swap(data);
-      for (size_t i = 0; i < _data.size(); ++i) {
-        _data[i].key = other._data[i].key;
-        copy_rdvalue(_data[i].val, other._data[i].val);
-      }
+    InternalDataType data(other._data.size());
+    _data.swap(data);
+    for (size_t i = 0; i < _data.size(); ++i) {
+      _data[i].key = other._data[i].key;
+      copy_rdvalue(_data[i].val, other._data[i].val);
     }
   }
 
@@ -532,7 +529,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     if (!preserveExisting) {
       *this = other;
     } else {
-      if (other._hasNonPodData) _hasNonPodData = true;
       for (size_t i = 0; i < other._data.size(); ++i) {
         const InternalPair &pair = other._data[i];
         InternalPair *target = nullptr;
@@ -557,26 +553,16 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
   Dict &operator=(const Dict &other) {
     if (this == &other) return *this;
-    if (_hasNonPodData) reset();
+    reset();
 
-    if (other._hasNonPodData) {
-      InternalDataType data(other._data.size());
-      _data.swap(data);
-      for (size_t i = 0; i < _data.size(); ++i) {
-        _data[i].key = other._data[i].key;
-        copy_rdvalue(_data[i].val, other._data[i].val);
-      }
-    } else {
-      _data = other._data;
+    InternalDataType data(other._data.size());
+    _data.swap(data);
+    for (size_t i = 0; i < _data.size(); ++i) {
+      _data[i].key = other._data[i].key;
+      copy_rdvalue(_data[i].val, other._data[i].val);
     }
-    _hasNonPodData = other._hasNonPodData;
     return *this;
   }
-
-  //----------------------------------------------------------
-  //! \brief Access to the underlying non-POD containment flag
-  //! This is meant to be used only in bulk updates of _data.
-  bool &getNonPODStatus() { return _hasNonPodData; }
 
   //----------------------------------------------------------
   //! \brief Access to the underlying data.
@@ -768,7 +754,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   template <typename T>
   void setVal(const std::string &what, T &val) {
     std::uint16_t key = get_key(what);
-    _hasNonPodData = true;
     for (auto &&data : _data) {
       if (data.key == key) {
         RDValue::cleanup_rdvalue(data.val);
@@ -780,7 +765,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   }
   template <typename T>
   void setVal(const std::uint16_t &key, T &val) {
-    _hasNonPodData = true;
     for (auto &&data : _data) {
       if (data.key == key) {
         RDValue::cleanup_rdvalue(data.val);
@@ -794,7 +778,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   template <typename T>
   void setPODVal(const std::string &what, T val) {
     std::uint16_t key = get_key(what);
-    // don't change the hasNonPodData status
     for (auto &&data : _data) {
       if (data.key == key) {
         RDValue::cleanup_rdvalue(data.val);
@@ -807,7 +790,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
   template <typename T>
   void setPODVal(const std::uint16_t &key, T val) {
-    // don't change the hasNonPodData status
     for (auto &&data : _data) {
       if (data.key == key) {
         RDValue::cleanup_rdvalue(data.val);
@@ -859,9 +841,7 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     std::uint16_t key = get_key(what);
     for (InternalDataType::iterator it = _data.begin(); it < _data.end(); ++it) {
       if (it->key == key) {
-        if (_hasNonPodData) {
-          RDValue::cleanup_rdvalue(it->val);
-        }
+        RDValue::cleanup_rdvalue(it->val);
         _data.erase(it);
         return;
       }
@@ -870,9 +850,7 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   void clearVal(const std::uint16_t &key) {
     for (InternalDataType::iterator it = _data.begin(); it < _data.end(); ++it) {
       if (it->key == key) {
-        if (_hasNonPodData) {
-          RDValue::cleanup_rdvalue(it->val);
-        }
+        RDValue::cleanup_rdvalue(it->val);
         _data.erase(it);
         return;
       }
@@ -883,10 +861,8 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   //! \brief Clears all keys (and values) from the dictionary.
   //!
   void reset() {
-    if (_hasNonPodData) {
-      for (auto &&data : _data) {
-        RDValue::cleanup_rdvalue(data.val);
-      }
+    for (auto &&data : _data) {
+      RDValue::cleanup_rdvalue(data.val);
     }
     InternalDataType data;
     _data.swap(data);
@@ -894,8 +870,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
  private:
   InternalDataType _data{};       //!< the actual dictionary
-  bool _hasNonPodData{false};  // if true, need a deep copy
-                        //  (copy_rdvalue)
 
 
 };
