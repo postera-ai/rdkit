@@ -338,8 +338,8 @@ class RDKIT_GRAPHMOL_EXPORT Bond : public RDProps {
   std::uint8_t d_bondType;
   std::uint8_t d_dirTag;
   std::uint8_t d_stereo;
-  atomindex_t d_index;
-  atomindex_t d_beginAtomIdx, d_endAtomIdx;
+  std::uint16_t d_index;
+  std::uint16_t d_beginAtomIdx, d_endAtomIdx;
   ROMol *dp_mol;
   INT_VECT *dp_stereoAtoms;
 
