@@ -34,44 +34,51 @@
 # places it (temporarily) in a /tmp directory.  This directory will 
 # automatically dissappear after you reboot the machine.
 
-if ! which wget > /dev/null
-then
-	echo "**Error: wget not found!"
-	exit 1
-fi
+# As a temporary fix to issues with the inchi-trust website, this zip
+# file has already been included in the repo.
+echo "INCHI-1-SRC.zip has already been included in this repo"
 
-DIR=`pwd`
-TEMPDIR=`mktemp -d -t rdkit-inchi-XXX`
-if [[ $DIR =~ External/INCHI-API$ ]]
-then
-	mkdir -p src
-	echo "================================================================"
-	echo "Downloading InChI software distribution version 1.05"
-	echo "  http://www.inchi-trust.org/download/105/INCHI-1-SRC.zip"
-	echo "  ====>"
-	echo "  $TEMPDIR"
-	echo "================================================================"
-	cd $TEMPDIR
-	wget http://www.inchi-trust.org/download/105/INCHI-1-SRC.zip
-	echo "================================================================"
-	echo "Unarchiving"
-	echo "================================================================"
-	unzip INCHI-1-SRC
-	echo "================================================================"
-	echo "Copying files"
-	echo "================================================================"
-	cp -a INCHI-1-SRC/* "$DIR/src"
-	echo "================================================================"
-	echo "Removing temporary files"
-	echo "================================================================"
-	cd $DIR
-	rm -rf $TEMPDIR
-	echo "================================================================"
-	echo "Done!"
-	echo "Make sure you (re)run cmake before running make"
-	echo "================================================================"
-else
-	echo '**Error: you must invoke this script from within the directory'
-	echo '         $RDKIT_SOURCE_ROOT/External/INCHI-API'
-	exit 1
-fi
+# Uncomment all lines below (and remove the message above) if you need
+# to restore the original behavior of this script.
+
+# if ! which wget > /dev/null
+# then
+# 	echo "**Error: wget not found!"
+# 	exit 1
+# fi
+# 
+# DIR=`pwd`
+# TEMPDIR=`mktemp -d -t rdkit-inchi-XXX`
+# if [[ $DIR =~ External/INCHI-API$ ]]
+# then
+# 	mkdir -p src
+# 	echo "================================================================"
+# 	echo "Downloading InChI software distribution version 1.05"
+# 	echo "  http://www.inchi-trust.org/download/105/INCHI-1-SRC.zip"
+# 	echo "  ====>"
+# 	echo "  $TEMPDIR"
+# 	echo "================================================================"
+# 	cd $TEMPDIR
+# 	wget http://www.inchi-trust.org/download/105/INCHI-1-SRC.zip
+# 	echo "================================================================"
+# 	echo "Unarchiving"
+# 	echo "================================================================"
+# 	unzip INCHI-1-SRC
+# 	echo "================================================================"
+# 	echo "Copying files"
+# 	echo "================================================================"
+# 	cp -a INCHI-1-SRC/* "$DIR/src"
+# 	echo "================================================================"
+# 	echo "Removing temporary files"
+# 	echo "================================================================"
+# 	cd $DIR
+# 	rm -rf $TEMPDIR
+# 	echo "================================================================"
+# 	echo "Done!"
+# 	echo "Make sure you (re)run cmake before running make"
+# 	echo "================================================================"
+# else
+# 	echo '**Error: you must invoke this script from within the directory'
+# 	echo '         $RDKIT_SOURCE_ROOT/External/INCHI-API'
+# 	exit 1
+# fi
