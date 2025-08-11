@@ -118,8 +118,12 @@ void _MolToSDStream(std::ostream *dp_ostream, const ROMol &mol, int confId,
     // if use did not specify any properties, write all non computed properties
     // out to the file
     STR_VECT properties = mol.getPropList();
+    std::vector<unsigned int> compLstNums;
+    mol.getPropIfPresent(RDKit::detail::computedPropName, compLstNums);
     STR_VECT compLst;
-    mol.getPropIfPresent(RDKit::detail::computedPropName, compLst);
+    for (auto num : compLstNums) {
+      compLst.push_back(Dict::get_strkey(num));
+    }
 
     STR_VECT_CI pi;
     for (pi = properties.begin(); pi != properties.end(); pi++) {

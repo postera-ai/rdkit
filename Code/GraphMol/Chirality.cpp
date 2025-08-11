@@ -755,7 +755,7 @@ const Atom *findHighestCIPNeighbor(const Atom *atom, const Atom *skipAtom) {
       continue;
     }
     unsigned cip = 0;
-    if (!neighbor->getPropIfPresent(common_properties::_CIPRank, cip)) {
+    if (!neighbor->getPropIfPresent(common_properties::_CIPRankKey, cip)) {
       // If at least one of the atoms doesn't have a CIP rank, the highest rank
       // does not make sense, so return a nullptr.
       return nullptr;
@@ -872,7 +872,7 @@ void buildCIPInvariants(const ROMol &mol, DOUBLE_VECT &res) {
     invariant = (invariant << nMassBits) | mass;
 
     int mapnum = -1;
-    atom->getPropIfPresent(common_properties::molAtomMapNumber, mapnum);
+    atom->getPropIfPresent(common_properties::molAtomMapNumberKey, mapnum);
     mapnum = (mapnum + 1) % 1024;  // increment to allow map numbers of zero
                                    // (though that would be stupid)
     invariant = (invariant << 10) | mapnum;
@@ -881,16 +881,21 @@ void buildCIPInvariants(const ROMol &mol, DOUBLE_VECT &res) {
   }
 }
 
-void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
-                     bool seedWithInvars) {
+void iterateCIPRanks(const ROMol &mol, const DOUBLE_VECT &invars,
+                     UINT_VECT &ranks, bool seedWithInvars) {
   PRECONDITION(invars.size() == mol.getNumAtoms(), "bad invars size");
   PRECONDITION(ranks.size() >= mol.getNumAtoms(), "bad ranks size");
 
   unsigned int numAtoms = mol.getNumAtoms();
+  if (numAtoms == 0) { return; }
+  if (numAtoms == 1) {
+    ranks[0] = 0;
+    return;
+  }
+
   CIP_ENTRY_VECT cipEntries(numAtoms);
-  INT_LIST allIndices;
-  for (unsigned int i = 0; i < numAtoms; ++i) {
-    allIndices.push_back(i);
+  for (auto& vec : cipEntries) {
+    vec.reserve(16);
   }
 #ifdef VERBOSE_CANON
   BOOST_LOG(rdDebugLog) << "invariants:" << std::endl;
@@ -900,7 +905,10 @@ void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
 #endif
 
   // rank those:
-  Rankers::rankVect(invars, ranks);
+  std::vector<unsigned int> rank_indices(numAtoms);
+  // The dual of rank_indices: rank_indices[i] == j <=> rank_indices_dual[j] == i
+  std::vector<unsigned int> rank_indices_dual(numAtoms);
+  Rankers::rankVect(invars, rank_indices, ranks);
 #ifdef VERBOSE_CANON
   BOOST_LOG(rdDebugLog) << "initial ranks:" << std::endl;
   for (unsigned int i = 0; i < numAtoms; ++i) {
@@ -911,11 +919,11 @@ void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
   //  Note: in general one should avoid the temptation to
   //  use invariants here, those lead to incorrect answers
   for (unsigned int i = 0; i < numAtoms; i++) {
-    if (!seedWithInvars) {
+    if (seedWithInvars) {
+      cipEntries[i].push_back(static_cast<int>(invars[i]));
+    } else {
       cipEntries[i].push_back(mol[i]->getAtomicNum());
       cipEntries[i].push_back(static_cast<int>(ranks[i]));
-    } else {
-      cipEntries[i].push_back(static_cast<int>(invars[i]));
     }
   }
 
@@ -932,18 +940,33 @@ void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
   unsigned int maxIts = numAtoms / 2 + 1;
   unsigned int numIts = 0;
   int lastNumRanks = -1;
-  unsigned int numRanks = *std::max_element(ranks.begin(), ranks.end()) + 1;
+  unsigned int numRanks = ranks[rank_indices[numAtoms-1]] + 1;
+  std::vector<unsigned int> counts(ranks.size());
+  std::vector<unsigned int> updatedNbrIdxs;
+  updatedNbrIdxs.reserve(8);
   while (numRanks < numAtoms && numIts < maxIts &&
          (lastNumRanks < 0 ||
           static_cast<unsigned int>(lastNumRanks) < numRanks)) {
     unsigned int longestEntry = 0;
     // ----------------------------------------------------
-    //
     // for each atom, get a sorted list of its neighbors' ranks:
-    //
-    for (int &index : allIndices) {
-      CIP_ENTRY localEntry;
-      localEntry.reserve(16);
+    for (unsigned int index = 0; index < numAtoms; ++index) {
+      // If the atom already has a unique rank, then skip processing it.
+      if (numIts > 0)  {
+        unsigned int rank_index = rank_indices_dual[index];
+        bool has_unique_rank_left = true;
+        bool has_unique_rank_right = true;
+        if (rank_index > 0) {
+          has_unique_rank_left = ranks[index] != ranks[rank_indices[rank_index-1]];
+        }
+        if (rank_index < numAtoms-1) {
+          has_unique_rank_right = ranks[index] != ranks[rank_indices[rank_index+1]];
+        }
+        if (has_unique_rank_left && has_unique_rank_right) { continue; }
+      }
+
+      // Note: counts is cleaned up when we drain into cipEntries.
+      updatedNbrIdxs.clear();
 
       // start by pushing on our neighbors' ranks:
       ROMol::OEDGE_ITER beg, end;
@@ -952,58 +975,68 @@ void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
         const Bond *bond = mol[*beg];
         ++beg;
         unsigned int nbrIdx = bond->getOtherAtomIdx(index);
-        const Atom *nbr = mol[nbrIdx];
+        updatedNbrIdxs.push_back(nbrIdx);
 
-        int rank = ranks[nbrIdx] + 1;
         // put the neighbor in 2N times where N is the bond order as a double.
         // this is to treat aromatic linkages on fair footing. i.e. at least in
-        // the
-        // first iteration --c(:c):c and --C(=C)-C should look the same.
+        // the first iteration --c(:c):c and --C(=C)-C should look the same.
         // this was part of issue 3009911
 
-        unsigned int count;
-        if (bond->getBondType() == Bond::DOUBLE && nbr->getAtomicNum() == 15 &&
-            (nbr->getDegree() == 4 || nbr->getDegree() == 3)) {
-          // a special case for chiral phosphorous compounds
-          // (this was leading to incorrect assignment of
-          // R/S labels ):
-          count = 1;
+        // a special case for chiral phosphorus compounds
+        // (this was leading to incorrect assignment of R/S labels ):
+        bool isChiralPhosphorusSpecialCase;
+        if (bond->getBondType() != Bond::DOUBLE) {
+          isChiralPhosphorusSpecialCase = false;
+        } else {  // double bond
+          const Atom *nbr = mol[nbrIdx];
+          if (nbr->getAtomicNum() != 15) {
+            isChiralPhosphorusSpecialCase = false;
+          } else {
+            unsigned int nbrDeg = nbr->getDegree();
+            isChiralPhosphorusSpecialCase = nbrDeg == 3 || nbrDeg == 4;
+          }
+        };
 
-          // general justification of this is:
-          // Paragraph 2.2. in the 1966 article is "Valence-Bond Conventions:
-          // Multiple-Bond Unsaturation and Aromaticity". It contains several
-          // conventions of which convention (b) is the one applying here:
-          // "(b) Contributions by d orbitals to bonds of quadriligant atoms are
-          // neglected."
-          // FIX: this applies to more than just P
+        // general justification of this is:
+        // Paragraph 2.2. in the 1966 article is "Valence-Bond Conventions:
+        // Multiple-Bond Unsaturation and Aromaticity". It contains several
+        // conventions of which convention (b) is the one applying here:
+        // "(b) Contributions by d orbitals to bonds of quadriligant atoms are
+        // neglected."
+        // FIX: this applies to more than just P
+        if (isChiralPhosphorusSpecialCase) {
+          counts[nbrIdx] += 1;
         } else {
-          count = static_cast<unsigned int>(
-              floor(2. * bond->getBondTypeAsDouble() + .1));
+          counts[nbrIdx] += bond->getTwiceBondType();
         }
-        auto ePos =
-            std::lower_bound(localEntry.begin(), localEntry.end(), rank);
-        localEntry.insert(ePos, count, rank);
-        ++nbr;
-      }
-      // add a zero for each coordinated H:
-      // (as long as we're not a query atom)
-      if (!mol[index]->hasQuery()) {
-        localEntry.insert(localEntry.begin(), mol[index]->getTotalNumHs(), 0);
       }
 
       // we now have a sorted list of our neighbors' ranks,
       // copy it on in reversed order:
-      cipEntries[index].insert(cipEntries[index].end(), localEntry.rbegin(),
-                               localEntry.rend());
-      if (cipEntries[index].size() > longestEntry) {
-        longestEntry = rdcast<unsigned int>(cipEntries[index].size());
+      if (updatedNbrIdxs.size() > 1) {  // compare vs 1 for performance.
+        std::sort(std::begin(updatedNbrIdxs), std::end(updatedNbrIdxs),
+                  [&ranks](unsigned int idx1, unsigned int idx2) {
+                    return ranks[idx1] > ranks[idx2];
+                  });
+      }
+      auto& cipEntry = cipEntries[index];
+      for (auto nbrIdx : updatedNbrIdxs) {
+        unsigned int count = counts[nbrIdx];
+        cipEntry.insert(cipEntry.end(), count, ranks[nbrIdx] + 1);
+        counts[nbrIdx] = 0;
+      }
+      // add a zero for each coordinated H as long as we're not a query atom
+      if (!mol[index]->hasQuery()) {
+        cipEntry.insert(cipEntry.end(), mol[index]->getTotalNumHs(), 0);
+      }
+
+      if (cipEntry.size() > longestEntry) {
+        longestEntry = rdcast<unsigned int>(cipEntry.size());
       }
     }
     // ----------------------------------------------------
-    //
     // pad the entries so that we compare rounds to themselves:
-    //
-    for (int &index : allIndices) {
+    for (unsigned int index = 0; index < numAtoms; ++index) {
       auto sz = rdcast<unsigned int>(cipEntries[index].size());
       if (sz < longestEntry) {
         cipEntries[index].insert(cipEntries[index].end(), longestEntry - sz,
@@ -1011,13 +1044,15 @@ void iterateCIPRanks(const ROMol &mol, DOUBLE_VECT &invars, UINT_VECT &ranks,
       }
     }
     // ----------------------------------------------------
-    //
     // sort the new ranks and update the list of active indices:
-    //
     lastNumRanks = numRanks;
 
-    Rankers::rankVect(cipEntries, ranks);
-    numRanks = *std::max_element(ranks.begin(), ranks.end()) + 1;
+    bool reset_indices = numIts == 0;
+    Rankers::rankVect(cipEntries, rank_indices, ranks, reset_indices);
+    numRanks = ranks[rank_indices[numAtoms-1]] + 1;
+    for (unsigned i = 0; i < numAtoms; ++i) {
+      rank_indices_dual[rank_indices[i]] = i;
+    }
 
     // now truncate each vector and stick the rank at the end
     for (unsigned int i = 0; i < numAtoms; ++i) {
@@ -1055,7 +1090,7 @@ void assignAtomCIPRanks(const ROMol &mol, UINT_VECT &ranks) {
 
   // copy the ranks onto the atoms:
   for (unsigned int i = 0; i < numAtoms; ++i) {
-    mol[i]->setProp(common_properties::_CIPRank, ranks[i], 1);
+    mol[i]->setProp(common_properties::_CIPRankKey, ranks[i], 1);
   }
 }
 
@@ -1191,7 +1226,7 @@ bool atomIsCandidateForRingStereochem(const ROMol &mol, const Atom *atom) {
           const Atom *nbr = bond->getOtherAtom(atom);
           ringNbrs.push_back(nbr);
           unsigned int rnk = 0;
-          nbr->getPropIfPresent(common_properties::_CIPRank, rnk);
+          nbr->getPropIfPresent(common_properties::_CIPRankKey, rnk);
           nbrRanks.insert(rnk);
         }
         ++beg;
@@ -1199,9 +1234,9 @@ bool atomIsCandidateForRingStereochem(const ROMol &mol, const Atom *atom) {
       unsigned int rank1 = 0, rank2 = 0;
       switch (nonRingNbrs.size()) {
         case 2:
-          if (nonRingNbrs[0]->getPropIfPresent(common_properties::_CIPRank,
+          if (nonRingNbrs[0]->getPropIfPresent(common_properties::_CIPRankKey,
                                                rank1) &&
-              nonRingNbrs[1]->getPropIfPresent(common_properties::_CIPRank,
+              nonRingNbrs[1]->getPropIfPresent(common_properties::_CIPRankKey,
                                                rank2)) {
             if (rank1 == rank2) {
               res = false;
@@ -1450,6 +1485,8 @@ std::pair<bool, bool> assignAtomChiralCodes(ROMol &mol, UINT_VECT &ranks,
                "bad rank vector size");
   bool atomChanged = false;
   unsigned int unassignedAtoms = 0;
+  Chirality::INT_PAIR_VECT nbrs;
+  nbrs.reserve(4);
 
   // ------------------
   // now loop over each atom and, if it's marked as chiral,
@@ -1463,7 +1500,7 @@ std::pair<bool, bool> assignAtomChiralCodes(ROMol &mol, UINT_VECT &ranks,
     // we understand:
     if (flagPossibleStereoCenters ||
         (tag != Atom::CHI_UNSPECIFIED && tag != Atom::CHI_OTHER)) {
-      if (atom->hasProp(common_properties::_CIPCode)) {
+      if (atom->hasProp(common_properties::_CIPCodeKey)) {
         continue;
       }
 
@@ -1471,7 +1508,7 @@ std::pair<bool, bool> assignAtomChiralCodes(ROMol &mol, UINT_VECT &ranks,
         //  if we need to, get the "CIP" ranking of each atom:
         assignAtomCIPRanks(mol, ranks);
       }
-      Chirality::INT_PAIR_VECT nbrs;
+      nbrs.clear();
       bool legalCenter, hasDupes;
       boost::tie(legalCenter, hasDupes) =
           isAtomPotentialChiralCenter(atom, mol, ranks, nbrs);
@@ -1479,7 +1516,7 @@ std::pair<bool, bool> assignAtomChiralCodes(ROMol &mol, UINT_VECT &ranks,
         ++unassignedAtoms;
       }
       if (legalCenter && !hasDupes && flagPossibleStereoCenters) {
-        atom->setProp(common_properties::_ChiralityPossible, 1);
+        atom->setProp(common_properties::_ChiralityPossibleKey, 1);
       }
 
       if (legalCenter && !hasDupes && tag != Atom::CHI_UNSPECIFIED &&
@@ -1521,7 +1558,7 @@ std::pair<bool, bool> assignAtomChiralCodes(ROMol &mol, UINT_VECT &ranks,
         } else {
           cipCode = "R";
         }
-        atom->setProp(common_properties::_CIPCode, cipCode);
+        atom->setProp(common_properties::_CIPCodeKey, cipCode);
       }
     }
   }
@@ -1697,7 +1734,7 @@ void rerankAtoms(const ROMol &mol, UINT_VECT &ranks) {
     const Atom *atom = mol.getAtomWithIdx(i);
     // Priority order: R > S > nothing
     std::string cipCode;
-    if (atom->getPropIfPresent(common_properties::_CIPCode, cipCode)) {
+    if (atom->getPropIfPresent(common_properties::_CIPCodeKey, cipCode)) {
       if (cipCode == "S") {
         invars[i] += 10;
       } else if (cipCode == "R") {
@@ -1721,7 +1758,7 @@ void rerankAtoms(const ROMol &mol, UINT_VECT &ranks) {
   iterateCIPRanks(mol, invars, ranks, true);
   // copy the ranks onto the atoms:
   for (unsigned int i = 0; i < mol.getNumAtoms(); i++) {
-    mol.getAtomWithIdx(i)->setProp(common_properties::_CIPRank, ranks[i]);
+    mol.getAtomWithIdx(i)->setProp(common_properties::_CIPRankKey, ranks[i]);
   }
 
 #ifdef VERBOSE_CANON
@@ -1808,7 +1845,7 @@ namespace MolOps {
  */
 void assignStereochemistry(ROMol &mol, bool cleanIt, bool force,
                            bool flagPossibleStereoCenters) {
-  if (!force && mol.hasProp(common_properties::_StereochemDone)) {
+  if (!force && mol.hasProp(common_properties::_StereochemDoneKey)) {
     return;
   }
 
@@ -1834,11 +1871,11 @@ void assignStereochemistry(ROMol &mol, bool cleanIt, bool force,
   for (ROMol::AtomIterator atIt = mol.beginAtoms(); atIt != mol.endAtoms();
        ++atIt) {
     if (cleanIt) {
-      if ((*atIt)->hasProp(common_properties::_CIPCode)) {
-        (*atIt)->clearProp(common_properties::_CIPCode);
+      if ((*atIt)->hasProp(common_properties::_CIPCodeKey)) {
+        (*atIt)->clearProp(common_properties::_CIPCodeKey);
       }
-      if ((*atIt)->hasProp(common_properties::_ChiralityPossible)) {
-        (*atIt)->clearProp(common_properties::_ChiralityPossible);
+      if ((*atIt)->hasProp(common_properties::_ChiralityPossibleKey)) {
+        (*atIt)->clearProp(common_properties::_ChiralityPossibleKey);
       }
     }
     if (!hasStereoAtoms && (*atIt)->getChiralTag() != Atom::CHI_UNSPECIFIED &&
@@ -1925,11 +1962,11 @@ void assignStereochemistry(ROMol &mol, bool cleanIt, bool force,
 
     for (ROMol::AtomIterator atIt = mol.beginAtoms(); atIt != mol.endAtoms();
          ++atIt) {
-      if ((*atIt)->hasProp(common_properties::_ringStereochemCand)) {
-        (*atIt)->clearProp(common_properties::_ringStereochemCand);
+      if ((*atIt)->hasProp(common_properties::_ringStereochemCandKey)) {
+        (*atIt)->clearProp(common_properties::_ringStereochemCandKey);
       }
-      if ((*atIt)->hasProp(common_properties::_ringStereoAtoms)) {
-        (*atIt)->clearProp(common_properties::_ringStereoAtoms);
+      if ((*atIt)->hasProp(common_properties::_ringStereoAtomsKey)) {
+        (*atIt)->clearProp(common_properties::_ringStereoAtomsKey);
       }
     }
     boost::dynamic_bitset<> possibleSpecialCases(mol.getNumAtoms());
@@ -1937,9 +1974,9 @@ void assignStereochemistry(ROMol &mol, bool cleanIt, bool force,
 
     for (auto atom : mol.atoms()) {
       if (atom->getChiralTag() != Atom::CHI_UNSPECIFIED &&
-          !atom->hasProp(common_properties::_CIPCode) &&
+          !atom->hasProp(common_properties::_CIPCodeKey) &&
           (!possibleSpecialCases[atom->getIdx()] ||
-           !atom->hasProp(common_properties::_ringStereoAtoms))) {
+           !atom->hasProp(common_properties::_ringStereoAtomsKey))) {
         atom->setChiralTag(Atom::CHI_UNSPECIFIED);
 
         // If the atom has an explicit hydrogen and no charge, that H
@@ -2033,7 +2070,7 @@ void assignStereochemistry(ROMol &mol, bool cleanIt, bool force,
 #endif
     }
   }
-  mol.setProp(common_properties::_StereochemDone, 1, true);
+  mol.setProp(common_properties::_StereochemDoneKey, 1, true);
 
 #if 0
   std::cerr << "---\n";
@@ -2088,13 +2125,13 @@ void findPotentialStereoBonds(ROMol &mol, bool cleanIt) {
             // ------------------
             // get the CIP ranking of each atom if we need it:
             if (!cipDone) {
-              if (!begAtom->hasProp(common_properties::_CIPRank)) {
+              if (!begAtom->hasProp(common_properties::_CIPRankKey)) {
                 Chirality::assignAtomCIPRanks(mol, ranks);
               } else {
                 // no need to recompute if we don't need to recompute. :-)
                 for (unsigned int ai = 0; ai < mol.getNumAtoms(); ++ai) {
                   ranks[ai] = mol.getAtomWithIdx(ai)->getProp<unsigned int>(
-                      common_properties::_CIPRank);
+                      common_properties::_CIPRankKey);
                 }
               }
               cipDone = true;
@@ -2568,11 +2605,11 @@ void removeStereochemistry(ROMol &mol) {
   for (ROMol::AtomIterator atIt = mol.beginAtoms(); atIt != mol.endAtoms();
        ++atIt) {
     (*atIt)->setChiralTag(Atom::CHI_UNSPECIFIED);
-    if ((*atIt)->hasProp(common_properties::_CIPCode)) {
-      (*atIt)->clearProp(common_properties::_CIPCode);
+    if ((*atIt)->hasProp(common_properties::_CIPCodeKey)) {
+      (*atIt)->clearProp(common_properties::_CIPCodeKey);
     }
-    if ((*atIt)->hasProp(common_properties::_CIPRank)) {
-      (*atIt)->clearProp(common_properties::_CIPRank);
+    if ((*atIt)->hasProp(common_properties::_CIPRankKey)) {
+      (*atIt)->clearProp(common_properties::_CIPRankKey);
     }
   }
   for (ROMol::BondIterator bondIt = mol.beginBonds(); bondIt != mol.endBonds();

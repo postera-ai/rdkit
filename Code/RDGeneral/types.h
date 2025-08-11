@@ -48,6 +48,7 @@ namespace RDKit {
 namespace detail {
 // used in various places for computed properties
 RDKIT_RDGENERAL_EXPORT extern const std::string computedPropName;
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t computedPropNameKey;
 }  // namespace detail
 
 namespace common_properties {
@@ -61,10 +62,13 @@ RDKIT_RDGENERAL_EXPORT extern const std::string
 RDKIT_RDGENERAL_EXPORT extern const std::string _3DConf;  // int
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _doIsoSmiles;  // int (should probably be removed)
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _doIsoSmilesKey;
+
 RDKIT_RDGENERAL_EXPORT extern const std::string extraRings;  // vec<vec<int> >
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _smilesAtomOutputOrder;  // vec<int> computed
 RDKIT_RDGENERAL_EXPORT extern const std::string _StereochemDone;  // int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _StereochemDoneKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _NeedsQueryScan;  // int (bool)
 RDKIT_RDGENERAL_EXPORT extern const std::string _fragSMARTS;      // std::string
 RDKIT_RDGENERAL_EXPORT extern const std::string
@@ -113,6 +117,10 @@ RDKIT_RDGENERAL_EXPORT extern const std::string
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _GasteigerHCharge;  // used to hold partial charges from implicit Hs
 
+RDKIT_RDGENERAL_EXPORT extern const std::string
+    _canonicalRankingNumbers;  // unsigned int computed
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _canonicalRankingNumbersKey;
+
 ///////////////////////////////////////////////////////////////
 // Atom Props
 
@@ -121,43 +129,58 @@ RDKIT_RDGENERAL_EXPORT extern const std::string
     _BondsPotentialStereo;  // int (or bool) COMPUTED
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _CIPCode;  // std::string COMPUTED
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _CIPCodeKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _CIPRank;  // int COMPUTED
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _CIPRankKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _ChiralityPossible;  // int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _ChiralityPossibleKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _UnknownStereo;  // int (bool) AddHs/Chirality
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _ringStereoAtoms;  // int vect Canon/Chiral/MolHash/MolOps//Renumber//RWmol
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _ringStereoAtomsKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _ringStereochemCand;  // chirality bool COMPUTED
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _ringStereochemCandKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _ringStereoWarning;  // obsolete ?
 
 // Smiles parsing
 RDKIT_RDGENERAL_EXPORT extern const std::string _SmilesStart;  // int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _SmilesStartKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _TraversalBondIndexOrder;  // ? unused
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _TraversalBondIndexOrderKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _TraversalRingClosureBond;  // unsigned int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _TraversalRingClosureBondKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _TraversalStartPoint;  // bool
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _TraversalStartPointKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _queryRootAtom;  // int SLNParse/SubstructMatch
 RDKIT_RDGENERAL_EXPORT extern const std::string _hasMassQuery;  // atom bool
 RDKIT_RDGENERAL_EXPORT extern const std::string _protected;  // atom int (bool)
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _supplementalSmilesLabel;  // atom string (SmilesWrite)
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _supplementalSmilesLabelKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _unspecifiedOrder;  // atom int (bool) smarts/smiles
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _unspecifiedOrderKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _RingClosures;  // INT_VECT smarts/smiles/canon
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _RingClosuresKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string
     atomLabel;  // atom string from CXSMILES
 
 // MDL Style Properties (MolFileParser)
 RDKIT_RDGENERAL_EXPORT extern const std::string molAtomMapNumber;   // int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t molAtomMapNumberKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string molFileAlias;       // string
 RDKIT_RDGENERAL_EXPORT extern const std::string molFileValue;       // string
 RDKIT_RDGENERAL_EXPORT extern const std::string molInversionFlag;   // int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t molInversionFlagKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string molParity;          // int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t molParityKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string molStereoCare;      // int
 RDKIT_RDGENERAL_EXPORT extern const std::string molRxnComponent;    // int
 RDKIT_RDGENERAL_EXPORT extern const std::string molRxnRole;         // int
@@ -172,9 +195,12 @@ RDKIT_RDGENERAL_EXPORT extern const std::string molReactStatus;     // int
 RDKIT_RDGENERAL_EXPORT extern const std::string molFileLinkNodes;   // string
 
 RDKIT_RDGENERAL_EXPORT extern const std::string _MolFileRLabel;  // unsigned int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _MolFileRLabelKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _MolFileChiralFlag;  // int
 RDKIT_RDGENERAL_EXPORT extern const std::string _MolFileAtomQuery;   // int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _MolFileAtomQueryKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _MolFileBondQuery;   // int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _MolFileBondQueryKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _MolFileBondEndPts;  // string
 RDKIT_RDGENERAL_EXPORT extern const std::string _MolFileBondAttach;  // string
 RDKIT_RDGENERAL_EXPORT extern const std::string
@@ -187,20 +213,29 @@ RDKIT_RDGENERAL_EXPORT extern const std::string
 RDKIT_RDGENERAL_EXPORT extern const std::string
     MRV_SMA;  // smarts string from Marvin
 RDKIT_RDGENERAL_EXPORT extern const std::string dummyLabel;  // atom string
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t dummyLabelKey;
 
 // Reaction Information (Reactions.cpp)
 RDKIT_RDGENERAL_EXPORT extern const std::string _QueryFormalCharge;  //  int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _QueryFormalChargeKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _QueryHCount;        // int
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _QueryHCountKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _QueryIsotope;       // int
-RDKIT_RDGENERAL_EXPORT extern const std::string
-    _QueryMass;  // int = round(float * 1000)
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _QueryIsotopeKey;       // int
+RDKIT_RDGENERAL_EXPORT extern const std::string _QueryMass;  // int = round(float * 1000)
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _QueryMassKey;
+
 RDKIT_RDGENERAL_EXPORT extern const std::string
     _ReactionDegreeChanged;                                // int (bool)
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _ReactionDegreeChangedKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string NullBond;  // int (bool)
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t NullBondKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string _rgroupAtomMaps;
 RDKIT_RDGENERAL_EXPORT extern const std::string _rgroupBonds;
 RDKIT_RDGENERAL_EXPORT extern const std::string reactantAtomIdx;
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t reactantAtomIdxKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string reactionMapNum;
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t reactionMapNumKey;
 
 // SLN
 RDKIT_RDGENERAL_EXPORT extern const std::string
@@ -213,9 +248,11 @@ RDKIT_RDGENERAL_EXPORT extern const std::string _Unfinished_SLN_;  // int (bool)
 
 // Smarts Smiles
 RDKIT_RDGENERAL_EXPORT extern const std::string _brokenChirality;  // atom bool
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t _brokenChiralityKey;
 RDKIT_RDGENERAL_EXPORT extern const std::string isImplicit;  // atom int (bool)
 RDKIT_RDGENERAL_EXPORT extern const std::string
     smilesSymbol;  // atom string (only used in test?)
+RDKIT_RDGENERAL_EXPORT extern const std::uint16_t smilesSymbolKey;
 
 // Tripos
 RDKIT_RDGENERAL_EXPORT extern const std::string

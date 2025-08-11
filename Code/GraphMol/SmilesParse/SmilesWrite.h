@@ -76,6 +76,13 @@ RDKIT_SMILESPARSE_EXPORT std::string MolToSmiles(
     int rootedAtAtom = -1, bool canonical = true, bool allBondsExplicit = false,
     bool allHsExplicit = false, bool doRandom = false);
 
+// Like MolToSmiles, but can modify the input molecule to avoid intermediate
+// allocations.
+RDKIT_SMILESPARSE_EXPORT std::vector<std::string> MolToSmilesFast(
+    ROMol &mol, bool doIsomericSmiles = true, bool doKekule = false,
+    int rootedAtAtom = -1, bool canonical = true, bool allBondsExplicit = false,
+    bool allHsExplicit = false, bool doRandom = false);
+
 //! \brief returns a vector of random SMILES for a molecule (may contain
 //! duplicates)
 /*!

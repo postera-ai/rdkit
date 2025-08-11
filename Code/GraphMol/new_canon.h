@@ -279,9 +279,9 @@ class RDKIT_GRAPHMOL_EXPORT AtomCompareFunctor {
     */
     int molAtomMapNumber_i = 0;
     int molAtomMapNumber_j = 0;
-    dp_atoms[i].atom->getPropIfPresent(common_properties::molAtomMapNumber,
+    dp_atoms[i].atom->getPropIfPresent(common_properties::molAtomMapNumberKey,
                                        molAtomMapNumber_i);
-    dp_atoms[j].atom->getPropIfPresent(common_properties::molAtomMapNumber,
+    dp_atoms[j].atom->getPropIfPresent(common_properties::molAtomMapNumberKey,
                                        molAtomMapNumber_j);
     if (molAtomMapNumber_i < molAtomMapNumber_j) {
       return -1;
@@ -347,11 +347,11 @@ class RDKIT_GRAPHMOL_EXPORT AtomCompareFunctor {
       ivi = 0;
       ivj = 0;
       std::string cipCode;
-      if (dp_atoms[i].atom->getPropIfPresent(common_properties::_CIPCode,
+      if (dp_atoms[i].atom->getPropIfPresent(common_properties::_CIPCodeKey,
                                              cipCode)) {
         ivi = cipCode == "R" ? 2 : 1;
       }
-      if (dp_atoms[j].atom->getPropIfPresent(common_properties::_CIPCode,
+      if (dp_atoms[j].atom->getPropIfPresent(common_properties::_CIPCodeKey,
                                              cipCode)) {
         ivj = cipCode == "R" ? 2 : 1;
       }
@@ -501,11 +501,11 @@ class RDKIT_GRAPHMOL_EXPORT ChiralAtomCompareFunctor {
     ivi = 0;
     ivj = 0;
     std::string cipCode;
-    if (dp_atoms[i].atom->getPropIfPresent(common_properties::_CIPCode,
+    if (dp_atoms[i].atom->getPropIfPresent(common_properties::_CIPCodeKey,
                                            cipCode)) {
       ivi = cipCode == "R" ? 2 : 1;
     }
-    if (dp_atoms[j].atom->getPropIfPresent(common_properties::_CIPCode,
+    if (dp_atoms[j].atom->getPropIfPresent(common_properties::_CIPCodeKey,
                                            cipCode)) {
       ivj = cipCode == "R" ? 2 : 1;
     }

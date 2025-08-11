@@ -586,6 +586,21 @@ int Atom::getPerturbationOrder(const INT_LIST &probe) const {
   int nSwaps = static_cast<int>(countSwapsToInterconvert(probe, ref));
   return nSwaps;
 }
+int Atom::getPerturbationOrder(const INT_VECT &probe) const {
+  PRECONDITION(
+      dp_mol,
+      "perturbation order not defined for atoms not associated with molecules")
+  INT_VECT ref;
+  ref.reserve(getOwningMol().getAtomDegree(this));
+  ROMol::OEDGE_ITER beg, end;
+  boost::tie(beg, end) = getOwningMol().getAtomBonds(this);
+  while (beg != end) {
+    ref.push_back(getOwningMol()[*beg]->getIdx());
+    ++beg;
+  }
+  int nSwaps = static_cast<int>(countSwapsToInterconvert(probe, ref));
+  return nSwaps;
+}
 
 void Atom::invertChirality() {
   switch (getChiralTag()) {

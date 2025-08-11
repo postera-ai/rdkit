@@ -87,6 +87,10 @@ class RDKIT_GRAPHMOL_EXPORT MolStackElem {
     }
     number = idx;
   }
+  explicit MolStackElem(MolStackTypes ctor_type, int idx) {
+    type = ctor_type;
+    number = idx;
+  }
   MolStackTypes type;  //!< stores the type of node
   MolStackUnion obj;   //!< holds our pointer (if appropriate)
   int number =

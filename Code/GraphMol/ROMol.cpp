@@ -132,7 +132,7 @@ void ROMol::initFromOther(const ROMol &other, bool quickCopy, int confId) {
     }
   } else {
     d_props.reset();
-    STR_VECT computed;
+    std::vector<unsigned int> computed;
     d_props.setVal(RDKit::detail::computedPropName, computed);
   }
   // std::cerr<<"---------    done init from other: "<<this<<"
@@ -149,7 +149,7 @@ void ROMol::initMol() {
   // this can used to blow out all computed properties while leaving the rest
   // along
   // initialize this list to an empty vector of strings
-  STR_VECT computed;
+  std::vector<unsigned int> computed;
   d_props.setVal(RDKit::detail::computedPropName, computed);
 }
 

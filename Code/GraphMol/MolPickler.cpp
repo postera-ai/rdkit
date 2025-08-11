@@ -340,7 +340,7 @@ void finalizeQueryFromDescription(Query<int, Atom const *, true> *query,
     query->setMatchFunc(nullQueryFun);
   } else if (descr == "AtomType") {
     query->setDataFunc(queryAtomType);
-  } else if (descr == "AtomInNRings" || descr == "RecursiveStructure") {
+  } else if (descr == "AtomInNRings" || descr == "RS") {
     // don't need to do anything here because the classes
     // automatically have everything set
   } else if (descr == "AtomAnd" || descr == "AtomOr" || descr == "AtomXor") {

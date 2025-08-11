@@ -332,6 +332,7 @@ class RDKIT_GRAPHMOL_EXPORT Atom : public RDProps {
 
   */
   int getPerturbationOrder(const INT_LIST &probe) const;
+  int getPerturbationOrder(const INT_VECT &probe) const;
 
   //! calculates any of our lazy \c properties
   /*!

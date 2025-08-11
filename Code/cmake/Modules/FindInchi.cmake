@@ -47,7 +47,9 @@ else(EXISTS ${CUSTOM_INCHI_PATH}/src/INCHI_BASE/src/ichican2.c)
     if(NOT DEFINED INCHI_BASE)
       string(REGEX REPLACE "^.*/" "" INCHI_BASE "${INCHI_URL}")
     endif()
-    downloadAndCheckMD5(${INCHI_URL} "${CUSTOM_INCHI_PATH}/${INCHI_BASE}" ${INCHI_MD5SUM})
+    # Temporary fix: don't download the file. It is included in the repo for now
+    # Uncomment the line below to restore downloading the file
+    #downloadAndCheckMD5(${INCHI_URL} "${CUSTOM_INCHI_PATH}/${INCHI_BASE}" ${INCHI_MD5SUM})
     execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf
       ${CUSTOM_INCHI_PATH}/INCHI-1-SRC.zip
       WORKING_DIRECTORY ${CUSTOM_INCHI_PATH})

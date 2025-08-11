@@ -1095,7 +1095,7 @@ void mergeQueryHs(RWMol &mol, bool mergeUnmappedOnly) {
       // recurse if needed (was github isusue 544)
       if (atom->hasQuery()) {
         // std::cerr<<"  q: "<<atom->getQuery()->getDescription()<<std::endl;
-        if (atom->getQuery()->getDescription() == "RecursiveStructure") {
+        if (atom->getQuery()->getDescription() == "RS") {
           auto *rqm = static_cast<RWMol *>(const_cast<ROMol *>(
               static_cast<RecursiveStructureQuery *>(atom->getQuery())
                   ->getQueryMol()));
@@ -1109,7 +1109,7 @@ void mergeQueryHs(RWMol &mol, bool mergeUnmappedOnly) {
           QueryAtom::QUERYATOM_QUERY::CHILD_TYPE qry = childStack.front();
           childStack.pop_front();
           // std::cerr<<"      child: "<<qry->getDescription()<<std::endl;
-          if (qry->getDescription() == "RecursiveStructure") {
+          if (qry->getDescription() == "RS") {
             // std::cerr<<"    recurse"<<std::endl;
             auto *rqm = static_cast<RWMol *>(const_cast<ROMol *>(
                 static_cast<RecursiveStructureQuery *>(qry.get())

@@ -162,11 +162,11 @@ void testMolProps() {
   // check for computed properties
   m2.setProp("cprop1", 1, true);
   m2.setProp("cprop2", 2, true);
-  STR_VECT cplst;
+  std::vector<unsigned int> cplst;
   m2.getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 2, "");
-  CHECK_INVARIANT(cplst[0] == "cprop1", "");
-  CHECK_INVARIANT(cplst[1] == "cprop2", "");
+  CHECK_INVARIANT(Dict::get_strkey(cplst[0]) == "cprop1", "");
+  CHECK_INVARIANT(Dict::get_strkey(cplst[1]) == "cprop2", "");
 
   propNames = m2.getPropList(false, false);
   TEST_ASSERT(propNames.size() == 1);
@@ -289,11 +289,11 @@ void testAtomProps() {
   // check for computed properties
   a1->setProp("cprop1", 1, true);
   a1->setProp("cprop2", 2, true);
-  STR_VECT cplst;
+  std::vector<unsigned int> cplst;
   a1->getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 2, "");
-  CHECK_INVARIANT(cplst[0] == "cprop1", "");
-  CHECK_INVARIANT(cplst[1] == "cprop2", "");
+  CHECK_INVARIANT(Dict::get_strkey(cplst[0]) == "cprop1", "");
+  CHECK_INVARIANT(Dict::get_strkey(cplst[1]) == "cprop2", "");
 
   a1->clearProp("cprop1");
   CHECK_INVARIANT(!a1->hasProp("cprop1"), "");
@@ -344,11 +344,11 @@ void testBondProps() {
   // check for computed properties
   b1->setProp("cprop1", 1, true);
   b1->setProp("cprop2", 2, true);
-  STR_VECT cplst;
+  std::vector<unsigned int> cplst;
   b1->getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 2, "");
-  CHECK_INVARIANT(cplst[0] == "cprop1", "");
-  CHECK_INVARIANT(cplst[1] == "cprop2", "");
+  CHECK_INVARIANT(Dict::get_strkey(cplst[0]) == "cprop1", "");
+  CHECK_INVARIANT(Dict::get_strkey(cplst[1]) == "cprop2", "");
 
   b1->clearProp("cprop1");
   CHECK_INVARIANT(!b1->hasProp("cprop1"), "");

@@ -60,6 +60,7 @@
 #include <GraphMol/Chirality.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
+#include <RDGeneral/types.h>
 #include <inchi_api.h>
 #include <cstring>
 #include <vector>
@@ -73,9 +74,9 @@
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <RDGeneral/BoostEndInclude.h>
-#if RDK_TEST_MULTITHREADED
+// #if RDK_BUILD_THREADSAFE_SSS
 #include <mutex>
-#endif
+// #endif
 
 //#define DEBUG 1
 namespace RDKit {
@@ -1254,10 +1255,6 @@ void cleanUp(RWMol& mol) {
 }  // end cleanUp
 }  // namespace
 
-#if RDK_TEST_MULTITHREADED
-std::mutex inchiMutex;
-#endif
-
 RWMol* InchiToMol(const std::string& inchi, ExtraInchiReturnValues& rv,
                   bool sanitize, bool removeHs) {
   // input
@@ -1273,9 +1270,6 @@ RWMol* InchiToMol(const std::string& inchi, ExtraInchiReturnValues& rv,
   {
     // output structure
     inchi_OutputStruct inchiOutput;
-#if RDK_TEST_MULTITHREADED
-    std::lock_guard<std::mutex> lock(inchiMutex);
-#endif
     // DLL call
     int retcode = GetStructFromINCHI(&inchiInput, &inchiOutput);
 
@@ -1711,10 +1705,21 @@ void fixOptionSymbol(const char* in, char* out) {
 
 /*! "reverse" clean up: prepare a molecule to be used with InChI sdk */
 void rCleanUp(RWMol& mol) {
-  RWMol* q = SmilesToMol("[O-][Cl+3]([O-])([O-])O");
+  static RWMol* q;
+
+  // Note: before upstreaming to RDKit, we'll likely need to add a compilation guard like
+  // #if RDK_BUILD_THREADSAFE_SSS
+  static std::once_flag q_init_once;
+  std::call_once(q_init_once, [&]() {q = SmilesToMol("[O-][Cl+3]([O-])([O-])O"); });
+  // #else
+  //   if (!q) {
+  //     q = SmilesToMol("[O-][Cl+3]([O-])([O-])O");
+  //   }
+  // #endif
+  // and also guard the #include<mutex> at the top.
+
   std::vector<MatchVectType> fgpMatches;
   SubstructMatch(mol, *q, fgpMatches);
-  delete q;
   // replace all matches
   for (auto match : fgpMatches) {
     // collect matching atoms
@@ -1848,7 +1853,7 @@ std::string MolToInchi(const ROMol& mol, ExtraInchiReturnValues& rv,
 
     // convert tetrahedral chirality info to Stereo0D
     if (atom->getChiralTag() != Atom::CHI_UNSPECIFIED ||
-        atom->hasProp("molParity")) {
+        atom->hasProp(common_properties::molParityKey)) {
       // we ignore the molParity if the number of neighbors are below 3
       atom->calcImplicitValence();
       if (atom->getNumImplicitHs() + atom->getDegree() < 3) {
@@ -2076,9 +2081,6 @@ std::string MolToInchi(const ROMol& mol, ExtraInchiReturnValues& rv,
   // call DLL
   std::string inchi;
   {
-#if RDK_TEST_MULTITHREADED
-    std::lock_guard<std::mutex> lock(inchiMutex);
-#endif
     int retcode = GetINCHI(&input, &output);
 
     // generate output
@@ -2119,9 +2121,6 @@ std::string MolBlockToInchi(const std::string& molBlock,
   // call DLL
   std::string inchi;
   {
-#if RDK_TEST_MULTITHREADED
-    std::lock_guard<std::mutex> lock(inchiMutex);
-#endif
     char* _options = nullptr;
     if (options) {
       _options = new char[strlen(options) + 1];
@@ -2158,9 +2157,6 @@ std::string InchiToInchiKey(const std::string& inchi) {
   char xtra1[65], xtra2[65];
   int ret = 0;
   {
-#if RDK_TEST_MULTITHREADED
-    std::lock_guard<std::mutex> lock(inchiMutex);
-#endif
     ret = GetINCHIKeyFromINCHI(inchi.c_str(), 0, 0, inchiKey, xtra1, xtra2);
   }
   std::string error;
