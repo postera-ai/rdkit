@@ -469,7 +469,8 @@ void pickleQuery(std::ostream &ss, const Query<int, T const *, true> *query) {
         // The tolerance is pickled first as we can't pickle a PairHolder with
         // the QUERY_VALUE tag
         streamWrite(ss, MolPickler::QUERY_VALUE, std::get<2>(v));
-        streamWriteProp(ss, std::get<1>(v),
+        auto pair = std::get<1>(v);
+        streamWriteProp(ss, pair.key, pair.val,
                         MolPickler::getCustomPropHandlers());
       } break;
       default:
@@ -630,7 +631,8 @@ Query<int, T const *, true> *buildBaseQuery(std::istream &ss, T const *owner,
       streamRead(ss, tolerance, version);
       PairHolder pair;
       bool hasNonPod = false;
-      streamReadProp(ss, pair, hasNonPod, MolPickler::getCustomPropHandlers());
+      streamReadProp(ss, pair.key, pair.val, hasNonPod,
+                     MolPickler::getCustomPropHandlers());
       switch (pair.val.getTag()) {
         case RDTypeTag::IntTag:
           res = makePropQuery<T, int>(pair.key, rdvalue_cast<int>(pair.val),

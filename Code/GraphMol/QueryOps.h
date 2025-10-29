@@ -887,7 +887,7 @@ class HasPropWithValueQuery
   }
 
   PairHolder getPair() const override {
-    return PairHolder(Dict::Pair(propname, val));
+    return PairHolder(std::pair(propname, val));
   }
 
   double getTolerance() const override { return tolerance; }
@@ -971,7 +971,7 @@ class HasPropWithValueQuery<TargetPtr, std::string>
   }
 
   PairHolder getPair() const override {
-    return PairHolder(Dict::Pair(propname, val));
+    return PairHolder(std::pair(propname, val));
   }
 
   double getTolerance() const override { return 0.0; }
@@ -1045,7 +1045,7 @@ class HasPropWithValueQuery<TargetPtr, ExplicitBitVect>
   }
 
   PairHolder getPair() const override {
-    return PairHolder(Dict::Pair(propname, val));
+    return PairHolder(std::pair(propname, val));
   }
 
   double getTolerance() const override { return tol; }
