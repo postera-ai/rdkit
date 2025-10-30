@@ -502,9 +502,9 @@ inline bool streamWriteProps(
 
   const Dict &dict = props.getDict();
   COUNT_TYPE count = 0;
-  for (const auto &elem : dict.getData()) {
+  for (const auto &elem : dict.iterValues()) {
     if (propnames.find(elem.first) != propnames.end()) {
-      if (isSerializable(elem, handlers)) {
+      if (isSerializable(elem.second, handlers)) {
         count++;
       }
     }
@@ -515,9 +515,9 @@ inline bool streamWriteProps(
   }
 
   COUNT_TYPE writtenCount = 0;
-  for (const auto &elem : dict.getData()) {
+  for (const auto &elem : dict.iterValues()) {
     if (propnames.find(elem.first) != propnames.end()) {
-      if (isSerializable(elem, handlers)) {
+      if (isSerializable(elem.second, handlers)) {
         // note - not all properties are serializable, this may be
         //  a null op
         if (streamWriteProp(ss, elem.first, elem.second, handlers)) {
@@ -644,10 +644,10 @@ inline unsigned int streamReadProps(std::istream &ss, RDProps &props,
   for (unsigned index = 0; index < count; ++index) {
     std::string key;
     RDValue val;
-    CHECK_INVARIANT(
-        streamReadProp(ss, key, val, dict.getNonPODStatus(), handlers),
-        "Corrupted property serialization detected");
-    dict.getData().emplace(std::move(key), std::move(val));
+    bool pod = false;  // moveInsert will update podstatus if needed
+    CHECK_INVARIANT(streamReadProp(ss, key, val, pod, handlers),
+                    "Corrupted property serialization detected");
+    dict.moveInsert(key, val);
   }
 
   return static_cast<unsigned int>(count);

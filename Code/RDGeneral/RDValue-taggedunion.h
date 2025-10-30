@@ -298,6 +298,21 @@ struct RDValue {
   }
 };
 
+namespace unstable {
+inline bool is_pod(const RDValue &val) {
+  switch (val.getTag()) {
+    case RDTypeTag::DoubleTag:
+    case RDTypeTag::FloatTag:
+    case RDTypeTag::IntTag:
+    case RDTypeTag::UnsignedIntTag:
+    case RDTypeTag::BoolTag:
+      return true;
+    default:
+      return false;
+  }
+}
+}  // namespace unstable
+
 /////////////////////////////////////////////////////////////////////////////////////
 // Given two RDValue::Values - copy the appropriate structure
 //   RDValue doesn't have a copy constructor, the default

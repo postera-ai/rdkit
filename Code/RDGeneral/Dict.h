@@ -20,6 +20,7 @@
 #include <string>
 #include <string_view>
 #include "RDValue.h"
+#include "DictIter.h"
 #include "Exceptions.h"
 #include <RDGeneral/BoostStartInclude.h>
 #include <boost/lexical_cast.hpp>
@@ -99,11 +100,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   //! \brief Access to the underlying non-POD containment flag
   //! This is meant to be used only in bulk updates of _data.
   bool &getNonPODStatus() { return _hasNonPodData; }
-
-  //----------------------------------------------------------
-  //! \brief Access to the underlying data.
-  const DataType &getData() const { return _data; }
-  DataType &getData() { return _data; }
 
   //----------------------------------------------------------
   //! \brief Returns whether or not the dictionary contains a particular
@@ -245,6 +241,26 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   void setVal(std::string_view what, int val) { setPODVal(what, val); }
   void setVal(std::string_view what, unsigned int val) { setPODVal(what, val); }
 
+  [[deprecated(
+      "this overload is unstable, it may be changed or removed without warning")]]
+  void moveInsert(std::string_view what, RDValue val) {
+    // ownership is transferred
+
+    _hasNonPodData |= !unstable::is_pod(val);
+
+    auto key = std::string(what);
+    auto it = _data.find(key);
+
+    if (it != _data.end()) {
+      RDValue::cleanup_rdvalue(it->second);
+      it->second = val;
+    } else {
+      _data.emplace(std::move(key), val);
+    }
+
+    val.type = RDTypeTag::EmptyTag;
+  }
+
   //! \overload
   void setVal(std::string_view what, const char *val) {
     std::string h(val);
@@ -300,6 +316,24 @@ class RDKIT_RDGENERAL_EXPORT Dict {
         }
       }
     }
+  }
+
+  [[deprecated(
+      "this method is unstable, it maye be changed or removed without warning")]]
+  unstable::DictConstIterableKeys iterKeys() const {
+    return {std::begin(_data), std::end(_data)};
+  }
+
+  [[deprecated(
+      "this method is unstable, it maye be changed or removed without warning")]]
+  unstable::DictConstIterableValues iterValues() const {
+    return {std::begin(_data), std::end(_data)};
+  }
+
+  [[deprecated(
+      "this method is unstable, it maye be changed or removed without warning")]]
+  unstable::DictConstIterableItems unstableItems() const {
+    return {std::begin(_data), std::end(_data)};
   }
 
  private:
