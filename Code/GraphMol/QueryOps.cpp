@@ -1125,9 +1125,11 @@ void finalizeQueryFromDescription(
     query->setDataFunc(queryAtomType);
   } else if (descr == "AtomNumRadicalElectrons") {
     query->setDataFunc(queryAtomNumRadicalElectrons);
-  } else if (descr == "AtomInNRings" || descr == "RS") {
-    // don't need to do anything here because the classes
-    // automatically have everything set
+  } else if (descr == "AtomInNRings" || descr == "RS" ||
+             descr == "RecursiveStructure") {
+    if (descr == "RecursiveStructure") {
+      query->setDescription("RS");
+    }
   } else if (descr == "AtomAnd" || descr == "AtomOr" || descr == "AtomXor" ||
              descr == "HasProp" || descr == "HasPropWithValue") {
     // don't need to do anything here because the classes
