@@ -39,7 +39,14 @@
 %include "std_string_view.i"
 
 %ignore RDKit::Dict::Pair;
+%ignore RDKit::Dict::InternalPair;
+%ignore RDKit::Dict::InternalDataType;
+%ignore RDKit::Dict::getInternalData;
 %ignore RDKit::PairHolder;
+%ignore RDKit::DictKeyIntern;
+%ignore RDKit::internKey;
+%ignore RDKit::keyToString;
+%include <RDGeneral/DictKeyIntern.h>
 %include <RDGeneral/Dict.h>
 
 

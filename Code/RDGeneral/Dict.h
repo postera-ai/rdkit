@@ -22,6 +22,7 @@
 #include <vector>
 #include "RDValue.h"
 #include "Exceptions.h"
+#include "DictKeyIntern.h"
 #include <RDGeneral/BoostStartInclude.h>
 #include <boost/lexical_cast.hpp>
 #include <RDGeneral/BoostEndInclude.h>
@@ -36,6 +37,16 @@ typedef std::vector<std::string> STR_VECT;
 //!
 class RDKIT_RDGENERAL_EXPORT Dict {
  public:
+  struct InternalPair {
+    DictKey key;
+    RDValue val;
+
+    InternalPair() : key(0), val() {}
+    explicit InternalPair(DictKey k) : key(k), val() {}
+    InternalPair(DictKey k, const RDValue &v) : key(k), val(v) {}
+    void cleanup() { RDValue::cleanup_rdvalue(val); }
+  };
+
   struct Pair {
     std::string key;
     RDValue val;
@@ -45,19 +56,18 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     explicit Pair(std::string_view s) : key(std::string(s)), val() {}
     Pair(std::string s, const RDValue &v) : key(std::move(s)), val(v) {}
     Pair(std::string_view s, const RDValue &v) : key(std::string(s)), val(v) {}
-    // In the case you are holding onto an rdvalue outside of a dictionary
-    //  or other container, you kust call cleanup to release non POD memory.
     void cleanup() { RDValue::cleanup_rdvalue(val); }
   };
 
   typedef std::vector<Pair> DataType;
+  typedef std::vector<InternalPair> InternalDataType;
 
   Dict() {}
 
   Dict(const Dict &other) : _data(other._data) {
     _hasNonPodData = other._hasNonPodData;
-    if (other._hasNonPodData) {  // other has non pod data, need to copy
-      std::vector<Pair> data(other._data.size());
+    if (other._hasNonPodData) {
+      InternalDataType data(other._data.size());
       _data.swap(data);
       for (size_t i = 0; i < _data.size(); ++i) {
         _data[i].key = other._data[i].key;
@@ -69,7 +79,7 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   Dict(Dict &&other) noexcept = default;
 
   ~Dict() {
-    reset();  // to clear pointers if necessary
+    reset();
   }
 
   void update(const Dict &other, bool preserveExisting = false) {
@@ -80,7 +90,7 @@ class RDKIT_RDGENERAL_EXPORT Dict {
         _hasNonPodData = true;
       }
       for (const auto &opair : other._data) {
-        Pair *target = nullptr;
+        InternalPair *target = nullptr;
         for (auto &dpair : _data) {
           if (dpair.key == opair.key) {
             target = &dpair;
@@ -89,11 +99,9 @@ class RDKIT_RDGENERAL_EXPORT Dict {
         }
 
         if (!target) {
-          // need to create blank entry and copy
-          _data.push_back(Pair(opair.key));
+          _data.push_back(InternalPair(opair.key));
           copy_rdvalue(_data.back().val, opair.val);
         } else {
-          // just copy
           copy_rdvalue(target->val, opair.val);
         }
       }
@@ -109,7 +117,7 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     }
 
     if (other._hasNonPodData) {
-      std::vector<Pair> data(other._data.size());
+      InternalDataType data(other._data.size());
       _data.swap(data);
       for (size_t i = 0; i < _data.size(); ++i) {
         _data[i].key = other._data[i].key;
@@ -137,21 +145,33 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
   //----------------------------------------------------------
   //! \brief Access to the underlying non-POD containment flag
-  //! This is meant to be used only in bulk updates of _data.
   bool &getNonPODStatus() { return _hasNonPodData; }
 
   //----------------------------------------------------------
-  //! \brief Access to the underlying data.
-  const DataType &getData() const { return _data; }
-  DataType &getData() { return _data; }
+  //! \brief Access to the underlying data as external Pairs (string keys).
+  DataType getData() const {
+    DataType result;
+    result.reserve(_data.size());
+    for (const auto &ip : _data) {
+      result.push_back(Pair(keyToString(ip.key), ip.val));
+    }
+    return result;
+  }
+
+  //! \brief Direct access to the internal storage (integer keys).
+  const InternalDataType &getInternalData() const { return _data; }
+  InternalDataType &getInternalData() { return _data; }
 
   //----------------------------------------------------------
 
-  //! \brief Returns whether or not the dictionary contains a particular
-  //!        key.
-  bool hasVal(const std::string_view what) const {
+  //! \brief Returns whether or not the dictionary contains a particular key.
+  bool hasVal(std::string_view what) const {
+    DictKey k = internKey(what);
+    return hasVal(k);
+  }
+  bool hasVal(DictKey k) const {
     for (const auto &data : _data) {
-      if (data.key == what) {
+      if (data.key == k) {
         return true;
       }
     }
@@ -160,76 +180,66 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
   //----------------------------------------------------------
   //! Returns the set of keys in the dictionary
-  /*!
-     \return  a \c STR_VECT
-  */
   STR_VECT keys() const {
     STR_VECT res;
     res.reserve(_data.size());
     for (const auto &item : _data) {
-      res.push_back(item.key);
+      res.push_back(keyToString(item.key));
     }
     return res;
   }
 
   //----------------------------------------------------------
   //! \brief Gets the value associated with a particular key
-  /*!
-     \param what  the key to lookup
-     \param res   a reference used to return the result
-
-     <b>Notes:</b>
-      - If \c res is a \c std::string, every effort will be made
-        to convert the specified element to a string using the
-        \c boost::lexical_cast machinery.
-      - If the dictionary does not contain the key \c what,
-        a KeyErrorException will be thrown.
-  */
   template <typename T>
-  void getVal(const std::string_view what, T &res) const {
+  void getVal(std::string_view what, T &res) const {
     res = getVal<T>(what);
   }
-
-  //! \overload
   template <typename T>
-  T getVal(const std::string_view what) const {
+  void getVal(DictKey k, T &res) const {
+    res = getVal<T>(k);
+  }
+
+  template <typename T>
+  T getVal(std::string_view what) const {
+    DictKey k = internKey(what);
+    return getVal<T>(k);
+  }
+  template <typename T>
+  T getVal(DictKey k) const {
     for (auto &data : _data) {
-      if (data.key == what) {
+      if (data.key == k) {
         return from_rdvalue<T>(data.val);
       }
     }
-    throw KeyErrorException(what);
+    throw KeyErrorException(keyToString(k));
   }
 
-  //! \overload
-  void getVal(const std::string_view what, std::string &res) const {
+  void getVal(std::string_view what, std::string &res) const {
+    DictKey k = internKey(what);
+    getVal(k, res);
+  }
+  void getVal(DictKey k, std::string &res) const {
     for (const auto &i : _data) {
-      if (i.key == what) {
+      if (i.key == k) {
         rdvalue_tostring(i.val, res);
         return;
       }
     }
-    throw KeyErrorException(what);
+    throw KeyErrorException(keyToString(k));
   }
 
   //----------------------------------------------------------
   //! \brief Potentially gets the value associated with a particular key
-  //!        returns true on success/false on failure.
-  /*!
-     \param what  the key to lookup
-     \param res   a reference used to return the result
-
-     <b>Notes:</b>
-      - If \c res is a \c std::string, every effort will be made
-        to convert the specified element to a string using the
-        \c boost::lexical_cast machinery.
-      - If the dictionary does not contain the key \c what,
-        a KeyErrorException will be thrown.
-  */
   template <typename T>
-  bool getValIfPresent(const std::string_view what, T &res) const {
+  bool getValIfPresent(std::string_view what, T &res) const {
+    DictKey k = internKey(what);
+    return getValIfPresent(k, res);
+  }
+  template <typename T>
+  bool getValIfPresent(DictKey k, T &res) const {
     for (const auto &data : _data) {
-      if (data.key == what) {
+      if (data.key == k) {
         res = from_rdvalue<T>(data.val);
         return true;
       }
@@ -237,10 +247,13 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     return false;
   }
 
-  //! \overload
-  bool getValIfPresent(const std::string_view what, std::string &res) const {
+  bool getValIfPresent(std::string_view what, std::string &res) const {
+    DictKey k = internKey(what);
+    return getValIfPresent(k, res);
+  }
+  bool getValIfPresent(DictKey k, std::string &res) const {
     for (const auto &i : _data) {
-      if (i.key == what) {
+      if (i.key == k) {
         rdvalue_tostring(i.val, res);
         return true;
       }
@@ -250,107 +263,112 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
   //----------------------------------------------------------
   //! \brief Sets the value associated with a key
-  /*!
-
-     \param what the key to set
-     \param val  the value to store
-
-     <b>Notes:</b>
-        - If \c val is a <tt>const char *</tt>, it will be converted
-           to a \c std::string for storage.
-        - If the dictionary already contains the key \c what,
-          the value will be replaced.
-  */
   template <typename T>
-  void setVal(const std::string_view what, T &val) {
+  void setVal(std::string_view what, T &val) {
     static_assert(!std::is_same_v<T, std::string_view>,
                   "T cannot be string_view");
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
+    DictKey k = internKey(what);
+    setVal(k, val);
+  }
+  template <typename T>
+  void setVal(DictKey k, T &val) {
     _hasNonPodData = true;
     for (auto &&data : _data) {
-      if (data.key == what) {
+      if (data.key == k) {
         RDValue::cleanup_rdvalue(data.val);
         data.val = val;
         return;
       }
     }
-    _data.push_back(Pair(what, val));
+    _data.emplace_back(k, val);
   }
 
   template <typename T>
-  void setPODVal(const std::string_view what, T val) {
+  void setPODVal(std::string_view what, T val) {
     static_assert(!std::is_same_v<T, std::string_view>,
                   "T cannot be string_view");
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
-    // don't change the hasNonPodData status
+    DictKey k = internKey(what);
+    setPODVal(k, val);
+  }
+  template <typename T>
+  void setPODVal(DictKey k, T val) {
     for (auto &&data : _data) {
-      if (data.key == what) {
+      if (data.key == k) {
         RDValue::cleanup_rdvalue(data.val);
         data.val = val;
         return;
       }
     }
-    _data.push_back(Pair(what, val));
+    _data.emplace_back(k, val);
   }
 
-  void setVal(const std::string_view what, bool val) {
+  void setVal(std::string_view what, bool val) {
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
     setPODVal(what, val);
   }
+  void setVal(DictKey k, bool val) { setPODVal(k, val); }
 
-  void setVal(const std::string_view what, double val) {
+  void setVal(std::string_view what, double val) {
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
     setPODVal(what, val);
   }
+  void setVal(DictKey k, double val) { setPODVal(k, val); }
 
-  void setVal(const std::string_view what, float val) {
+  void setVal(std::string_view what, float val) {
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
     setPODVal(what, val);
   }
-  void setVal(const std::string_view what, int val) {
+  void setVal(DictKey k, float val) { setPODVal(k, val); }
+
+  void setVal(std::string_view what, int val) {
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
     setPODVal(what, val);
   }
+  void setVal(DictKey k, int val) { setPODVal(k, val); }
 
-  void setVal(const std::string_view what, unsigned int val) {
+  void setVal(std::string_view what, unsigned int val) {
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
     setPODVal(what, val);
   }
+  void setVal(DictKey k, unsigned int val) { setPODVal(k, val); }
 
-  //! \overload
-  void setVal(const std::string_view what, const char *val) {
+  void setVal(std::string_view what, const char *val) {
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
     std::string h(val);
     setVal(what, h);
   }
+  void setVal(DictKey k, const char *val) {
+    std::string h(val);
+    setVal(k, h);
+  }
 
   //----------------------------------------------------------
-  //! \brief Clears the value associated with a particular key,
-  //!     removing the key from the dictionary.
-  /*!
-
-     \param what the key to clear
-
-  */
-  void clearVal(const std::string_view what) {
-    for (DataType::iterator it = _data.begin(); it < _data.end(); ++it) {
-      if (it->key == what) {
+  //! \brief Clears the value associated with a particular key.
+  void clearVal(std::string_view what) {
+    DictKey k = internKey(what);
+    clearVal(k);
+  }
+  void clearVal(DictKey k) {
+    for (auto it = _data.begin(); it < _data.end(); ++it) {
+      if (it->key == k) {
         if (_hasNonPodData) {
           RDValue::cleanup_rdvalue(it->val);
         }
@@ -362,34 +380,34 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
   //----------------------------------------------------------
   //! \brief Clears all keys (and values) from the dictionary.
-  //!
   void reset() {
     if (_hasNonPodData) {
       for (auto &&data : _data) {
         RDValue::cleanup_rdvalue(data.val);
       }
     }
-    DataType data;
+    InternalDataType data;
     _data.swap(data);
   }
 
  private:
-  DataType _data{};            //!< the actual dictionary
-  bool _hasNonPodData{false};  // if true, need a deep copy
-                               //  (copy_rdvalue)
+  InternalDataType _data{};
+  bool _hasNonPodData{false};
 };
 
 template <>
-inline std::string Dict::getVal<std::string>(
-    const std::string_view what) const {
+inline std::string Dict::getVal<std::string>(std::string_view what) const {
   std::string res;
   getVal(what, res);
   return res;
 }
+template <>
+inline std::string Dict::getVal<std::string>(DictKey k) const {
+  std::string res;
+  getVal(k, res);
+  return res;
+}
 
-// Utility class for holding a Dict::Pair
-//  Dict::Pairs require containers for memory management
-//  This utility class covers cleanup and copying
 class PairHolder : public Dict::Pair {
  public:
   PairHolder() : Pair() {}

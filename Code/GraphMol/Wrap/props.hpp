@@ -100,7 +100,7 @@ boost::python::dict GetPropsAsDict(const T &obj, bool includePrivate,
                                    bool autoConvertStrings = true) {
   boost::python::dict dict;
   auto &rd_dict = obj.getDict();
-  auto &data = rd_dict.getData();
+  auto data = rd_dict.getData();
 
   STR_VECT keys = obj.getPropList(includePrivate, includeComputed);
   for (auto &rdvalue : data) {
