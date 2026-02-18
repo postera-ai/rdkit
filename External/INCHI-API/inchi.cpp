@@ -70,6 +70,7 @@
 #include <queue>
 #include "inchi.h"
 #include <algorithm>
+#include <mutex>
 
 #include <RDGeneral/BoostStartInclude.h>
 #include <tuple>
@@ -1692,10 +1693,13 @@ void fixOptionSymbol(const char *in, char *out) {
 
 /*! "reverse" clean up: prepare a molecule to be used with InChI sdk */
 void rCleanUp(RWMol &mol) {
-  RWMol *q = SmilesToMol("[O-][Cl+3]([O-])([O-])O");
+  static std::once_flag q_init_once;
+  static RWMol *q;
+  std::call_once(q_init_once, []() {
+    q = SmilesToMol("[O-][Cl+3]([O-])([O-])O");
+  });
   std::vector<MatchVectType> fgpMatches;
   SubstructMatch(mol, *q, fgpMatches);
-  delete q;
   // replace all matches
   for (auto match : fgpMatches) {
     // collect matching atoms
