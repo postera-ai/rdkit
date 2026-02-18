@@ -150,10 +150,11 @@ void copyProperties(
       continue;
     }
 
+    std::string keyStr(prop.key);
     switch (prop.val.getTag()) {
       case RDTypeTag::BoolTag: {
-        auto propName = prop.key;
-        if (!std::regex_match(prop.key, MMCT_PROP_REGEX)) {
+        std::string propName(keyStr);
+        if (!std::regex_match(propName, MMCT_PROP_REGEX)) {
           propName.insert(0, "b_rdkit_");
         }
 
@@ -163,10 +164,10 @@ void copyProperties(
 
       case RDTypeTag::IntTag:
       case RDTypeTag::UnsignedIntTag: {
-        auto propName = prop.key;
+        std::string propName(keyStr);
         if (prop.key == common_properties::_MolFileRLabel) {
           propName = MAE_RGROUP_LABEL;
-        } else if (!std::regex_match(prop.key, MMCT_PROP_REGEX)) {
+        } else if (!std::regex_match(propName, MMCT_PROP_REGEX)) {
           propName.insert(0, "i_rdkit_");
         }
 
@@ -176,8 +177,8 @@ void copyProperties(
 
       case RDTypeTag::DoubleTag:
       case RDTypeTag::FloatTag: {
-        auto propName = prop.key;
-        if (!std::regex_match(prop.key, MMCT_PROP_REGEX)) {
+        std::string propName(keyStr);
+        if (!std::regex_match(propName, MMCT_PROP_REGEX)) {
           propName.insert(0, "r_rdkit_");
         }
 
@@ -186,8 +187,8 @@ void copyProperties(
       }
 
       case RDTypeTag::StringTag: {
-        auto propName = prop.key;
-        if (!std::regex_match(prop.key, MMCT_PROP_REGEX)) {
+        std::string propName(keyStr);
+        if (!std::regex_match(propName, MMCT_PROP_REGEX)) {
           propName.insert(0, "s_rdkit_");
         }
 

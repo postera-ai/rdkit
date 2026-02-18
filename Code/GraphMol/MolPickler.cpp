@@ -472,7 +472,7 @@ void pickleQuery(std::ostream &ss, const Query<int, T const *, true> *query) {
         // The tolerance is pickled first as we can't pickle a PairHolder with
         // the QUERY_VALUE tag
         streamWrite(ss, MolPickler::QUERY_VALUE, std::get<2>(v));
-        streamWriteProp(ss, std::get<1>(v),
+        streamWriteProp(ss, std::get<1>(v).key, std::get<1>(v).val,
                         MolPickler::getCustomPropHandlers());
       } break;
       default:

@@ -39,12 +39,19 @@
 %include "std_string_view.i"
 
 %ignore RDKit::Dict::Pair;
+%ignore RDKit::Dict::InternedPair;
+%ignore RDKit::Dict::PairView;
 %ignore RDKit::PairHolder;
 %ignore RDKit::Dict::appendPair;
 %ignore RDKit::Dict::getRawVal;
 %ignore RDKit::Dict::begin;
 %ignore RDKit::Dict::end;
 %ignore RDKit::Dict::const_iterator;
+%ignore RDKit::PropKeyId;
+%ignore RDKit::kInvalidPropKey;
+%ignore RDKit::internPropKey;
+%ignore RDKit::propKeyToString;
+%ignore RDKit::numInternedKeys;
 %include <RDGeneral/Dict.h>
 
 

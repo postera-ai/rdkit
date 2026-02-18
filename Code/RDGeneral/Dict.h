@@ -22,6 +22,7 @@
 #include <vector>
 #include "RDValue.h"
 #include "Exceptions.h"
+#include "PropKeyIntern.h"
 #include <RDGeneral/BoostStartInclude.h>
 #include <boost/lexical_cast.hpp>
 #include <RDGeneral/BoostEndInclude.h>
@@ -34,6 +35,10 @@ typedef std::vector<std::string> STR_VECT;
 //!
 //!  The actual storage is done using \c RDValue objects.
 //!
+//!  Internally, keys that match the global interned property set
+//!  (common_properties) are stored as compact uint16_t IDs for faster
+//!  lookup. Unknown keys go into an overflow vector.
+//!
 class RDKIT_RDGENERAL_EXPORT Dict {
  public:
   struct Pair {
@@ -45,23 +50,94 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     explicit Pair(std::string_view s) : key(std::string(s)), val() {}
     Pair(std::string s, const RDValue &v) : key(std::move(s)), val(v) {}
     Pair(std::string_view s, const RDValue &v) : key(std::string(s)), val(v) {}
-    // In the case you are holding onto an rdvalue outside of a dictionary
-    //  or other container, you kust call cleanup to release non POD memory.
     void cleanup() { RDValue::cleanup_rdvalue(val); }
+  };
+
+  struct InternedPair {
+    PropKeyId keyId;
+    RDValue val;
+
+    InternedPair() : keyId(kInvalidPropKey), val() {}
+    InternedPair(PropKeyId id, const RDValue &v) : keyId(id), val(v) {}
   };
 
   typedef std::vector<Pair> DataType;
 
+  struct PairView {
+    std::string_view key;
+    const RDValue &val;
+  };
+
+  class const_iterator {
+   public:
+    using value_type = PairView;
+    using difference_type = std::ptrdiff_t;
+    using iterator_category = std::forward_iterator_tag;
+
+    const_iterator() = default;
+    const_iterator(const Dict *dict, std::size_t internIdx,
+                   std::size_t overflowIdx)
+        : d_dict(dict), d_internIdx(internIdx), d_overflowIdx(overflowIdx) {}
+
+    PairView operator*() const {
+      if (d_internIdx < d_dict->_interned.size()) {
+        const auto &ip = d_dict->_interned[d_internIdx];
+        return {propKeyToString(ip.keyId), ip.val};
+      }
+      const auto &op = d_dict->_overflow[d_overflowIdx];
+      return {op.key, op.val};
+    }
+
+    const_iterator &operator++() {
+      if (d_internIdx < d_dict->_interned.size()) {
+        ++d_internIdx;
+      } else {
+        ++d_overflowIdx;
+      }
+      return *this;
+    }
+
+    const_iterator operator++(int) {
+      auto tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const const_iterator &other) const {
+      return d_internIdx == other.d_internIdx &&
+             d_overflowIdx == other.d_overflowIdx;
+    }
+
+    bool operator!=(const const_iterator &other) const {
+      return !(*this == other);
+    }
+
+   private:
+    const Dict *d_dict{nullptr};
+    std::size_t d_internIdx{0};
+    std::size_t d_overflowIdx{0};
+  };
+
   Dict() {}
 
-  Dict(const Dict &other) : _data(other._data) {
-    _hasNonPodData = other._hasNonPodData;
-    if (other._hasNonPodData) {  // other has non pod data, need to copy
-      std::vector<Pair> data(other._data.size());
-      _data.swap(data);
-      for (size_t i = 0; i < _data.size(); ++i) {
-        _data[i].key = other._data[i].key;
-        copy_rdvalue(_data[i].val, other._data[i].val);
+  Dict(const Dict &other)
+      : _interned(other._interned),
+        _overflow(other._overflow),
+        _hasNonPodData(other._hasNonPodData) {
+    if (other._hasNonPodData) {
+      // deep copy interned values
+      std::vector<InternedPair> idata(other._interned.size());
+      _interned.swap(idata);
+      for (size_t i = 0; i < _interned.size(); ++i) {
+        _interned[i].keyId = other._interned[i].keyId;
+        copy_rdvalue(_interned[i].val, other._interned[i].val);
+      }
+      // deep copy overflow values
+      std::vector<Pair> odata(other._overflow.size());
+      _overflow.swap(odata);
+      for (size_t i = 0; i < _overflow.size(); ++i) {
+        _overflow[i].key = other._overflow[i].key;
+        copy_rdvalue(_overflow[i].val, other._overflow[i].val);
       }
     }
   }
@@ -69,7 +145,7 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   Dict(Dict &&other) noexcept = default;
 
   ~Dict() {
-    reset();  // to clear pointers if necessary
+    reset();
   }
 
   void update(const Dict &other, bool preserveExisting = false) {
@@ -79,22 +155,28 @@ class RDKIT_RDGENERAL_EXPORT Dict {
       if (other._hasNonPodData) {
         _hasNonPodData = true;
       }
-      for (const auto &opair : other._data) {
-        Pair *target = nullptr;
-        for (auto &dpair : _data) {
+      for (const auto &oip : other._interned) {
+        RDValue *target = findMutableVal(oip.keyId);
+        if (!target) {
+          _interned.push_back(InternedPair(oip.keyId, RDValue()));
+          copy_rdvalue(_interned.back().val, oip.val);
+        } else {
+          copy_rdvalue(*target, oip.val);
+        }
+      }
+      for (const auto &opair : other._overflow) {
+        RDValue *target = nullptr;
+        for (auto &dpair : _overflow) {
           if (dpair.key == opair.key) {
-            target = &dpair;
+            target = &dpair.val;
             break;
           }
         }
-
         if (!target) {
-          // need to create blank entry and copy
-          _data.push_back(Pair(opair.key));
-          copy_rdvalue(_data.back().val, opair.val);
+          _overflow.push_back(Pair(opair.key));
+          copy_rdvalue(_overflow.back().val, opair.val);
         } else {
-          // just copy
-          copy_rdvalue(target->val, opair.val);
+          copy_rdvalue(*target, opair.val);
         }
       }
     }
@@ -109,14 +191,21 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     }
 
     if (other._hasNonPodData) {
-      std::vector<Pair> data(other._data.size());
-      _data.swap(data);
-      for (size_t i = 0; i < _data.size(); ++i) {
-        _data[i].key = other._data[i].key;
-        copy_rdvalue(_data[i].val, other._data[i].val);
+      std::vector<InternedPair> idata(other._interned.size());
+      _interned.swap(idata);
+      for (size_t i = 0; i < _interned.size(); ++i) {
+        _interned[i].keyId = other._interned[i].keyId;
+        copy_rdvalue(_interned[i].val, other._interned[i].val);
+      }
+      std::vector<Pair> odata(other._overflow.size());
+      _overflow.swap(odata);
+      for (size_t i = 0; i < _overflow.size(); ++i) {
+        _overflow[i].key = other._overflow[i].key;
+        copy_rdvalue(_overflow[i].val, other._overflow[i].val);
       }
     } else {
-      _data = other._data;
+      _interned = other._interned;
+      _overflow = other._overflow;
     }
     _hasNonPodData = other._hasNonPodData;
     return *this;
@@ -131,35 +220,47 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     }
     _hasNonPodData = other._hasNonPodData;
     other._hasNonPodData = false;
-    _data = std::move(other._data);
+    _interned = std::move(other._interned);
+    _overflow = std::move(other._overflow);
     return *this;
   }
 
   //----------------------------------------------------------
-  //! \brief Returns the number of entries in the dictionary
-  std::size_t size() const { return _data.size(); }
+  std::size_t size() const { return _interned.size() + _overflow.size(); }
 
-  //! \brief Returns whether the dictionary is empty
-  bool empty() const { return _data.empty(); }
+  bool empty() const { return _interned.empty() && _overflow.empty(); }
 
-  using const_iterator = DataType::const_iterator;
-  const_iterator begin() const { return _data.begin(); }
-  const_iterator end() const { return _data.end(); }
+  const_iterator begin() const { return {this, 0, 0}; }
+  const_iterator end() const {
+    return {this, _interned.size(), _overflow.size()};
+  }
 
-  //! \brief Appends a populated Pair to the dictionary.
   void appendPair(Pair &&pair) {
     if (pair.val.needsCleanup()) {
       _hasNonPodData = true;
     }
-    _data.push_back(std::move(pair));
+    auto id = internPropKey(pair.key);
+    if (id) {
+      _interned.push_back(InternedPair(*id, pair.val));
+      pair.val.type = RDTypeTag::EmptyTag;
+    } else {
+      _overflow.push_back(std::move(pair));
+    }
   }
 
-  //! \brief Returns a const reference to the raw RDValue for a key.
-  //! Throws KeyErrorException if the key is not found.
   const RDValue &getRawVal(const std::string_view what) const {
-    for (const auto &data : _data) {
-      if (data.key == what) {
-        return data.val;
+    auto id = internPropKey(what);
+    if (id) {
+      for (const auto &ip : _interned) {
+        if (ip.keyId == *id) {
+          return ip.val;
+        }
+      }
+    } else {
+      for (const auto &op : _overflow) {
+        if (op.key == what) {
+          return op.val;
+        }
       }
     }
     throw KeyErrorException(what);
@@ -167,11 +268,18 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
   //----------------------------------------------------------
 
-  //! \brief Returns whether or not the dictionary contains a particular
-  //!        key.
   bool hasVal(const std::string_view what) const {
-    for (const auto &data : _data) {
-      if (data.key == what) {
+    auto id = internPropKey(what);
+    if (id) {
+      for (const auto &ip : _interned) {
+        if (ip.keyId == *id) {
+          return true;
+        }
+      }
+      return false;
+    }
+    for (const auto &op : _overflow) {
+      if (op.key == what) {
         return true;
       }
     }
@@ -179,89 +287,99 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   }
 
   //----------------------------------------------------------
-  //! Returns the set of keys in the dictionary
-  /*!
-     \return  a \c STR_VECT
-  */
   STR_VECT keys() const {
     STR_VECT res;
-    res.reserve(_data.size());
-    for (const auto &item : _data) {
-      res.push_back(item.key);
+    res.reserve(size());
+    for (const auto &ip : _interned) {
+      res.emplace_back(propKeyToString(ip.keyId));
+    }
+    for (const auto &op : _overflow) {
+      res.push_back(op.key);
     }
     return res;
   }
 
   //----------------------------------------------------------
-  //! \brief Gets the value associated with a particular key
-  /*!
-     \param what  the key to lookup
-     \param res   a reference used to return the result
-
-     <b>Notes:</b>
-      - If \c res is a \c std::string, every effort will be made
-        to convert the specified element to a string using the
-        \c boost::lexical_cast machinery.
-      - If the dictionary does not contain the key \c what,
-        a KeyErrorException will be thrown.
-  */
   template <typename T>
   void getVal(const std::string_view what, T &res) const {
     res = getVal<T>(what);
   }
 
-  //! \overload
   template <typename T>
   T getVal(const std::string_view what) const {
-    for (auto &data : _data) {
-      if (data.key == what) {
-        return from_rdvalue<T>(data.val);
+    auto id = internPropKey(what);
+    if (id) {
+      for (const auto &ip : _interned) {
+        if (ip.keyId == *id) {
+          return from_rdvalue<T>(ip.val);
+        }
+      }
+    } else {
+      for (const auto &op : _overflow) {
+        if (op.key == what) {
+          return from_rdvalue<T>(op.val);
+        }
       }
     }
     throw KeyErrorException(what);
   }
 
-  //! \overload
   void getVal(const std::string_view what, std::string &res) const {
-    for (const auto &i : _data) {
-      if (i.key == what) {
-        rdvalue_tostring(i.val, res);
-        return;
+    auto id = internPropKey(what);
+    if (id) {
+      for (const auto &ip : _interned) {
+        if (ip.keyId == *id) {
+          rdvalue_tostring(ip.val, res);
+          return;
+        }
+      }
+    } else {
+      for (const auto &op : _overflow) {
+        if (op.key == what) {
+          rdvalue_tostring(op.val, res);
+          return;
+        }
       }
     }
     throw KeyErrorException(what);
   }
 
   //----------------------------------------------------------
-  //! \brief Potentially gets the value associated with a particular key
-  //!        returns true on success/false on failure.
-  /*!
-     \param what  the key to lookup
-     \param res   a reference used to return the result
-
-     <b>Notes:</b>
-      - If \c res is a \c std::string, every effort will be made
-        to convert the specified element to a string using the
-        \c boost::lexical_cast machinery.
-      - If the dictionary does not contain the key \c what,
-        a KeyErrorException will be thrown.
-  */
   template <typename T>
   bool getValIfPresent(const std::string_view what, T &res) const {
-    for (const auto &data : _data) {
-      if (data.key == what) {
-        res = from_rdvalue<T>(data.val);
+    auto id = internPropKey(what);
+    if (id) {
+      for (const auto &ip : _interned) {
+        if (ip.keyId == *id) {
+          res = from_rdvalue<T>(ip.val);
+          return true;
+        }
+      }
+      return false;
+    }
+    for (const auto &op : _overflow) {
+      if (op.key == what) {
+        res = from_rdvalue<T>(op.val);
         return true;
       }
     }
     return false;
   }
 
-  //! \overload
   bool getValIfPresent(const std::string_view what, std::string &res) const {
-    for (const auto &i : _data) {
-      if (i.key == what) {
-        rdvalue_tostring(i.val, res);
+    auto id = internPropKey(what);
+    if (id) {
+      for (const auto &ip : _interned) {
+        if (ip.keyId == *id) {
+          rdvalue_tostring(ip.val, res);
+          return true;
+        }
+      }
+      return false;
+    }
+    for (const auto &op : _overflow) {
+      if (op.key == what) {
+        rdvalue_tostring(op.val, res);
         return true;
       }
     }
@@ -269,18 +387,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   }
 
   //----------------------------------------------------------
-  //! \brief Sets the value associated with a key
-  /*!
-
-     \param what the key to set
-     \param val  the value to store
-
-     <b>Notes:</b>
-        - If \c val is a <tt>const char *</tt>, it will be converted
-           to a \c std::string for storage.
-        - If the dictionary already contains the key \c what,
-          the value will be replaced.
-  */
   template <typename T>
   void setVal(const std::string_view what, T &val) {
     static_assert(!std::is_same_v<T, std::string_view>,
@@ -289,14 +395,26 @@ class RDKIT_RDGENERAL_EXPORT Dict {
       throw ValueErrorException("Cannot set value with empty key");
     }
     _hasNonPodData = true;
-    for (auto &&data : _data) {
-      if (data.key == what) {
-        RDValue::cleanup_rdvalue(data.val);
-        data.val = val;
-        return;
+    auto id = internPropKey(what);
+    if (id) {
+      for (auto &ip : _interned) {
+        if (ip.keyId == *id) {
+          RDValue::cleanup_rdvalue(ip.val);
+          ip.val = val;
+          return;
+        }
       }
+      _interned.push_back(InternedPair(*id, val));
+    } else {
+      for (auto &op : _overflow) {
+        if (op.key == what) {
+          RDValue::cleanup_rdvalue(op.val);
+          op.val = val;
+          return;
+        }
+      }
+      _overflow.push_back(Pair(what, val));
     }
-    _data.push_back(Pair(what, val));
   }
 
   template <typename T>
@@ -306,15 +424,26 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
-    // don't change the hasNonPodData status
-    for (auto &&data : _data) {
-      if (data.key == what) {
-        RDValue::cleanup_rdvalue(data.val);
-        data.val = val;
-        return;
+    auto id = internPropKey(what);
+    if (id) {
+      for (auto &ip : _interned) {
+        if (ip.keyId == *id) {
+          RDValue::cleanup_rdvalue(ip.val);
+          ip.val = val;
+          return;
+        }
       }
+      _interned.push_back(InternedPair(*id, val));
+    } else {
+      for (auto &op : _overflow) {
+        if (op.key == what) {
+          RDValue::cleanup_rdvalue(op.val);
+          op.val = val;
+          return;
+        }
+      }
+      _overflow.push_back(Pair(what, val));
     }
-    _data.push_back(Pair(what, val));
   }
 
   void setVal(const std::string_view what, bool val) {
@@ -351,7 +480,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     setPODVal(what, val);
   }
 
-  //! \overload
   void setVal(const std::string_view what, const char *val) {
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
@@ -361,42 +489,66 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   }
 
   //----------------------------------------------------------
-  //! \brief Clears the value associated with a particular key,
-  //!     removing the key from the dictionary.
-  /*!
-
-     \param what the key to clear
-
-  */
   void clearVal(const std::string_view what) {
-    for (DataType::iterator it = _data.begin(); it < _data.end(); ++it) {
-      if (it->key == what) {
-        if (_hasNonPodData) {
-          RDValue::cleanup_rdvalue(it->val);
+    auto id = internPropKey(what);
+    if (id) {
+      for (auto it = _interned.begin(); it != _interned.end(); ++it) {
+        if (it->keyId == *id) {
+          if (_hasNonPodData) {
+            RDValue::cleanup_rdvalue(it->val);
+          }
+          _interned.erase(it);
+          return;
         }
-        _data.erase(it);
-        return;
+      }
+    } else {
+      for (auto it = _overflow.begin(); it != _overflow.end(); ++it) {
+        if (it->key == what) {
+          if (_hasNonPodData) {
+            RDValue::cleanup_rdvalue(it->val);
+          }
+          _overflow.erase(it);
+          return;
+        }
       }
     }
   }
 
   //----------------------------------------------------------
-  //! \brief Clears all keys (and values) from the dictionary.
-  //!
   void reset() {
     if (_hasNonPodData) {
-      for (auto &&data : _data) {
-        RDValue::cleanup_rdvalue(data.val);
+      for (auto &ip : _interned) {
+        RDValue::cleanup_rdvalue(ip.val);
+      }
+      for (auto &op : _overflow) {
+        RDValue::cleanup_rdvalue(op.val);
       }
     }
-    DataType data;
-    _data.swap(data);
+    {
+      std::vector<InternedPair> tmp;
+      _interned.swap(tmp);
+    }
+    {
+      DataType tmp;
+      _overflow.swap(tmp);
+    }
   }
 
  private:
-  DataType _data{};            //!< the actual dictionary
-  bool _hasNonPodData{false};  // if true, need a deep copy
-                               //  (copy_rdvalue)
+  friend class const_iterator;
+
+  RDValue *findMutableVal(PropKeyId id) {
+    for (auto &ip : _interned) {
+      if (ip.keyId == id) {
+        return &ip.val;
+      }
+    }
+    return nullptr;
+  }
+
+  std::vector<InternedPair> _interned{};
+  DataType _overflow{};
+  bool _hasNonPodData{false};
 };
 
 template <>
@@ -407,9 +559,6 @@ inline std::string Dict::getVal<std::string>(
   return res;
 }
 
-// Utility class for holding a Dict::Pair
-//  Dict::Pairs require containers for memory management
-//  This utility class covers cleanup and copying
 class PairHolder : public Dict::Pair {
  public:
   PairHolder() : Pair() {}
