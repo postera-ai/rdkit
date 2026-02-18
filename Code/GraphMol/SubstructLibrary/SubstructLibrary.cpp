@@ -178,7 +178,7 @@ bool query_needs_rings(const ROMol &in_query) {
     if (atom->hasQuery()) {
       if (describeQuery(atom).find("Ring") != std::string::npos) {
         return true;
-      } else if (atom->getQuery()->getDescription() == "RecursiveStructure") {
+      } else if (atom->getQuery()->getDescription() == "RS") {
         auto *rsq = (RecursiveStructureQuery *)atom->getQuery();
         if (query_needs_rings(*rsq->getQueryMol())) {
           return true;

@@ -665,7 +665,7 @@ void MatchSubqueries(const ROMol &mol, QueryAtom::QUERYATOM_QUERY *query,
                      SUBQUERY_MAP &subqueryMap,
                      std::vector<RecursiveStructureQuery *> &locked) {
   PRECONDITION(query, "bad query");
-  if (query->getDescription() == "RecursiveStructure") {
+  if (query->getDescription() == "RS") {
     auto *rsq = (RecursiveStructureQuery *)query;
 #ifdef RDK_BUILD_THREADSAFE_SSS
     rsq->d_mutex.lock();

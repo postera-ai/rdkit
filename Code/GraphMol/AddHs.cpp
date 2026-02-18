@@ -1295,7 +1295,7 @@ void mergeQueryHs(RWMol &mol, bool mergeUnmappedOnly, bool mergeIsotopes) {
 
       // recurse if needed (was github isusue 544)
       if (atom->hasQuery()) {
-        if (atom->getQuery()->getDescription() == "RecursiveStructure") {
+        if (atom->getQuery()->getDescription() == "RS") {
           auto *rsq = dynamic_cast<RecursiveStructureQuery *>(atom->getQuery());
           CHECK_INVARIANT(rsq, "could not convert recursive structure query");
           RWMol *rqm = new RWMol(*rsq->getQueryMol());
@@ -1309,7 +1309,7 @@ void mergeQueryHs(RWMol &mol, bool mergeUnmappedOnly, bool mergeIsotopes) {
         while (childStack.size()) {
           QueryAtom::QUERYATOM_QUERY::CHILD_TYPE qry = childStack.front();
           childStack.pop_front();
-          if (qry->getDescription() == "RecursiveStructure") {
+          if (qry->getDescription() == "RS") {
             auto *rsq = dynamic_cast<RecursiveStructureQuery *>(qry.get());
             CHECK_INVARIANT(rsq, "could not convert recursive structure query");
             RWMol *rqm = new RWMol(*rsq->getQueryMol());
@@ -1363,7 +1363,7 @@ std::pair<bool, bool> hasQueryHs(const ROMol &mol) {
         break;
     }
     if (atom->hasQuery()) {
-      if (atom->getQuery()->getDescription() == "RecursiveStructure") {
+      if (atom->getQuery()->getDescription() == "RS") {
         auto *rsq = dynamic_cast<RecursiveStructureQuery *>(atom->getQuery());
         CHECK_INVARIANT(rsq, "could not convert recursive structure query");
         auto res = hasQueryHs(*rsq->getQueryMol());
@@ -1379,7 +1379,7 @@ std::pair<bool, bool> hasQueryHs(const ROMol &mol) {
       while (!childStack.empty()) {
         QueryAtom::QUERYATOM_QUERY::CHILD_TYPE qry = childStack.front();
         childStack.pop_front();
-        if (qry->getDescription() == "RecursiveStructure") {
+        if (qry->getDescription() == "RS") {
           auto *rsq = dynamic_cast<RecursiveStructureQuery *>(qry.get());
           CHECK_INVARIANT(rsq, "could not convert recursive structure query");
           auto res = hasQueryHs(*rsq->getQueryMol());

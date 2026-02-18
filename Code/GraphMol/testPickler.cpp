@@ -398,7 +398,7 @@ void testQueries() {
   TEST_ASSERT(m1->getNumAtoms() == 1);
   TEST_ASSERT(m1->getAtomWithIdx(0)->hasQuery());
   TEST_ASSERT(m1->getAtomWithIdx(0)->getQuery()->getDescription() ==
-              "RecursiveStructure");
+              "RS");
   smi = "C";
   m2 = SmilesToMol(smi);
   TEST_ASSERT(m2);
@@ -560,7 +560,7 @@ void testQueries() {
   TEST_ASSERT(m1->getNumAtoms() == 1);
   TEST_ASSERT(m1->getAtomWithIdx(0)->hasQuery());
   TEST_ASSERT(m1->getAtomWithIdx(0)->getQuery()->getDescription() ==
-              "RecursiveStructure");
+              "RS");
   smi = "C";
   m2 = SmilesToMol(smi);
   TEST_ASSERT(m2);

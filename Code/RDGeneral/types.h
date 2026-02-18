@@ -69,7 +69,7 @@ inline constexpr std::string_view _BondsPotentialStereo =
     "_BondsPotentialStereo";
 inline constexpr std::string_view _ChiralAtomRank = "_chiralAtomRank";
 inline constexpr std::string_view _CIPCode = "_CIPCode";
-inline constexpr std::string_view _CIPRank = "_CIPRank";
+inline constexpr std::string_view _CIPRank = "R";
 inline constexpr std::string_view _CIPComputed = "_CIPComputed";
 inline constexpr std::string_view _CIPNeighborOrder = "_CIPNeighborOrder";
 inline constexpr std::string_view _CanonicalRankingNumber =

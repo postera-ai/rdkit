@@ -339,7 +339,7 @@ std::string getAtomSmartsSimple(const QueryAtom *qatom,
 std::string getRecursiveStructureQuerySmarts(
     const QueryAtom::QUERYATOM_QUERY *query, const SmilesWriteParams &params) {
   PRECONDITION(query, "bad query");
-  PRECONDITION(query->getDescription() == "RecursiveStructure", "bad query");
+  PRECONDITION(query->getDescription() == "RS", "bad query");
   const auto *rquery = dynamic_cast<const RecursiveStructureQuery *>(query);
   PRECONDITION(rquery, "could not convert query to RecursiveStructureQuery");
   auto *qmol = const_cast<ROMol *>(rquery->getQueryMol());
@@ -505,7 +505,7 @@ std::string _recurseGetSmarts(const QueryAtom *qatom,
   bool needParen;
   std::string csmarts1;
   // deal with the first child
-  if (dsc1 == "RecursiveStructure") {
+  if (dsc1 == "RS") {
     csmarts1 = getRecursiveStructureQuerySmarts(child1, params);
     features |= static_cast<unsigned int>(QueryBoolFeatures::HAS_RECURSION);
   } else if ((dsc1 != "AtomOr") && (dsc1 != "AtomAnd")) {
@@ -541,7 +541,7 @@ std::string _recurseGetSmarts(const QueryAtom *qatom,
     std::string csmarts2;
 
     // deal with the next child
-    if (dsc2 == "RecursiveStructure") {
+    if (dsc2 == "RS") {
       csmarts2 = getRecursiveStructureQuerySmarts(child2, params);
       features |= static_cast<unsigned int>(QueryBoolFeatures::HAS_RECURSION);
     } else if ((dsc2 != "AtomOr") && (dsc2 != "AtomAnd")) {
@@ -921,7 +921,7 @@ std::string GetAtomSmarts(const Atom *atom, const SmilesWriteParams &params) {
       if (res.length() == 1) {  // single atom symbol we don't need parens
         needParen = false;
       }
-    } else if (descrip == "RecursiveStructure") {
+    } else if (descrip == "RS") {
       // it's a bare recursive structure query:
       res = getRecursiveStructureQuerySmarts(query, params);
       needParen = true;
