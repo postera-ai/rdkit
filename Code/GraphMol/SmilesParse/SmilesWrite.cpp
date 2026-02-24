@@ -45,36 +45,36 @@ bool inOrganicSubset(int atomicNumber) {
 }
 
 namespace {
-std::string getAtomChiralityInfo(const Atom *atom) {
-  auto allowNontet = Chirality::getAllowNontetrahedralChirality();
-  std::string atString;
+
+enum class ChiralResult { NONE, TETRAHEDRAL, NON_TETRAHEDRAL };
+
+ChiralResult writeAtomChirality(std::ostringstream &out, const Atom *atom) {
   switch (atom->getChiralTag()) {
     case Atom::CHI_TETRAHEDRAL_CW:
-      atString = "@@";
-      break;
+      out << "@@";
+      return ChiralResult::TETRAHEDRAL;
     case Atom::CHI_TETRAHEDRAL_CCW:
-      atString = "@";
-      break;
+      out << "@";
+      return ChiralResult::TETRAHEDRAL;
     default:
       break;
   }
-  if (atString.empty() && allowNontet) {
+  if (Chirality::getAllowNontetrahedralChirality()) {
+    const char *prefix = nullptr;
     switch (atom->getChiralTag()) {
       case Atom::CHI_SQUAREPLANAR:
-        atString = "@SP";
+        prefix = "@SP";
         break;
       case Atom::CHI_TRIGONALBIPYRAMIDAL:
-        atString = "@TB";
+        prefix = "@TB";
         break;
       case Atom::CHI_OCTAHEDRAL:
-        atString = "@OH";
+        prefix = "@OH";
         break;
       default:
         break;
     }
-    if (!atString.empty()) {
-      // we added info about non-tetrahedral stereo, so check whether or not
-      // we need to also add permutation info
+    if (prefix) {
       int permutation = 0;
       if (atom->getChiralTag() > Atom::ChiralType::CHI_OTHER &&
           atom->getPropIfPresent(common_properties::_chiralPermutation,
@@ -82,12 +82,21 @@ std::string getAtomChiralityInfo(const Atom *atom) {
           !SmilesParseOps::checkChiralPermutation(atom->getChiralTag(),
                                                   permutation)) {
         throw ValueErrorException("bad chirality spec");
-      } else if (permutation) {
-        atString += std::to_string(permutation);
       }
+      out << prefix;
+      if (permutation) {
+        out << permutation;
+      }
+      return ChiralResult::NON_TETRAHEDRAL;
     }
   }
-  return atString;
+  return ChiralResult::NONE;
+}
+
+std::string getAtomChiralityInfo(const Atom *atom) {
+  std::ostringstream out;
+  writeAtomChirality(out, atom);
+  return out.str();
 }
 
 // -----
@@ -100,7 +109,7 @@ std::string getAtomChiralityInfo(const Atom *atom) {
 //   - atom-map information present
 //   - the atom has a nonstandard valence
 //   - bonded to a metal
-bool atomNeedsBracket(const Atom *atom, const std::string &atString,
+bool atomNeedsBracket(const Atom *atom, ChiralResult chiral,
                       const SmilesWriteParams &params) {
   PRECONDITION(atom, "null atom");
   auto num = atom->getAtomicNum();
@@ -111,7 +120,8 @@ bool atomNeedsBracket(const Atom *atom, const std::string &atString,
   if (atom->getFormalCharge()) {
     return true;
   }
-  if (params.doIsomericSmiles && (atom->getIsotope() || !atString.empty())) {
+  if (params.doIsomericSmiles &&
+      (atom->getIsotope() || chiral != ChiralResult::NONE)) {
     return true;
   }
   if (atom->hasProp(common_properties::molAtomMapNumber)) {
@@ -148,11 +158,9 @@ bool atomNeedsBracket(const Atom *atom, const std::string &atString,
   return false;
 }
 
-}  // namespace
-
-std::string GetAtomSmiles(const Atom *atom, const SmilesWriteParams &params) {
+void writeAtomSmiles(std::ostringstream &res, const Atom *atom,
+                     const SmilesWriteParams &params) {
   PRECONDITION(atom, "bad atom");
-  std::string res;
   int fc = atom->getFormalCharge();
   int num = atom->getAtomicNum();
   int isotope = atom->getIsotope();
@@ -164,29 +172,38 @@ std::string GetAtomSmiles(const Atom *atom, const SmilesWriteParams &params) {
     symb = PeriodicTable::getTable()->getElementSymbol(num);
   }
 
-  // check for atomic stereochemistry
-  std::string atString;
+  ChiralResult chiral = ChiralResult::NONE;
   if (params.doIsomericSmiles) {
     if (atom->getChiralTag() != Atom::CHI_UNSPECIFIED &&
         !atom->hasProp(common_properties::_brokenChirality)) {
-      atString = getAtomChiralityInfo(atom);
+      // Peek at the chiral tag to determine bracket-necessity without
+      // writing anything yet. For tetrahedral (the common case), we can
+      // check directly. For non-tetrahedral, we need the full logic but
+      // that's rare.
+      auto tag = atom->getChiralTag();
+      if (tag == Atom::CHI_TETRAHEDRAL_CW || tag == Atom::CHI_TETRAHEDRAL_CCW) {
+        chiral = ChiralResult::TETRAHEDRAL;
+      } else if (Chirality::getAllowNontetrahedralChirality()) {
+        if (tag == Atom::CHI_SQUAREPLANAR ||
+            tag == Atom::CHI_TRIGONALBIPYRAMIDAL ||
+            tag == Atom::CHI_OCTAHEDRAL) {
+          chiral = ChiralResult::NON_TETRAHEDRAL;
+        }
+      }
     }
   }
+
   bool needsBracket = true;
   if (!hasCustomSymbol && !params.allHsExplicit) {
-    needsBracket = atomNeedsBracket(atom, atString, params);
+    needsBracket = atomNeedsBracket(atom, chiral, params);
   }
   if (needsBracket) {
-    res += "[";
+    res << '[';
   }
 
   if (isotope && params.doIsomericSmiles) {
-    res += std::to_string(isotope);
+    res << isotope;
   }
-  // this was originally only done for the organic subset,
-  // applying it to other atom-types is a fix for Issue 3152751:
-  // Only accept for atom->getAtomicNum() in [5, 6, 7, 8, 14, 15, 16, 33, 34,
-  // 52]
   if (!params.doKekule && atom->getIsAromatic() && symb[0] >= 'A' &&
       symb[0] <= 'Z') {
     switch (atom->getAtomicNum()) {
@@ -203,58 +220,69 @@ std::string GetAtomSmiles(const Atom *atom, const SmilesWriteParams &params) {
         symb[0] -= ('A' - 'a');
     }
   }
-  res += symb;
+  res << symb;
 
-  res += atString;
+  if (chiral == ChiralResult::TETRAHEDRAL) {
+    if (atom->getChiralTag() == Atom::CHI_TETRAHEDRAL_CW) {
+      res << "@@";
+    } else {
+      res << '@';
+    }
+  } else if (chiral == ChiralResult::NON_TETRAHEDRAL) {
+    writeAtomChirality(res, atom);
+  }
 
   if (needsBracket) {
     unsigned int totNumHs = atom->getTotalNumHs();
     if (totNumHs > 0) {
-      res += "H";
+      res << 'H';
       if (totNumHs > 1) {
-        res += std::to_string(totNumHs);
+        res << totNumHs;
       }
     }
     if (fc > 0) {
-      res += "+";
+      res << '+';
       if (fc > 1) {
-        res += std::to_string(fc);
+        res << fc;
       }
     } else if (fc < 0) {
       if (fc < -1) {
-        res += std::to_string(fc);
+        res << fc;
       } else {
-        res += "-";
+        res << '-';
       }
     }
 
     int mapNum;
     if (atom->getPropIfPresent(common_properties::molAtomMapNumber, mapNum)) {
-      res += ":";
-      res += std::to_string(mapNum);
+      res << ':' << mapNum;
     }
-    res += "]";
+    res << ']';
   }
 
-  // If the atom has this property, the contained string will
-  // be inserted directly in the SMILES:
   std::string label;
   if (atom->getPropIfPresent(common_properties::_supplementalSmilesLabel,
                              label)) {
-    res += label;
+    res << label;
   }
-
-  return res;
 }
 
-std::string GetBondSmiles(const Bond *bond, const SmilesWriteParams &params,
-                          int atomToLeftIdx) {
+}  // namespace
+
+std::string GetAtomSmiles(const Atom *atom, const SmilesWriteParams &params) {
+  std::ostringstream out;
+  writeAtomSmiles(out, atom, params);
+  return out.str();
+}
+
+namespace {
+void writeBondSmiles(std::ostringstream &res, const Bond *bond,
+                     const SmilesWriteParams &params, int atomToLeftIdx) {
   PRECONDITION(bond, "bad bond");
   if (atomToLeftIdx < 0) {
     atomToLeftIdx = bond->getBeginAtomIdx();
   }
 
-  std::string res = "";
   bool aromatic = false;
   if (!params.doKekule && (bond->getBondType() == Bond::SINGLE ||
                            bond->getBondType() == Bond::DOUBLE ||
@@ -267,8 +295,6 @@ std::string GetBondSmiles(const Bond *bond, const SmilesWriteParams &params,
           (a1->getAtomicNum() || a2->getAtomicNum())) {
         aromatic = true;
       }
-    } else {
-      aromatic = false;
     }
   }
 
@@ -282,81 +308,81 @@ std::string GetBondSmiles(const Bond *bond, const SmilesWriteParams &params,
         switch (dir) {
           case Bond::ENDDOWNRIGHT:
             if (params.allBondsExplicit || params.doIsomericSmiles) {
-              res = "\\";
+              res << '\\';
             }
             break;
           case Bond::ENDUPRIGHT:
             if (params.allBondsExplicit || params.doIsomericSmiles) {
-              res = "/";
+              res << '/';
             }
             break;
           default:
             if (params.allBondsExplicit) {
-              res = "-";
+              res << '-';
             }
             break;
         }
       } else {
-        // if the bond is marked as aromatic and the two atoms
-        //  are aromatic, we need no marker (this arises in kekulized
-        //  molecules).
-        // FIX: we should be able to dump kekulized smiles
-        //   currently this is possible by removing all
-        //   isAromatic flags, but there should maybe be another way
         if (params.allBondsExplicit) {
-          res = "-";
+          res << '-';
         } else if (aromatic && !bond->getIsAromatic()) {
-          res = "-";
+          res << '-';
         }
       }
       break;
     case Bond::DOUBLE:
-      // see note above
       if (!aromatic || !bond->getIsAromatic() || params.allBondsExplicit) {
-        res = "=";
+        res << '=';
       }
       break;
     case Bond::TRIPLE:
-      res = "#";
+      res << '#';
       break;
     case Bond::QUADRUPLE:
-      res = "$";
+      res << '$';
       break;
     case Bond::AROMATIC:
       if (dir != Bond::NONE && dir != Bond::UNKNOWN) {
         switch (dir) {
           case Bond::ENDDOWNRIGHT:
             if (params.allBondsExplicit || params.doIsomericSmiles) {
-              res = "\\";
+              res << '\\';
             }
             break;
           case Bond::ENDUPRIGHT:
             if (params.allBondsExplicit || params.doIsomericSmiles) {
-              res = "/";
+              res << '/';
             }
             break;
           default:
             if (params.allBondsExplicit || !aromatic) {
-              res = ":";
+              res << ':';
             }
             break;
         }
       } else if (params.allBondsExplicit || !aromatic) {
-        res = ":";
+        res << ':';
       }
       break;
     case Bond::DATIVE:
       if (atomToLeftIdx >= 0 &&
           bond->getBeginAtomIdx() == static_cast<unsigned int>(atomToLeftIdx)) {
-        res = "->";
+        res << "->";
       } else {
-        res = "<-";
+        res << "<-";
       }
       break;
     default:
-      res = "~";
+      res << '~';
   }
-  return res;
+}
+}  // namespace
+
+std::string GetBondSmiles(const Bond *bond, const SmilesWriteParams &params,
+                          int atomToLeftIdx) {
+  std::ostringstream out;
+  writeBondSmiles(out, bond, params, atomToLeftIdx);
+  return out.str();
 }
 
 std::string FragmentSmilesConstruct(
@@ -388,7 +414,7 @@ std::string FragmentSmilesConstruct(
   Canon::MolStack molStack;
   // try to prevent excessive reallocation
   molStack.reserve(mol.getNumAtoms() + mol.getNumBonds());
-  std::stringstream res;
+  std::ostringstream res;
 
   std::map<int, int> ringClosureMap;
   int ringIdx, closureVal;
@@ -413,7 +439,7 @@ std::string FragmentSmilesConstruct(
         ringClosuresToErase.clear();
         // std::cout << "\t\tAtom: " << mSE.obj.atom->getIdx() << std::endl;
         if (!atomSymbols) {
-          res << GetAtomSmiles(mSE.obj.atom, params);
+          writeAtomSmiles(res, mSE.obj.atom, params);
         } else {
           res << (*atomSymbols)[mSE.obj.atom->getIdx()];
         }
@@ -423,7 +449,7 @@ std::string FragmentSmilesConstruct(
         bond = mSE.obj.bond;
         // std::cout << "\t\tBond: " << bond->getIdx() << std::endl;
         if (!bondSymbols) {
-          res << GetBondSmiles(bond, params, mSE.number);
+          writeBondSmiles(res, bond, params, mSE.number);
         } else {
           res << (*bondSymbols)[bond->getIdx()];
         }
