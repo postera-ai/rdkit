@@ -677,6 +677,10 @@ inline unsigned int streamReadProps(std::istream &ss, RDProps &props,
                                    dict.getNonPODStatus(), handlers),
                     "Corrupted property serialization detected");
   }
+  std::sort(idata.begin(), idata.end(),
+            [](const Dict::InternalPair &a, const Dict::InternalPair &b) {
+              return a.key < b.key;
+            });
 
   return static_cast<unsigned int>(count);
 }

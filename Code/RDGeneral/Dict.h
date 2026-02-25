@@ -16,6 +16,7 @@
 #ifndef RD_DICT_H_012020
 #define RD_DICT_H_012020
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <string_view>
@@ -62,6 +63,22 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   typedef std::vector<Pair> DataType;
   typedef std::vector<InternalPair> InternalDataType;
 
+ private:
+  static bool keyLess(const InternalPair &a, const InternalPair &b) {
+    return a.key < b.key;
+  }
+  InternalDataType::const_iterator lowerBound(DictKey k) const {
+    InternalPair probe(k);
+    return std::lower_bound(_data.begin(), _data.end(), probe, keyLess);
+  }
+  InternalDataType::iterator lowerBound(DictKey k) {
+    InternalPair probe(k);
+    return std::lower_bound(_data.begin(), _data.end(), probe, keyLess);
+  }
+  InternalDataType _data{};
+  bool _hasNonPodData{false};
+
+ public:
   Dict() {}
 
   Dict(const Dict &other) : _data(other._data) {
@@ -90,19 +107,12 @@ class RDKIT_RDGENERAL_EXPORT Dict {
         _hasNonPodData = true;
       }
       for (const auto &opair : other._data) {
-        InternalPair *target = nullptr;
-        for (auto &dpair : _data) {
-          if (dpair.key == opair.key) {
-            target = &dpair;
-            break;
-          }
-        }
-
-        if (!target) {
-          _data.push_back(InternalPair(opair.key));
-          copy_rdvalue(_data.back().val, opair.val);
+        auto it = lowerBound(opair.key);
+        if (it != _data.end() && it->key == opair.key) {
+          copy_rdvalue(it->val, opair.val);
         } else {
-          copy_rdvalue(target->val, opair.val);
+          it = _data.insert(it, InternalPair(opair.key));
+          copy_rdvalue(it->val, opair.val);
         }
       }
     }
@@ -170,12 +180,8 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     return hasVal(k);
   }
   bool hasVal(DictKey k) const {
-    for (const auto &data : _data) {
-      if (data.key == k) {
-        return true;
-      }
-    }
-    return false;
+    auto it = lowerBound(k);
+    return it != _data.end() && it->key == k;
   }
 
   //----------------------------------------------------------
@@ -207,10 +213,9 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   }
   template <typename T>
   T getVal(DictKey k) const {
-    for (auto &data : _data) {
-      if (data.key == k) {
-        return from_rdvalue<T>(data.val);
-      }
+    auto it = lowerBound(k);
+    if (it != _data.end() && it->key == k) {
+      return from_rdvalue<T>(it->val);
     }
     throw KeyErrorException(keyToString(k));
   }
@@ -220,11 +225,10 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     getVal(k, res);
   }
   void getVal(DictKey k, std::string &res) const {
-    for (const auto &i : _data) {
-      if (i.key == k) {
-        rdvalue_tostring(i.val, res);
-        return;
-      }
+    auto it = lowerBound(k);
+    if (it != _data.end() && it->key == k) {
+      rdvalue_tostring(it->val, res);
+      return;
     }
     throw KeyErrorException(keyToString(k));
   }
@@ -238,11 +242,10 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   }
   template <typename T>
   bool getValIfPresent(DictKey k, T &res) const {
-    for (const auto &data : _data) {
-      if (data.key == k) {
-        res = from_rdvalue<T>(data.val);
-        return true;
-      }
+    auto it = lowerBound(k);
+    if (it != _data.end() && it->key == k) {
+      res = from_rdvalue<T>(it->val);
+      return true;
     }
     return false;
   }
@@ -252,11 +255,10 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     return getValIfPresent(k, res);
   }
   bool getValIfPresent(DictKey k, std::string &res) const {
-    for (const auto &i : _data) {
-      if (i.key == k) {
-        rdvalue_tostring(i.val, res);
-        return true;
-      }
+    auto it = lowerBound(k);
+    if (it != _data.end() && it->key == k) {
+      rdvalue_tostring(it->val, res);
+      return true;
     }
     return false;
   }
@@ -276,14 +278,13 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   template <typename T>
   void setVal(DictKey k, T &val) {
     _hasNonPodData = true;
-    for (auto &&data : _data) {
-      if (data.key == k) {
-        RDValue::cleanup_rdvalue(data.val);
-        data.val = val;
-        return;
-      }
+    auto it = lowerBound(k);
+    if (it != _data.end() && it->key == k) {
+      RDValue::cleanup_rdvalue(it->val);
+      it->val = val;
+      return;
     }
-    _data.emplace_back(k, val);
+    _data.insert(it, InternalPair(k, val));
   }
 
   template <typename T>
@@ -298,14 +299,13 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   }
   template <typename T>
   void setPODVal(DictKey k, T val) {
-    for (auto &&data : _data) {
-      if (data.key == k) {
-        RDValue::cleanup_rdvalue(data.val);
-        data.val = val;
-        return;
-      }
+    auto it = lowerBound(k);
+    if (it != _data.end() && it->key == k) {
+      RDValue::cleanup_rdvalue(it->val);
+      it->val = val;
+      return;
     }
-    _data.emplace_back(k, val);
+    _data.insert(it, InternalPair(k, RDValue(val)));
   }
 
   void setVal(std::string_view what, bool val) {
@@ -367,14 +367,12 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     clearVal(k);
   }
   void clearVal(DictKey k) {
-    for (auto it = _data.begin(); it < _data.end(); ++it) {
-      if (it->key == k) {
-        if (_hasNonPodData) {
-          RDValue::cleanup_rdvalue(it->val);
-        }
-        _data.erase(it);
-        return;
+    auto it = lowerBound(k);
+    if (it != _data.end() && it->key == k) {
+      if (_hasNonPodData) {
+        RDValue::cleanup_rdvalue(it->val);
       }
+      _data.erase(it);
     }
   }
 
@@ -390,9 +388,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     _data.swap(data);
   }
 
- private:
-  InternalDataType _data{};
-  bool _hasNonPodData{false};
 };
 
 template <>
