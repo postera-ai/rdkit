@@ -209,7 +209,7 @@ void MultithreadedSDMolSupplier::readMolProps(RWMol &mol,
             std::getline(inStream, tempStr);
             stmp = strip(tempStr);
           }
-          mol.setProp(dlabel, prop);
+          mol.setProp(internKey(dlabel), prop);
           if (df_processPropertyLists) {
             // apply this as an atom property list if that's appropriate
             FileParserUtils::processMolPropertyList(mol, dlabel);

@@ -73,8 +73,8 @@ TEST_CASE("testCoresLabelledProperly", "[RGroupInternals]") {
   for (const auto &core : data->cores) {
     auto mol = core.second.core;
     for (const auto atom : mol->atoms()) {
-      if (atom->hasProp(RLABEL)) {
-        int rlabel = atom->getProp<int>(RLABEL);
+      if (atom->hasProp(internKey(RLABEL))) {
+        int rlabel = atom->getProp<int>(internKey(RLABEL));
         if (rlabel < 0) {
           CHECK(rlabels.find(rlabel) == rlabels.end());
           rlabels.insert(rlabel);

@@ -1265,7 +1265,7 @@ std::vector<StereoInfo> findPotentialStereo(ROMol &mol, bool cleanIt,
     mol.updatePropertyCache(false);
   }
   std::vector<StereoInfo> res = runCleanup(mol, findPossible, cleanIt);
-  mol.setProp("_potentialStereo", res, true);
+  mol.setProp(internKey("_potentialStereo"), res, true);
   return res;
 }
 

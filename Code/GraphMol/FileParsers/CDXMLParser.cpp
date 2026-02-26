@@ -295,7 +295,7 @@ bool parse_fragment(RWMol &mol, ptree &frag,
       }
       set_fuse_label(rd_atom, atommap);
       if (mergeparent > 0) {
-        rd_atom->setProp<int>("MergeParent", mergeparent);
+        rd_atom->setProp<int>(internKey("MergeParent"), mergeparent);
       }
 
       rd_atom->setProp<std::vector<double>>(CDX_ATOM_POS, atom_coords);

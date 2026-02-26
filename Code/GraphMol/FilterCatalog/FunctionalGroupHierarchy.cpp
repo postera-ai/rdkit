@@ -200,9 +200,9 @@ void hierarchy_create() {
   for (const auto &fd : FuncDataArray) {
     // Make a new node
     ROMOL_SPTR pattern(SmartsToMol(fd.smarts, 0, true));
-    pattern->setProp("Label", fd.label);
+    pattern->setProp(internKey("Label"), fd.label);
     if (fd.removalReaction) {
-      pattern->setProp("RemovalReaction", fd.removalReaction);
+      pattern->setProp(internKey("RemovalReaction"), fd.removalReaction);
     }
     std::string key(fd.name);
     flattenedHierarchy[key] = pattern;

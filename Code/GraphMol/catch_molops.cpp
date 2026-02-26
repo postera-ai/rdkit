@@ -428,11 +428,11 @@ struct SelectedComponents {
 static std::unique_ptr<RDKit::RWMol> getTestMol() {
   std::unique_ptr<RDKit::RWMol> mol{RDKit::SmilesToMol("CCCCCCCCCCCCCCC")};
   for (auto &atom : mol->atoms()) {
-    atom->setProp("orig_idx", atom->getIdx());
+    atom->setProp(internKey("orig_idx"), atom->getIdx());
   }
 
   for (auto &bond : mol->bonds()) {
-    bond->setProp("orig_idx", bond->getIdx());
+    bond->setProp(internKey("orig_idx"), bond->getIdx());
   }
 
   return mol;
@@ -478,7 +478,7 @@ TEST_CASE("test_extract_atoms", "[copyMolSubset]") {
 
   std::vector<unsigned int> extracted_atoms;
   for (auto &atom : extracted_mol->atoms()) {
-    extracted_atoms.push_back(atom->template getProp<unsigned int>("orig_idx"));
+    extracted_atoms.push_back(atom->template getProp<unsigned int>(internKey("orig_idx")));
   }
 
   CHECK(extracted_atoms == expected_atoms);
@@ -488,7 +488,7 @@ TEST_CASE("test_extract_bonds", "[copyMolSubset]") {
   auto test_mol = getTestMol();
 
   for (auto &bond : test_mol->bonds()) {
-    bond->setProp("test_prop", true);
+    bond->setProp(internKey("test_prop"), true);
   }
 
   for (auto &bond : test_mol->bonds()) {
@@ -497,10 +497,10 @@ TEST_CASE("test_extract_bonds", "[copyMolSubset]") {
     auto m = copyMolSubset(*test_mol, {begin_idx, end_idx});
 
     REQUIRE(m->getNumBonds() == 1);
-    CHECK(m->getBondWithIdx(0)->getProp<bool>("test_prop") == true);
+    CHECK(m->getBondWithIdx(0)->getProp<bool>(internKey("test_prop")) == true);
     CHECK(m->getNumAtoms() == 2);
-    CHECK(m->getAtomWithIdx(0)->getProp<unsigned int>("orig_idx") == begin_idx);
-    CHECK(m->getAtomWithIdx(1)->getProp<unsigned int>("orig_idx") == end_idx);
+    CHECK(m->getAtomWithIdx(0)->getProp<unsigned int>(internKey("orig_idx")) == begin_idx);
+    CHECK(m->getAtomWithIdx(1)->getProp<unsigned int>(internKey("orig_idx")) == end_idx);
   }
 }
 
@@ -552,19 +552,19 @@ TEST_CASE("test_extract_substance_groups", "[copyMolSubset]") {
     auto &extracted_sgroup = ::RDKit::getSubstanceGroups(*extracted_mol)[0];
     for (auto &idx : extracted_sgroup.getAtoms()) {
       auto atom = extracted_mol->getAtomWithIdx(idx);
-      CHECK(selected_atoms[atom->template getProp<unsigned int>("orig_idx")] ==
+      CHECK(selected_atoms[atom->template getProp<unsigned int>(internKey("orig_idx"))] ==
             true);
     }
 
     for (auto &idx : extracted_sgroup.getParentAtoms()) {
       auto atom = extracted_mol->getAtomWithIdx(idx);
-      CHECK(selected_atoms[atom->template getProp<unsigned int>("orig_idx")] ==
+      CHECK(selected_atoms[atom->template getProp<unsigned int>(internKey("orig_idx"))] ==
             true);
     }
 
     for (auto &idx : extracted_sgroup.getBonds()) {
       auto bond = extracted_mol->getBondWithIdx(idx);
-      CHECK(selected_bonds[bond->template getProp<unsigned int>("orig_idx")] ==
+      CHECK(selected_bonds[bond->template getProp<unsigned int>(internKey("orig_idx"))] ==
             true);
     }
   }
@@ -611,11 +611,11 @@ TEST_CASE("test_extract_stereo_groups", "[copyMolSubset]") {
   if (flag) {
     auto &extracted_stereo_group = extracted_mol->getStereoGroups()[0];
     for (auto &atom : extracted_stereo_group.getAtoms()) {
-      CHECK(selected_atoms[atom->template getProp<int>("orig_idx")] == true);
+      CHECK(selected_atoms[atom->template getProp<int>(internKey("orig_idx"))] == true);
     }
 
     for (auto &bond : extracted_stereo_group.getBonds()) {
-      CHECK(selected_bonds[bond->template getProp<int>("orig_idx")] == true);
+      CHECK(selected_bonds[bond->template getProp<int>(internKey("orig_idx"))] == true);
     }
   }
 }

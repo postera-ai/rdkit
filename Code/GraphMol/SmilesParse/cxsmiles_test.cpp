@@ -207,8 +207,8 @@ TEST_CASE("CXSMILES and mol name") {
     CHECK(m->getNumAtoms() == 3);
     CHECK(m->getAtomWithIdx(0)->getProp<std::string>(
               common_properties::atomLabel) == "foo");
-    CHECK(m->getProp<std::string>("_CXSMILES_Data") == "|$foo;;bar$|");
-    CHECK(!m->hasProp("_Name"));
+    CHECK(m->getProp<std::string>(internKey("_CXSMILES_Data")) == "|$foo;;bar$|");
+    CHECK(!m->hasProp(internKey("_Name")));
     delete m;
   }
   {
@@ -222,7 +222,7 @@ TEST_CASE("CXSMILES and mol name") {
     CHECK(m->getNumAtoms() == 3);
     CHECK(m->getAtomWithIdx(0)->getProp<std::string>(
               common_properties::atomLabel) == "foo");
-    CHECK(m->getProp<std::string>("_CXSMILES_Data") == "|$foo;;bar$|");
+    CHECK(m->getProp<std::string>(internKey("_CXSMILES_Data")) == "|$foo;;bar$|");
     CHECK(m->getProp<std::string>(common_properties::_Name) == "ourname");
     delete m;
   }
@@ -346,14 +346,14 @@ TEST_CASE("atom properties") {
     ROMol *m = SmilesToMol(smiles, params);
     REQUIRE(m);
     CHECK(m->getNumAtoms() == 3);
-    CHECK(m->getAtomWithIdx(0)->hasProp("prop1"));
-    CHECK(m->getAtomWithIdx(0)->getProp<std::string>("prop1") == "val1");
-    CHECK(m->getAtomWithIdx(0)->hasProp("prop2"));
-    CHECK(m->getAtomWithIdx(0)->getProp<std::string>("prop2") == "val2");
-    CHECK(m->getAtomWithIdx(1)->hasProp("prop2"));
-    CHECK(m->getAtomWithIdx(1)->getProp<std::string>("prop2") == "v2&4");
-    CHECK(m->getAtomWithIdx(1)->hasProp("prop1"));
-    CHECK(m->getAtomWithIdx(1)->getProp<std::string>("prop1") == "v1;2;3");
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("prop1")));
+    CHECK(m->getAtomWithIdx(0)->getProp<std::string>(internKey("prop1")) == "val1");
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("prop2")));
+    CHECK(m->getAtomWithIdx(0)->getProp<std::string>(internKey("prop2")) == "val2");
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("prop2")));
+    CHECK(m->getAtomWithIdx(1)->getProp<std::string>(internKey("prop2")) == "v2&4");
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("prop1")));
+    CHECK(m->getAtomWithIdx(1)->getProp<std::string>(internKey("prop1")) == "v1;2;3");
 
     delete m;
   }
@@ -367,10 +367,10 @@ TEST_CASE("atom properties") {
     ROMol *m = SmilesToMol(smiles, params);
     REQUIRE(m);
     CHECK(m->getNumAtoms() == 3);
-    CHECK(m->getAtomWithIdx(0)->hasProp("prop2"));
-    CHECK(m->getAtomWithIdx(0)->getProp<std::string>("prop2") == "val2");
-    CHECK(m->getAtomWithIdx(1)->hasProp("prop1"));
-    CHECK(m->getAtomWithIdx(1)->getProp<std::string>("prop1") == "v1;2;3");
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("prop2")));
+    CHECK(m->getAtomWithIdx(0)->getProp<std::string>(internKey("prop2")) == "val2");
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("prop1")));
+    CHECK(m->getAtomWithIdx(1)->getProp<std::string>(internKey("prop1")) == "v1;2;3");
     CHECK(m->getAtomWithIdx(0)->hasProp(common_properties::molFileValue));
     CHECK(m->getAtomWithIdx(0)->getProp<std::string>(
               common_properties::molFileValue) == "value 2");

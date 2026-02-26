@@ -23,135 +23,135 @@ TEST_CASE("Property list conversion") {
   REQUIRE(m);
   auto getter = [&m](size_t which) { return m->getAtomWithIdx(which); };
   SECTION("basics: iprops") {
-    m->setProp("atom.iprop.foo1", "1   6 9");
-    m->setProp("atom.iprop.foo2", "3 n/a   9");
-    m->setProp("atom.iprop.foo3", "[?]  5 1 ?");
-    m->setProp("atom.iprop.foo4", "[foo] 3 foo   9");
+    m->setProp(internKey("atom.iprop.foo1"), "1   6 9");
+    m->setProp(internKey("atom.iprop.foo2"), "3 n/a   9");
+    m->setProp(internKey("atom.iprop.foo3"), "[?]  5 1 ?");
+    m->setProp(internKey("atom.iprop.foo4"), "[foo] 3 foo   9");
     FileParserUtils::applyMolListProps<int>(*m, "atom.iprop.", m->getNumAtoms(),
                                             getter);
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo2"));
-    CHECK(!m->getAtomWithIdx(1)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo3"));
-    CHECK(!m->getAtomWithIdx(2)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo4"));
-    CHECK(!m->getAtomWithIdx(1)->hasProp("foo4"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo4"));
-    CHECK(m->getAtomWithIdx(1)->getProp<int>("foo1") == 6);
-    CHECK(m->getAtomWithIdx(2)->getProp<int>("foo2") == 9);
-    CHECK(m->getAtomWithIdx(1)->getProp<int>("foo3") == 1);
-    CHECK(m->getAtomWithIdx(1)->getProp<std::string>("foo3") == "1");
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo2")));
+    CHECK(!m->getAtomWithIdx(1)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo3")));
+    CHECK(!m->getAtomWithIdx(2)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo4")));
+    CHECK(!m->getAtomWithIdx(1)->hasProp(internKey("foo4")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo4")));
+    CHECK(m->getAtomWithIdx(1)->getProp<int>(internKey("foo1")) == 6);
+    CHECK(m->getAtomWithIdx(2)->getProp<int>(internKey("foo2")) == 9);
+    CHECK(m->getAtomWithIdx(1)->getProp<int>(internKey("foo3")) == 1);
+    CHECK(m->getAtomWithIdx(1)->getProp<std::string>(internKey("foo3")) == "1");
   }
   SECTION("basics: dprops") {
-    m->setProp("atom.dprop.foo1", "1   6 9");
-    m->setProp("atom.dprop.foo2", "3 n/a   9");
-    m->setProp("atom.dprop.foo3", "[?]  5 1 ?");
+    m->setProp(internKey("atom.dprop.foo1"), "1   6 9");
+    m->setProp(internKey("atom.dprop.foo2"), "3 n/a   9");
+    m->setProp(internKey("atom.dprop.foo3"), "[?]  5 1 ?");
     FileParserUtils::applyMolListProps<double>(*m, "atom.dprop.",
                                                m->getNumAtoms(), getter);
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo2"));
-    CHECK(!m->getAtomWithIdx(1)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo3"));
-    CHECK(!m->getAtomWithIdx(2)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(1)->getProp<double>("foo1") == 6);
-    CHECK(m->getAtomWithIdx(2)->getProp<double>("foo2") == 9);
-    CHECK(m->getAtomWithIdx(1)->getProp<double>("foo3") == 1);
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo2")));
+    CHECK(!m->getAtomWithIdx(1)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo3")));
+    CHECK(!m->getAtomWithIdx(2)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(1)->getProp<double>(internKey("foo1")) == 6);
+    CHECK(m->getAtomWithIdx(2)->getProp<double>(internKey("foo2")) == 9);
+    CHECK(m->getAtomWithIdx(1)->getProp<double>(internKey("foo3")) == 1);
   }
   SECTION("basics: props") {
-    m->setProp("atom.prop.foo1", "1   6 9");
-    m->setProp("atom.prop.foo2", "3 n/a   9");
-    m->setProp("atom.prop.foo3", "[?]  5 1 ?");
+    m->setProp(internKey("atom.prop.foo1"), "1   6 9");
+    m->setProp(internKey("atom.prop.foo2"), "3 n/a   9");
+    m->setProp(internKey("atom.prop.foo3"), "[?]  5 1 ?");
     FileParserUtils::applyMolListProps<std::string>(*m, "atom.prop.",
                                                     m->getNumAtoms(), getter);
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo2"));
-    CHECK(!m->getAtomWithIdx(1)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo3"));
-    CHECK(!m->getAtomWithIdx(2)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(1)->getProp<std::string>("foo1") == "6");
-    CHECK(m->getAtomWithIdx(2)->getProp<std::string>("foo2") == "9");
-    CHECK(m->getAtomWithIdx(1)->getProp<std::string>("foo3") == "1");
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo2")));
+    CHECK(!m->getAtomWithIdx(1)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo3")));
+    CHECK(!m->getAtomWithIdx(2)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(1)->getProp<std::string>(internKey("foo1")) == "6");
+    CHECK(m->getAtomWithIdx(2)->getProp<std::string>(internKey("foo2")) == "9");
+    CHECK(m->getAtomWithIdx(1)->getProp<std::string>(internKey("foo3")) == "1");
   }
   SECTION("basics: bprops") {
-    m->setProp("atom.bprop.foo1", "1   0 0");
-    m->setProp("atom.bprop.foo2", "0 n/a   1");
-    m->setProp("atom.bprop.foo3", "[?]  0 1 ?");
+    m->setProp(internKey("atom.bprop.foo1"), "1   0 0");
+    m->setProp(internKey("atom.bprop.foo2"), "0 n/a   1");
+    m->setProp(internKey("atom.bprop.foo3"), "[?]  0 1 ?");
     FileParserUtils::applyMolListProps<bool>(*m, "atom.bprop.",
                                              m->getNumAtoms(), getter);
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo2"));
-    CHECK(!m->getAtomWithIdx(1)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo3"));
-    CHECK(!m->getAtomWithIdx(2)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(1)->getProp<bool>("foo1") == false);
-    CHECK(m->getAtomWithIdx(2)->getProp<bool>("foo2") == true);
-    CHECK(m->getAtomWithIdx(1)->getProp<bool>("foo3") == true);
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo2")));
+    CHECK(!m->getAtomWithIdx(1)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo3")));
+    CHECK(!m->getAtomWithIdx(2)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(1)->getProp<bool>(internKey("foo1")) == false);
+    CHECK(m->getAtomWithIdx(2)->getProp<bool>(internKey("foo2")) == true);
+    CHECK(m->getAtomWithIdx(1)->getProp<bool>(internKey("foo3")) == true);
   }
   SECTION("basics: bond props") {
     auto bgetter = [&m](size_t which) { return m->getBondWithIdx(which); };
 
-    m->setProp("bond.prop.foo1", "1   6");
-    m->setProp("bond.prop.foo2", "3 n/a");
-    m->setProp("bond.prop.foo3", "[?]  ? 5");
+    m->setProp(internKey("bond.prop.foo1"), "1   6");
+    m->setProp(internKey("bond.prop.foo2"), "3 n/a");
+    m->setProp(internKey("bond.prop.foo3"), "[?]  ? 5");
     FileParserUtils::applyMolListProps<std::string>(*m, "bond.prop.",
                                                     m->getNumBonds(), bgetter);
-    CHECK(m->getBondWithIdx(0)->hasProp("foo1"));
-    CHECK(m->getBondWithIdx(1)->hasProp("foo1"));
-    CHECK(m->getBondWithIdx(0)->hasProp("foo2"));
-    CHECK(!m->getBondWithIdx(1)->hasProp("foo2"));
-    CHECK(!m->getBondWithIdx(0)->hasProp("foo3"));
-    CHECK(m->getBondWithIdx(1)->hasProp("foo3"));
-    CHECK(m->getBondWithIdx(1)->getProp<std::string>("foo1") == "6");
-    CHECK(m->getBondWithIdx(1)->getProp<std::string>("foo3") == "5");
+    CHECK(m->getBondWithIdx(0)->hasProp(internKey("foo1")));
+    CHECK(m->getBondWithIdx(1)->hasProp(internKey("foo1")));
+    CHECK(m->getBondWithIdx(0)->hasProp(internKey("foo2")));
+    CHECK(!m->getBondWithIdx(1)->hasProp(internKey("foo2")));
+    CHECK(!m->getBondWithIdx(0)->hasProp(internKey("foo3")));
+    CHECK(m->getBondWithIdx(1)->hasProp(internKey("foo3")));
+    CHECK(m->getBondWithIdx(1)->getProp<std::string>(internKey("foo1")) == "6");
+    CHECK(m->getBondWithIdx(1)->getProp<std::string>(internKey("foo3")) == "5");
   }
 }
 TEST_CASE("processMolPropertyLists") {
   SECTION("basics") {
     auto m = "COC"_smiles;
     REQUIRE(m);
-    m->setProp("atom.iprop.foo1", "1   6 9");
-    m->setProp("atom.dprop.foo2", "3 n/a   9");
-    m->setProp("atom.prop.foo3", "[?]  5 1 ?");
-    m->setProp("atom.bprop.foo4", "1 0 0");
-    m->setProp("bond.prop.foo2", "3 7");
+    m->setProp(internKey("atom.iprop.foo1"), "1   6 9");
+    m->setProp(internKey("atom.dprop.foo2"), "3 n/a   9");
+    m->setProp(internKey("atom.prop.foo3"), "[?]  5 1 ?");
+    m->setProp(internKey("atom.bprop.foo4"), "1 0 0");
+    m->setProp(internKey("bond.prop.foo2"), "3 7");
     FileParserUtils::processMolPropertyLists(*m);
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo1"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo2"));
-    CHECK(!m->getAtomWithIdx(1)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo2"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo3"));
-    CHECK(!m->getAtomWithIdx(2)->hasProp("foo3"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("foo4"));
-    CHECK(m->getAtomWithIdx(1)->hasProp("foo4"));
-    CHECK(m->getAtomWithIdx(2)->hasProp("foo4"));
-    CHECK(m->getAtomWithIdx(1)->getProp<int>("foo1") == 6);
-    CHECK(m->getAtomWithIdx(2)->getProp<double>("foo2") == 9);
-    CHECK(m->getAtomWithIdx(1)->getProp<std::string>("foo3") == "1");
-    CHECK(m->getAtomWithIdx(1)->getProp<bool>("foo4") == false);
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo1")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo2")));
+    CHECK(!m->getAtomWithIdx(1)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo2")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo3")));
+    CHECK(!m->getAtomWithIdx(2)->hasProp(internKey("foo3")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("foo4")));
+    CHECK(m->getAtomWithIdx(1)->hasProp(internKey("foo4")));
+    CHECK(m->getAtomWithIdx(2)->hasProp(internKey("foo4")));
+    CHECK(m->getAtomWithIdx(1)->getProp<int>(internKey("foo1")) == 6);
+    CHECK(m->getAtomWithIdx(2)->getProp<double>(internKey("foo2")) == 9);
+    CHECK(m->getAtomWithIdx(1)->getProp<std::string>(internKey("foo3")) == "1");
+    CHECK(m->getAtomWithIdx(1)->getProp<bool>(internKey("foo4")) == false);
 
-    CHECK(m->getBondWithIdx(0)->hasProp("foo2"));
-    CHECK(m->getBondWithIdx(1)->hasProp("foo2"));
-    CHECK(m->getBondWithIdx(0)->getProp<int>("foo2"));
-    CHECK(m->getBondWithIdx(1)->getProp<int>("foo2"));
+    CHECK(m->getBondWithIdx(0)->hasProp(internKey("foo2")));
+    CHECK(m->getBondWithIdx(1)->hasProp(internKey("foo2")));
+    CHECK(m->getBondWithIdx(0)->getProp<int>(internKey("foo2")));
+    CHECK(m->getBondWithIdx(1)->getProp<int>(internKey("foo2")));
   }
 }
 
@@ -199,23 +199,23 @@ $$$$
     suppl.setProcessPropertyLists(false);
     std::unique_ptr<RDKit::ROMol> m(suppl[0]);
     REQUIRE(m);
-    CHECK(m->hasProp("atom.prop.AtomLabel"));
-    CHECK(!m->getAtomWithIdx(0)->hasProp("AtomLabel"));
+    CHECK(m->hasProp(internKey("atom.prop.AtomLabel")));
+    CHECK(!m->getAtomWithIdx(0)->hasProp(internKey("AtomLabel")));
   }
   SECTION("with processing") {
     RDKit::SDMolSupplier suppl;
     suppl.setData(sdf);
     std::unique_ptr<RDKit::ROMol> m(suppl[0]);
     REQUIRE(m);
-    CHECK(m->hasProp("atom.prop.AtomLabel"));
-    CHECK(m->getAtomWithIdx(0)->hasProp("AtomLabel"));
-    CHECK(m->hasProp("bond.prop.foo"));
+    CHECK(m->hasProp(internKey("atom.prop.AtomLabel")));
+    CHECK(m->getAtomWithIdx(0)->hasProp(internKey("AtomLabel")));
+    CHECK(m->hasProp(internKey("bond.prop.foo")));
     std::string val;
-    CHECK(m->getBondWithIdx(0)->getPropIfPresent("foo", val));
+    CHECK(m->getBondWithIdx(0)->getPropIfPresent(internKey("foo"), val));
     CHECK(val == "bar");
 
-    CHECK(m->hasProp("atom.iprop.TooLong"));
-    CHECK(!m->getAtomWithIdx(0)->hasProp("TooLong"));
+    CHECK(m->hasProp(internKey("atom.iprop.TooLong")));
+    CHECK(!m->getAtomWithIdx(0)->hasProp(internKey("TooLong")));
   }
 }
 
@@ -223,60 +223,60 @@ TEST_CASE("createAtomPropertyLists") {
   SECTION("basics") {
     auto m = "COC"_smiles;
     REQUIRE(m);
-    m->getAtomWithIdx(0)->setProp<int>("foo1", 1);
-    m->getAtomWithIdx(2)->setProp<int>("foo1", 9);
+    m->getAtomWithIdx(0)->setProp<int>(internKey("foo1"), 1);
+    m->getAtomWithIdx(2)->setProp<int>(internKey("foo1"), 9);
     FileParserUtils::createAtomIntPropertyList(*m, "foo1");
-    REQUIRE(m->hasProp("atom.iprop.foo1"));
-    CHECK(m->getProp<std::string>("atom.iprop.foo1") == "1 n/a 9");
+    REQUIRE(m->hasProp(internKey("atom.iprop.foo1")));
+    CHECK(m->getProp<std::string>(internKey("atom.iprop.foo1")) == "1 n/a 9");
 
-    m->getAtomWithIdx(0)->setProp<double>("foo2", 1);
-    m->getAtomWithIdx(1)->setProp<double>("foo2", 4);
-    m->getAtomWithIdx(2)->setProp<double>("foo2", 9);
+    m->getAtomWithIdx(0)->setProp<double>(internKey("foo2"), 1);
+    m->getAtomWithIdx(1)->setProp<double>(internKey("foo2"), 4);
+    m->getAtomWithIdx(2)->setProp<double>(internKey("foo2"), 9);
     FileParserUtils::createAtomDoublePropertyList(*m, "foo2");
-    REQUIRE(m->hasProp("atom.dprop.foo2"));
-    CHECK(m->getProp<std::string>("atom.dprop.foo2") == "1 4 9");
+    REQUIRE(m->hasProp(internKey("atom.dprop.foo2")));
+    CHECK(m->getProp<std::string>(internKey("atom.dprop.foo2")) == "1 4 9");
 
-    m->getAtomWithIdx(0)->setProp<std::string>("foo3", "1");
-    m->getAtomWithIdx(1)->setProp<std::string>("foo3", "4");
+    m->getAtomWithIdx(0)->setProp<std::string>(internKey("foo3"), "1");
+    m->getAtomWithIdx(1)->setProp<std::string>(internKey("foo3"), "4");
     FileParserUtils::createAtomStringPropertyList(*m, "foo3", "?");
-    REQUIRE(m->hasProp("atom.prop.foo3"));
-    CHECK(m->getProp<std::string>("atom.prop.foo3") == "[?] 1 4 ?");
+    REQUIRE(m->hasProp(internKey("atom.prop.foo3")));
+    CHECK(m->getProp<std::string>(internKey("atom.prop.foo3")) == "[?] 1 4 ?");
 
-    m->getAtomWithIdx(0)->setProp<bool>("foo4", 1);
-    m->getAtomWithIdx(1)->setProp<bool>("foo4", 0);
-    m->getAtomWithIdx(2)->setProp<bool>("foo4", 0);
+    m->getAtomWithIdx(0)->setProp<bool>(internKey("foo4"), 1);
+    m->getAtomWithIdx(1)->setProp<bool>(internKey("foo4"), 0);
+    m->getAtomWithIdx(2)->setProp<bool>(internKey("foo4"), 0);
     FileParserUtils::createAtomBoolPropertyList(*m, "foo4");
-    REQUIRE(m->hasProp("atom.bprop.foo4"));
-    CHECK(m->getProp<std::string>("atom.bprop.foo4") == "1 0 0");
+    REQUIRE(m->hasProp(internKey("atom.bprop.foo4")));
+    CHECK(m->getProp<std::string>(internKey("atom.bprop.foo4")) == "1 0 0");
 
-    m->getBondWithIdx(0)->setProp<bool>("foo5", 1);
-    m->getBondWithIdx(1)->setProp<bool>("foo5", 0);
+    m->getBondWithIdx(0)->setProp<bool>(internKey("foo5"), 1);
+    m->getBondWithIdx(1)->setProp<bool>(internKey("foo5"), 0);
     FileParserUtils::createBondBoolPropertyList(*m, "foo5");
-    REQUIRE(m->hasProp("bond.bprop.foo5"));
-    CHECK(m->getProp<std::string>("bond.bprop.foo5") == "1 0");
+    REQUIRE(m->hasProp(internKey("bond.bprop.foo5")));
+    CHECK(m->getProp<std::string>(internKey("bond.bprop.foo5")) == "1 0");
   }
   SECTION("long lines") {
     auto m = "COC"_smiles;
     REQUIRE(m);
     auto getter = [&m](size_t which) { return m->getAtomWithIdx(which); };
-    m->getAtomWithIdx(0)->setProp<std::string>("foo1", std::string(80, 'a'));
-    m->getAtomWithIdx(1)->setProp<std::string>("foo1", std::string(80, 'b'));
-    m->getAtomWithIdx(2)->setProp<std::string>("foo1", std::string(80, 'c'));
+    m->getAtomWithIdx(0)->setProp<std::string>(internKey("foo1"), std::string(80, 'a'));
+    m->getAtomWithIdx(1)->setProp<std::string>(internKey("foo1"), std::string(80, 'b'));
+    m->getAtomWithIdx(2)->setProp<std::string>(internKey("foo1"), std::string(80, 'c'));
     FileParserUtils::createAtomStringPropertyList(*m, "foo1");
-    REQUIRE(m->hasProp("atom.prop.foo1"));
-    std::string ps = m->getProp<std::string>("atom.prop.foo1");
+    REQUIRE(m->hasProp(internKey("atom.prop.foo1")));
+    std::string ps = m->getProp<std::string>(internKey("atom.prop.foo1"));
     CHECK(ps.length() > 240);
     CHECK(ps.find("\n") != std::string::npos);
     for (auto &atom : m->atoms()) {
-      atom->clearProp("foo1");
+      atom->clearProp(internKey("foo1"));
     }
     FileParserUtils::applyMolListProps<std::string>(*m, "atom.prop.",
                                                     m->getNumAtoms(), getter);
-    CHECK(m->getAtomWithIdx(0)->getProp<std::string>("foo1") ==
+    CHECK(m->getAtomWithIdx(0)->getProp<std::string>(internKey("foo1")) ==
           std::string(80, 'a'));
-    CHECK(m->getAtomWithIdx(1)->getProp<std::string>("foo1") ==
+    CHECK(m->getAtomWithIdx(1)->getProp<std::string>(internKey("foo1")) ==
           std::string(80, 'b'));
-    CHECK(m->getAtomWithIdx(2)->getProp<std::string>("foo1") ==
+    CHECK(m->getAtomWithIdx(2)->getProp<std::string>(internKey("foo1")) ==
           std::string(80, 'c'));
   }
 }

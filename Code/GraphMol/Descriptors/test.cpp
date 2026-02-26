@@ -393,7 +393,7 @@ void testLipinski1() {
     unsigned int oVal, nVal;
     std::string foo;
 
-    mol->getProp("NUM_HACCEPTORS", foo);
+    mol->getProp(internKey("NUM_HACCEPTORS"), foo);
     oVal = boost::lexical_cast<unsigned int>(foo);
     nVal = calcNumHBA(*mol);
     if (oVal != nVal) {
@@ -402,7 +402,7 @@ void testLipinski1() {
     }
     TEST_ASSERT(oVal == nVal);
 
-    mol->getProp("NUM_HDONORS", foo);
+    mol->getProp(internKey("NUM_HDONORS"), foo);
     oVal = boost::lexical_cast<unsigned int>(foo);
     nVal = calcNumHBD(*mol);
     if (oVal != nVal) {
@@ -411,7 +411,7 @@ void testLipinski1() {
     }
     TEST_ASSERT(oVal == nVal);
 
-    mol->getProp("NUM_LIPINSKIHDONORS", foo);
+    mol->getProp(internKey("NUM_LIPINSKIHDONORS"), foo);
     oVal = boost::lexical_cast<unsigned int>(foo);
     nVal = calcLipinskiHBD(*mol);
     if (oVal != nVal) {
@@ -420,7 +420,7 @@ void testLipinski1() {
     }
     TEST_ASSERT(oVal == nVal);
 
-    mol->getProp("NUM_LIPINSKIHACCEPTORS", foo);
+    mol->getProp(internKey("NUM_LIPINSKIHACCEPTORS"), foo);
     oVal = boost::lexical_cast<unsigned int>(foo);
     nVal = calcLipinskiHBA(*mol);
     if (oVal != nVal) {
@@ -429,7 +429,7 @@ void testLipinski1() {
     }
     TEST_ASSERT(oVal == nVal);
 
-    mol->getProp("NUM_RINGS", foo);
+    mol->getProp(internKey("NUM_RINGS"), foo);
     oVal = boost::lexical_cast<unsigned int>(foo);
     nVal = calcNumRings(*mol);
     if (oVal != nVal) {
@@ -438,7 +438,7 @@ void testLipinski1() {
     }
     TEST_ASSERT(oVal == nVal);
 
-    mol->getProp("NUM_HETEROATOMS", foo);
+    mol->getProp(internKey("NUM_HETEROATOMS"), foo);
     oVal = boost::lexical_cast<unsigned int>(foo);
     nVal = calcNumHeteroatoms(*mol);
     if (oVal != nVal) {
@@ -447,7 +447,7 @@ void testLipinski1() {
     }
     TEST_ASSERT(oVal == nVal);
 
-    mol->getProp(rot_prop, foo);
+    mol->getProp(internKey(rot_prop), foo);
     oVal = boost::lexical_cast<unsigned int>(foo);
     nVal = calcNumRotatableBonds(*mol);
     if (oVal != nVal) {
@@ -456,7 +456,7 @@ void testLipinski1() {
     }
     TEST_ASSERT(oVal == nVal);
 
-    mol->getProp(NonStrictRotProp, foo);
+    mol->getProp(internKey(NonStrictRotProp), foo);
     oVal = boost::lexical_cast<unsigned int>(foo);
     nVal = calcNumRotatableBonds(*mol, NonStrict);
     if (oVal != nVal) {
@@ -465,7 +465,7 @@ void testLipinski1() {
     }
     TEST_ASSERT(oVal == nVal);
 
-    mol->getProp(StrictRotProp, foo);
+    mol->getProp(internKey(StrictRotProp), foo);
     oVal = boost::lexical_cast<unsigned int>(foo);
     nVal = calcNumRotatableBonds(*mol, Strict);
     if (oVal != nVal) {
@@ -842,10 +842,10 @@ void runblock(const std::vector<ROMol *> &mols, unsigned int count,
 
       int oVal;
       std::string foo;
-      mol->getProp("NUM_HACCEPTORS", foo);
+      mol->getProp(internKey("NUM_HACCEPTORS"), foo);
       oVal = boost::lexical_cast<int>(foo);
       TEST_ASSERT(oVal == nHBA);
-      mol->getProp("NUM_HDONORS", foo);
+      mol->getProp(internKey("NUM_HDONORS"), foo);
       oVal = boost::lexical_cast<unsigned int>(foo);
       TEST_ASSERT(oVal == nHBD);
 
@@ -1481,27 +1481,27 @@ void testRingDescriptors() {
     ROMol *mol = suppl.next();
     TEST_ASSERT(mol);
     unsigned int iv;
-    mol->getProp("NumRings", iv);
+    mol->getProp(internKey("NumRings"), iv);
     TEST_ASSERT(iv == calcNumRings(*mol));
-    mol->getProp("NumAromaticRings", iv);
+    mol->getProp(internKey("NumAromaticRings"), iv);
     TEST_ASSERT(iv == calcNumAromaticRings(*mol));
-    mol->getProp("NumSaturatedRings", iv);
+    mol->getProp(internKey("NumSaturatedRings"), iv);
     TEST_ASSERT(iv == calcNumSaturatedRings(*mol));
-    mol->getProp("NumAromaticHeterocycles", iv);
+    mol->getProp(internKey("NumAromaticHeterocycles"), iv);
     TEST_ASSERT(iv == calcNumAromaticHeterocycles(*mol));
-    mol->getProp("NumAromaticCarbocycles", iv);
+    mol->getProp(internKey("NumAromaticCarbocycles"), iv);
     TEST_ASSERT(iv == calcNumAromaticCarbocycles(*mol));
-    mol->getProp("NumSaturatedHeterocycles", iv);
+    mol->getProp(internKey("NumSaturatedHeterocycles"), iv);
     TEST_ASSERT(iv == calcNumSaturatedHeterocycles(*mol));
-    mol->getProp("NumSaturatedCarbocycles", iv);
+    mol->getProp(internKey("NumSaturatedCarbocycles"), iv);
     TEST_ASSERT(iv == calcNumSaturatedCarbocycles(*mol));
-    mol->getProp("NumAliphaticRings", iv);
+    mol->getProp(internKey("NumAliphaticRings"), iv);
     TEST_ASSERT(iv == calcNumAliphaticRings(*mol));
-    mol->getProp("NumAliphaticHeterocycles", iv);
+    mol->getProp(internKey("NumAliphaticHeterocycles"), iv);
     TEST_ASSERT(iv == calcNumAliphaticHeterocycles(*mol));
-    mol->getProp("NumAliphaticCarbocycles", iv);
+    mol->getProp(internKey("NumAliphaticCarbocycles"), iv);
     TEST_ASSERT(iv == calcNumAliphaticCarbocycles(*mol));
-    mol->getProp("NumHeterocycles", iv);
+    mol->getProp(internKey("NumHeterocycles"), iv);
     TEST_ASSERT(iv == calcNumHeterocycles(*mol));
 
     delete mol;
@@ -1924,16 +1924,16 @@ void testProperties() {
     std::vector<double> props = sink.computeProperties(*mol, true);
 
     TEST_ASSERT(props == res);
-    TEST_ASSERT(mol->getProp<double>("NumSpiroAtoms") == 1.);
-    TEST_ASSERT(mol->getProp<double>("NumBridgeheadAtoms") == 2.);
+    TEST_ASSERT(mol->getProp<double>(internKey("NumSpiroAtoms")) == 1.);
+    TEST_ASSERT(mol->getProp<double>(internKey("NumBridgeheadAtoms")) == 2.);
     delete mol;
 
     mol = SmilesToMol("C1CCC2(C1)CC1CCC2CC1");
     TEST_ASSERT(mol);
     // Test annotation as well
     sink.annotateProperties(*mol);
-    TEST_ASSERT(mol->getProp<double>("NumSpiroAtoms") == 1.);
-    TEST_ASSERT(mol->getProp<double>("NumBridgeheadAtoms") == 2.);
+    TEST_ASSERT(mol->getProp<double>(internKey("NumSpiroAtoms")) == 1.);
+    TEST_ASSERT(mol->getProp<double>(internKey("NumBridgeheadAtoms")) == 2.);
     delete mol;
   }
 

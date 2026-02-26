@@ -293,7 +293,7 @@ void test504() {
   unsigned int nq = qm->getNumAtoms();
   for (size_t ai = 0; ai < nq; ai++) {
     Atom *atom = qm->getAtomWithIdx(ai);
-    atom->setProp("molAtomMapNumber", (int)ai);
+    atom->setProp(internKey("molAtomMapNumber"), (int)ai);
   }
   std::cout << "Query +MAP " << MolToSmiles(*qm) << "\n";
   mols.emplace_back(qm);  // with RING INFO
@@ -332,7 +332,7 @@ void test18() {
   unsigned int nq = qm->getNumAtoms();
   for (size_t ai = 0; ai < nq; ai++) {
     Atom *atom = qm->getAtomWithIdx(ai);
-    atom->setProp("molAtomMapNumber", (int)ai);
+    atom->setProp(internKey("molAtomMapNumber"), (int)ai);
   }
   std::cout << "Query +MAP " << MolToSmiles(*qm) << "\n";
   mols.emplace_back(qm);  // with RING INFO
@@ -494,9 +494,9 @@ void testJnk1LigandsDistance() {
   while (!suppl->atEnd()) {
     ROMol *m = suppl->next();
     if (m) {
-      if (m->getProp<std::string>("_Name") == "17124-1") {
+      if (m->getProp<std::string>(internKey("_Name")) == "17124-1") {
         m1 = m;
-      } else if (m->getProp<std::string>("_Name") == "18629-1") {
+      } else if (m->getProp<std::string>(internKey("_Name")) == "18629-1") {
         m2 = m;
       } else {
         ROMOL_SPTR cleanupMol(m);  // don't leak memory

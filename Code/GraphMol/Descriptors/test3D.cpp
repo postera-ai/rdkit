@@ -63,7 +63,7 @@ void testPMI1() {
     TEST_ASSERT(m);
     RDKit::ROMol mcpy(*m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(internKey("_Name"), nm);
     std::string inm;
     instrm >> inm;
     TEST_ASSERT(inm == nm);
@@ -229,12 +229,12 @@ void testPMI2() {
 
     // tolerances are coarse because the reference values come from MOE
     // and the placement of Hs is not identical
-    TEST_ASSERT(compare("pmi1", m->getProp<double>("pmi1"), pmi1, pmi1 / 100));
-    TEST_ASSERT(compare("pmi2", m->getProp<double>("pmi2"), pmi2, pmi2 / 100));
-    TEST_ASSERT(compare("pmi3", m->getProp<double>("pmi3"), pmi3, pmi3 / 100));
+    TEST_ASSERT(compare("pmi1", m->getProp<double>(internKey("pmi1")), pmi1, pmi1 / 100));
+    TEST_ASSERT(compare("pmi2", m->getProp<double>(internKey("pmi2")), pmi2, pmi2 / 100));
+    TEST_ASSERT(compare("pmi3", m->getProp<double>(internKey("pmi3")), pmi3, pmi3 / 100));
 
-    TEST_ASSERT(compare("npr1", m->getProp<double>("npr1"), npr1, npr1 / 100));
-    TEST_ASSERT(compare("npr2", m->getProp<double>("npr2"), npr2, npr2 / 100));
+    TEST_ASSERT(compare("npr1", m->getProp<double>(internKey("npr1")), npr1, npr1 / 100));
+    TEST_ASSERT(compare("npr2", m->getProp<double>(internKey("npr2")), npr2, npr2 / 100));
     delete m;
   }
   BOOST_LOG(rdErrorLog) << "  done" << std::endl;
@@ -254,7 +254,7 @@ void testNPR1() {
     TEST_ASSERT(m);
     RDKit::ROMol mcpy(*m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(internKey("_Name"), nm);
 
     double val;
     double pmi1_m, pmi2_m, pmi3_m, pmi1_nom, pmi2_nom, pmi3_nom;

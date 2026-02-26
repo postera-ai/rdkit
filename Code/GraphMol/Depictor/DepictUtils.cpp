@@ -568,14 +568,14 @@ std::unique_ptr<RDKit::RWMol> prepareTemplateForRGroups(
     reducedTemplateMol.reset(new RDKit::RWMol(templateMol));
     for (auto reducedTemplateAtom : reducedTemplateMol->atoms()) {
       auto formerIdx = reducedTemplateAtom->getIdx();
-      reducedTemplateAtom->setProp(FORMER_IDX, formerIdx);
+      reducedTemplateAtom->setProp(RDKit::internKey(FORMER_IDX), formerIdx);
       auto it = removedIdxToNbrIdx.find(formerIdx);
       if (it != removedIdxToNbrIdx.end()) {
         auto otherAtom = reducedTemplateMol->getAtomWithIdx(it->second);
         std::vector<unsigned int> formerNbrIndices;
-        otherAtom->getPropIfPresent(FORMER_NBR_INDICES, formerNbrIndices);
+        otherAtom->getPropIfPresent(RDKit::internKey(FORMER_NBR_INDICES), formerNbrIndices);
         formerNbrIndices.push_back(formerIdx);
-        otherAtom->setProp(FORMER_NBR_INDICES, formerNbrIndices);
+        otherAtom->setProp(RDKit::internKey(FORMER_NBR_INDICES), formerNbrIndices);
       }
     }
     reducedTemplateMol->beginBatchEdit();
@@ -602,10 +602,10 @@ void reducedToFullMatches(const RDKit::RWMol &reducedQuery,
       const auto reducedQueryAtom = reducedQuery.getAtomWithIdx(pairIt->first);
       const auto molAtom = molHs.getAtomWithIdx(pairIt->second);
       unsigned int formerIdx;
-      reducedQueryAtom->getProp(FORMER_IDX, formerIdx);
+      reducedQueryAtom->getProp(RDKit::internKey(FORMER_IDX), formerIdx);
       pairIt->first = formerIdx;
       std::vector<unsigned int> formerNbrIndices;
-      reducedQueryAtom->getPropIfPresent(FORMER_NBR_INDICES, formerNbrIndices);
+      reducedQueryAtom->getPropIfPresent(RDKit::internKey(FORMER_NBR_INDICES), formerNbrIndices);
       for (const auto &molNbr : molHs.atomNeighbors(molAtom)) {
         if (formerNbrIndices.empty()) {
           break;

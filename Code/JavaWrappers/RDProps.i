@@ -38,8 +38,38 @@
 
 %include <RDGeneral/RDProps.h>
 
-%template(setProp)  RDKit::RDProps::setProp<std::string>;
-%template(setIntProp) RDKit::RDProps::setProp<int>;
-%template(setBoolProp) RDKit::RDProps::setProp<bool>;
-%template(setDoubleProp) RDKit::RDProps::setProp<double>;
+%extend RDKit::RDProps {
+  std::string getProp(const std::string &key) {
+    std::string res;
+    self->getProp(RDKit::internKey(key), res);
+    return res;
+  }
+  int getIntProp(const std::string &key) {
+    return self->getProp<int>(RDKit::internKey(key));
+  }
+  bool getBoolProp(const std::string &key) {
+    return self->getProp<bool>(RDKit::internKey(key));
+  }
+  double getDoubleProp(const std::string &key) {
+    return self->getProp<double>(RDKit::internKey(key));
+  }
+  void setProp(const std::string &key, const std::string &val, bool computed = false) {
+    self->setProp(RDKit::internKey(key), val, computed);
+  }
+  void setIntProp(const std::string &key, int val, bool computed = false) {
+    self->setProp(RDKit::internKey(key), val, computed);
+  }
+  void setBoolProp(const std::string &key, bool val, bool computed = false) {
+    self->setProp(RDKit::internKey(key), val, computed);
+  }
+  void setDoubleProp(const std::string &key, double val, bool computed = false) {
+    self->setProp(RDKit::internKey(key), val, computed);
+  }
+  bool hasProp(const std::string &key) {
+    return self->hasProp(RDKit::internKey(key));
+  }
+  void clearProp(const std::string &key) {
+    self->clearProp(RDKit::internKey(key));
+  }
+}
 

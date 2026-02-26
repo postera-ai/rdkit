@@ -149,7 +149,7 @@ RDNumeric::DoubleVector *generateErGFingerprintForReducedGraph(
   for (ROMol::ConstAtomIterator atIt = mol.beginAtoms(); atIt != mol.endAtoms();
        ++atIt) {
     const std::vector<int> &tv =
-        (*atIt)->getProp<std::vector<int>>("_ErGAtomTypes");
+        (*atIt)->getProp<std::vector<int>>(internKey("_ErGAtomTypes"));
     tvs.push_back(tv);
   }
 
@@ -221,7 +221,7 @@ ROMol *generateMolExtendedReducedGraph(
         tv.push_back(i);
       }
     }
-    (*atIt)->setProp("_ErGAtomTypes", tv);
+    (*atIt)->setProp(internKey("_ErGAtomTypes"), tv);
   }
 
   // start by adding dummies at the ring centroids
@@ -243,7 +243,7 @@ ROMol *generateMolExtendedReducedGraph(
       } else {
         tv.push_back(aliphaticFlag);
       }
-      res->getAtomWithIdx(nIdx)->setProp("_ErGAtomTypes", tv);
+      res->getAtomWithIdx(nIdx)->setProp(internKey("_ErGAtomTypes"), tv);
     }
   }
 
@@ -253,7 +253,7 @@ ROMol *generateMolExtendedReducedGraph(
     if (mol.getRingInfo()->numAtomRings(i) &&
         mol.getAtomWithIdx(i)->getDegree() == 2 &&
         res->getAtomWithIdx(i)
-            ->getProp<std::vector<int>>("_ErGAtomTypes")
+            ->getProp<std::vector<int>>(internKey("_ErGAtomTypes"))
             .empty()) {
       res->removeAtom(i);
     }

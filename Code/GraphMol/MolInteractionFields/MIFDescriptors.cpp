@@ -220,7 +220,7 @@ Coulomb::Coulomb(const RDKit::ROMol &mol, int confId, double probeCharge,
   d_pos.reserve(3 * d_nAtoms);
   RDKit::Conformer conf = mol.getConformer(confId);
   for (unsigned int i = 0; i < d_nAtoms; ++i) {
-    d_charges.push_back(mol.getAtomWithIdx(i)->getProp<double>(prop));
+    d_charges.push_back(mol.getAtomWithIdx(i)->getProp<double>(RDKit::internKey(prop)));
     const RDGeom::Point3D &pt = conf.getAtomPos(i);
     d_pos.push_back(pt.x);
     d_pos.push_back(pt.y);
@@ -364,7 +364,7 @@ CoulombDielectric::CoulombDielectric(const RDKit::ROMol &mol, int confId,
 
   RDKit::Conformer conf = mol.getConformer(confId);
   for (unsigned int i = 0; i < d_nAtoms; ++i) {
-    d_charges.push_back(mol.getAtomWithIdx(i)->getProp<double>(prop));
+    d_charges.push_back(mol.getAtomWithIdx(i)->getProp<double>(RDKit::internKey(prop)));
     const RDGeom::Point3D &pt = conf.getAtomPos(i);
     d_pos.push_back(pt.x);
     d_pos.push_back(pt.y);

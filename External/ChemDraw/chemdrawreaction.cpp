@@ -55,7 +55,7 @@ void make_query_atoms(RWMol &mol) {
 
 void add_template(const std::string &prop, std::map<int, ROMOL_SPTR> &templates,
                   std::unique_ptr<RWMol> &mol) {
-  auto reactant_idx = mol->getProp<int>(prop);
+  auto reactant_idx = mol->getProp<int>(internKey(prop));
   if (templates.find(reactant_idx) != templates.end()) {
     templates[reactant_idx] =
         ROMOL_SPTR(combineMols(*templates[reactant_idx], *mol));
@@ -86,8 +86,8 @@ ChemDrawDataStreamToChemicalReactions(std::istream &inStream, bool sanitize,
   for (size_t i = 0; i < mols.size(); ++i) {
     unsigned int step = 0;
     unsigned int scheme = 0;
-    if (mols[i]->getPropIfPresent(CDX_SCHEME_ID, scheme) &&
-        mols[i]->getPropIfPresent(CDX_STEP_ID, step)) {
+    if (mols[i]->getPropIfPresent(internKey(CDX_SCHEME_ID), scheme) &&
+        mols[i]->getPropIfPresent(internKey(CDX_STEP_ID), step)) {
       auto schemestep = std::pair<unsigned int, unsigned int>(scheme, step);
       schemes[schemestep].push_back(i);
     }
@@ -103,15 +103,15 @@ ChemDrawDataStreamToChemicalReactions(std::istream &inStream, bool sanitize,
       CHECK_INVARIANT(
           used.find(idx) == used.end(),
           "Fragment used in twice in one or more reactions, this shouldn't happen");
-      if (mols[idx]->hasProp(CDX_REAGENT_ID)) {
+      if (mols[idx]->hasProp(internKey(CDX_REAGENT_ID))) {
         used.insert(idx);
         make_query_atoms(*mols[idx]);
         add_template(CDX_REAGENT_ID, reactant_templates, mols[idx]);
-      } else if (mols[idx]->hasProp(CDX_AGENT_ID)) {
+      } else if (mols[idx]->hasProp(internKey(CDX_AGENT_ID))) {
         used.insert(idx);
         make_query_atoms(*mols[idx]);
         add_template(CDX_AGENT_ID, agent_templates, mols[idx]);
-      } else if (mols[idx]->hasProp(CDX_PRODUCT_ID)) {
+      } else if (mols[idx]->hasProp(internKey(CDX_PRODUCT_ID))) {
         used.insert(idx);
         make_query_atoms(*mols[idx]);
         add_template(CDX_PRODUCT_ID, product_templates, mols[idx]);

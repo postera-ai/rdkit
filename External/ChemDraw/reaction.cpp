@@ -66,9 +66,9 @@ void ReactionStepInfo::set_reaction_data(
         continue;
       }
       auto &mol = mols[fragment->second];
-      mol->setProp(CDX_SCHEME_ID, scheme_id);
-      mol->setProp(CDX_STEP_ID, step_id);
-      mol->setProp(prop, reagent_idx);
+      mol->setProp(internKey(CDX_SCHEME_ID), scheme_id);
+      mol->setProp(internKey(CDX_STEP_ID), step_id);
+      mol->setProp(internKey(prop), reagent_idx);
     }
     reagent_idx += 1;
   }
@@ -147,10 +147,10 @@ void ReactionInfo::set_reaction_steps(
     std::map<unsigned int, Atom *> atoms;
     size_t mol_idx = 0;
     for (auto &mol : mols) {
-      auto idx = mol->getProp<unsigned int>(CDX_FRAG_ID);
+      auto idx = mol->getProp<unsigned int>(internKey(CDX_FRAG_ID));
       fragments[idx] = mol_idx++;
       for (auto &atom : mol->atoms()) {
-        auto idx = atom->getProp<unsigned int>(CDX_ATOM_ID);
+        auto idx = atom->getProp<unsigned int>(internKey(CDX_ATOM_ID));
         atoms[idx] = atom;
       }
     }

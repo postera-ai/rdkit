@@ -84,7 +84,7 @@ std::string describeQueryHelper(const RDKit::Atom::QUERYATOM_QUERY *q, unsigned 
 %extend RDKit::Atom {
   std::string getProp(const std::string key){
     std::string res;
-    ($self)->getProp(key, res);
+    ($self)->getProp(RDKit::internKey(key), res);
     return res;
   }
 

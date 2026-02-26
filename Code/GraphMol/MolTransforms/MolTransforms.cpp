@@ -207,27 +207,27 @@ bool computePrincipalAxesAndMoments(const RDKit::Conformer &conf,
   const char *momentsPropName =
       ignoreHs ? "_principalMoments_noH" : "_principalMoments";
   const ROMol &mol = conf.getOwningMol();
-  if (!weights && !force && mol.hasProp(axesPropName) &&
-      mol.hasProp(momentsPropName)) {
-    mol.getProp(axesPropName, axes);
-    mol.getProp(momentsPropName, moments);
-    return true;
-  }
-  auto origin = computeCentroid(conf, ignoreHs, weights);
+   if (!weights && !force && mol.hasProp(internKey(axesPropName)) &&
+       mol.hasProp(internKey(momentsPropName))) {
+     mol.getProp(internKey(axesPropName), axes);
+     mol.getProp(internKey(momentsPropName), moments);
+     return true;
+   }
+   auto origin = computeCentroid(conf, ignoreHs, weights);
 
-  double sumXX, sumXY, sumXZ, sumYY, sumYZ, sumZZ;
-  computeInertiaTerms(conf, origin, sumXX, sumXY, sumXZ, sumYY, sumYZ, sumZZ,
-                      ignoreHs, weights);
+   double sumXX, sumXY, sumXZ, sumYY, sumYZ, sumZZ;
+   computeInertiaTerms(conf, origin, sumXX, sumXY, sumXZ, sumYY, sumYZ, sumZZ,
+                       ignoreHs, weights);
 
-  if (!getEigenValEigenVectHelper(axes, moments, sumXX, sumXY, sumXZ, sumYY,
-                                  sumYZ, sumZZ)) {
-    return false;
-  }
+   if (!getEigenValEigenVectHelper(axes, moments, sumXX, sumXY, sumXZ, sumYY,
+                                   sumYZ, sumZZ)) {
+     return false;
+   }
 
-  if (!weights) {
-    mol.setProp(axesPropName, axes, true);
-    mol.setProp(momentsPropName, moments, true);
-  }
+   if (!weights) {
+     mol.setProp(internKey(axesPropName), axes, true);
+     mol.setProp(internKey(momentsPropName), moments, true);
+   }
   return true;
 }
 
@@ -240,20 +240,18 @@ bool computePrincipalAxesAndMomentsFromGyrationMatrix(
   const char *momentsPropName =
       ignoreHs ? "_principalMoments_noH_cov" : "_principalMoments_cov";
   const ROMol &mol = conf.getOwningMol();
-  if (!weights && !force && mol.hasProp(axesPropName) &&
-      mol.hasProp(momentsPropName)) {
-    mol.getProp(axesPropName, axes);
-    mol.getProp(momentsPropName, moments);
+  if (!weights && !force && mol.hasProp(internKey(axesPropName)) &&
+      mol.hasProp(internKey(momentsPropName))) {
+    mol.getProp(internKey(axesPropName), axes);
+    mol.getProp(internKey(momentsPropName), moments);
     return true;
   }
   auto origin = computeCentroid(conf, ignoreHs, weights);
-  // Note that this may not return a right-handed axis.
   bool res = getEigenValEigenVectFromCovMat(conf, axes, moments, origin,
-                                            ignoreHs, true, weights);
-
+                                             ignoreHs, true, weights);
   if (res && !weights) {
-    conf.getOwningMol().setProp(axesPropName, axes, true);
-    conf.getOwningMol().setProp(momentsPropName, moments, true);
+    conf.getOwningMol().setProp(internKey(axesPropName), axes, true);
+    conf.getOwningMol().setProp(internKey(momentsPropName), moments, true);
   }
   return res;
 }

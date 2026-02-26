@@ -184,13 +184,13 @@ void RascalResult::rebuildFromFrags(
       std::max(d_mol1->getNumBonds(), d_mol2->getNumBonds()));
   for (const auto &f : frags) {
     for (auto atom : f->atoms()) {
-      if (atom->hasProp("ORIG_INDEX")) {
-        fragAtoms.set(atom->getProp<int>("ORIG_INDEX"));
+      if (atom->hasProp(internKey("ORIG_INDEX"))) {
+        fragAtoms.set(atom->getProp<int>(internKey("ORIG_INDEX")));
       }
     }
     for (auto bond : f->bonds()) {
-      if (bond->hasProp("ORIG_INDEX")) {
-        fragBonds.set(bond->getProp<int>("ORIG_INDEX"));
+      if (bond->hasProp(internKey("ORIG_INDEX"))) {
+        fragBonds.set(bond->getProp<int>(internKey("ORIG_INDEX")));
       }
     }
   }
@@ -394,9 +394,9 @@ void RascalResult::applyMaxFragSep() {
                          const double *pathMatrix, int num_atoms) -> double {
     int minDist = std::numeric_limits<int>::max();
     for (auto at1 : frag1->atoms()) {
-      int at1Idx = at1->getProp<int>("ORIG_INDEX");
+      int at1Idx = at1->getProp<int>(internKey("ORIG_INDEX"));
       for (auto at2 : frag2->atoms()) {
-        int at2Idx = at2->getProp<int>("ORIG_INDEX");
+        int at2Idx = at2->getProp<int>(internKey("ORIG_INDEX"));
         int dist = std::nearbyint(pathMatrix[at1Idx * num_atoms + at2Idx]);
         if (dist < minDist) {
           minDist = dist;
@@ -448,7 +448,7 @@ void RascalResult::applyMaxFragSep() {
         continue;
       }
       for (auto b : frag->bonds()) {
-        int b_idx = b->getProp<int>("ORIG_INDEX");
+        int b_idx = b->getProp<int>(internKey("ORIG_INDEX"));
         for (auto &bm : d_bondMatches) {
           if (b_idx == bm.first) {
             new_bond_matches.push_back(bm);
@@ -465,7 +465,7 @@ void RascalResult::applyMaxFragSep() {
         continue;
       }
       for (auto a : frag->atoms()) {
-        int a_idx = a->getProp<int>("ORIG_INDEX");
+        int a_idx = a->getProp<int>(internKey("ORIG_INDEX"));
         for (auto &am : d_atomMatches) {
           if (a_idx == am.first) {
             new_atom_matches.push_back(am);
@@ -514,14 +514,14 @@ RDKit::ROMol *RascalResult::makeMolFrags(int molNum) const {
     if (!ainClique[a->getIdx()]) {
       molFrags->removeAtom(a);
     } else {
-      a->setProp<int>("ORIG_INDEX", a->getIdx());
+      a->setProp<int>(internKey("ORIG_INDEX"), a->getIdx());
     }
   }
   for (auto &b : molFrags->bonds()) {
     if (!binClique[b->getIdx()]) {
       molFrags->removeBond(b->getBeginAtomIdx(), b->getEndAtomIdx());
     } else {
-      b->setProp<int>("ORIG_INDEX", b->getIdx());
+      b->setProp<int>(internKey("ORIG_INDEX"), b->getIdx());
     }
   }
   molFrags->commitBatchEdit();

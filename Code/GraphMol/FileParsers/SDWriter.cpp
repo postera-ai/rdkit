@@ -85,7 +85,7 @@ void _writePropToStream(std::ostream *dp_ostream, const ROMol &mol,
   // catable to a string
   std::string pval;
   try {
-    mol.getProp(name, pval);
+    mol.getProp(internKey(name), pval);
   } catch (std::bad_any_cast &) {
     return;
   }
@@ -130,7 +130,7 @@ void _MolToSDStream(std::ostream *dp_ostream, const ROMol &mol, int confId,
     // check if we have any properties the user specified to write out
     // in which loop over them and write them out
     for (pi = props->begin(); pi != props->end(); pi++) {
-      if (mol.hasProp(*pi)) {
+      if (mol.hasProp(internKey(*pi))) {
         _writePropToStream(dp_ostream, mol, (*pi), d_molid);
       }
     }

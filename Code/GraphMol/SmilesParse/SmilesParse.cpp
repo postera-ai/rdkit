@@ -403,7 +403,7 @@ void handleCXPartAndName(RWMol *res, const T &params, const std::string &cxPart,
           throw;
         }
       }
-      res->setProp("_CXSMILES_Data", std::string(cxPart.cbegin(), pos));
+      res->setProp(internKey("_CXSMILES_Data"), std::string(cxPart.cbegin(), pos));
     } else if (params.strictCXSMILES && !params.parseName &&
                pos != cxPart.cend()) {
       throw RDKit::SmilesParseException(
@@ -457,10 +457,10 @@ std::unique_ptr<RWMol> MolFromSmiles(const std::string &smiles,
     }
   }
 
-  if (res->hasProp(SmilesParseOps::detail::_needsDetectAtomStereo)) {
+  if (res->hasProp(internKey(SmilesParseOps::detail::_needsDetectAtomStereo))) {
     // we encountered a wedged bond in the CXSMILES,
     // these need to be handled the same way they were in mol files
-    res->clearProp(SmilesParseOps::detail::_needsDetectAtomStereo);
+    res->clearProp(internKey(SmilesParseOps::detail::_needsDetectAtomStereo));
 
     if (conf) {
       MolOps::assignChiralTypesFromBondDirs(*res, conf->getId());
@@ -491,7 +491,7 @@ std::unique_ptr<RWMol> MolFromSmiles(const std::string &smiles,
       MolOps::sanitizeMol(*res);
     }
 
-    if (res->hasProp(SmilesParseOps::detail::_needsDetectBondStereo)) {
+    if (res->hasProp(internKey(SmilesParseOps::detail::_needsDetectBondStereo))) {
       // we encountered either wiggly bond in the CXSMILES,
       // these need to be handled the same way they were in mol files
       if (conf || conf3d) {
@@ -499,7 +499,7 @@ std::unique_ptr<RWMol> MolFromSmiles(const std::string &smiles,
       }
       MolOps::setDoubleBondNeighborDirections(*res, conf ? conf : conf3d);
     }
-    res->clearProp(SmilesParseOps::detail::_needsDetectBondStereo);
+    res->clearProp(internKey(SmilesParseOps::detail::_needsDetectBondStereo));
     // figure out stereochemistry:
     bool cleanIt = true, force = true, flagPossible = true;
     MolOps::assignStereochemistry(*res, cleanIt, force, flagPossible);

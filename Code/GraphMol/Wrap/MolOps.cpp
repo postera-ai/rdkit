@@ -1038,9 +1038,9 @@ python::tuple hasQueryHsHelper(const ROMol &m) {
 //  we need a helper function for testing that we can read them
 //  correctly.
 void _testSetProps(RDProps &props, const std::string &prefix) {
-  props.setProp<bool>(prefix + "bool", true);
-  props.setProp<unsigned int>(prefix + "uint", -1);
-  props.setProp<double>(prefix + "double", 3.14159);
+  props.setProp<bool>(internKey(prefix + "bool"), true);
+  props.setProp<unsigned int>(internKey(prefix + "uint"), -1);
+  props.setProp<double>(internKey(prefix + "double"), 3.14159);
 
   std::vector<int> svint;
   svint.push_back(0);
@@ -1048,7 +1048,7 @@ void _testSetProps(RDProps &props, const std::string &prefix) {
   svint.push_back(2);
   svint.push_back(-2);
 
-  props.setProp<std::vector<int>>(prefix + "svint", svint);
+  props.setProp<std::vector<int>>(internKey(prefix + "svint"), svint);
 
   std::vector<unsigned int> svuint;
   svuint.push_back(0);
@@ -1056,19 +1056,19 @@ void _testSetProps(RDProps &props, const std::string &prefix) {
   svuint.push_back(2);
   svuint.push_back(-2);
 
-  props.setProp<std::vector<unsigned int>>(prefix + "svuint", svuint);
+  props.setProp<std::vector<unsigned int>>(internKey(prefix + "svuint"), svuint);
 
   std::vector<double> svdouble;
   svdouble.push_back(0.);
   svdouble.push_back(1.);
   svdouble.push_back(2.);
-  props.setProp<std::vector<double>>(prefix + "svdouble", svdouble);
+  props.setProp<std::vector<double>>(internKey(prefix + "svdouble"), svdouble);
 
   std::vector<std::string> svstring;
   svstring.push_back("The");
   svstring.push_back("RDKit");
 
-  props.setProp<std::vector<std::string>>(prefix + "svstring", svstring);
+  props.setProp<std::vector<std::string>>(internKey(prefix + "svstring"), svstring);
 }
 
 void testSetProps(ROMol &mol) {

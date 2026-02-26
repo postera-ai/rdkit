@@ -41,6 +41,7 @@
 
 #include <RDGeneral/RDLog.h>
 using namespace std;
+using RDKit::internKey;
 
 void test1() {
   RDKit::RWMol *mol;
@@ -295,13 +296,13 @@ void test3() {
   mol = RDKit::SLNToMol(sln);
   TEST_ASSERT(mol);
   TEST_ASSERT(mol->getNumAtoms() == 1);
-  TEST_ASSERT(mol->getAtomWithIdx(0)->hasProp("foo"));
-  mol->getAtomWithIdx(0)->getProp("foo", pval);
+  TEST_ASSERT(mol->getAtomWithIdx(0)->hasProp(internKey("foo")));
+  mol->getAtomWithIdx(0)->getProp(internKey("foo"), pval);
   TEST_ASSERT(pval == "");
-  TEST_ASSERT(mol->getAtomWithIdx(0)->hasProp("bar"));
-  mol->getAtomWithIdx(0)->getProp("bar", pval);
+  TEST_ASSERT(mol->getAtomWithIdx(0)->hasProp(internKey("bar")));
+  mol->getAtomWithIdx(0)->getProp(internKey("bar"), pval);
   TEST_ASSERT(pval == "baz");
-  TEST_ASSERT(!mol->getAtomWithIdx(0)->hasProp("baz"));
+  TEST_ASSERT(!mol->getAtomWithIdx(0)->hasProp(internKey("baz")));
 
   delete mol;
   sln = "H[I=2]-C(-H[I=2])(F)F";
@@ -599,7 +600,7 @@ void test6() {
   patt = RDKit::SLNQueryToMol(sln);
   TEST_ASSERT(patt);
   TEST_ASSERT(patt->getNumAtoms() == 1);
-  TEST_ASSERT(!patt->getAtomWithIdx(0)->hasProp("rbc"));
+  TEST_ASSERT(!patt->getAtomWithIdx(0)->hasProp(internKey("rbc")));
 
   smi = "C1CC1";
   mol = RDKit::SmilesToMol(smi);
@@ -660,7 +661,7 @@ void test6() {
   patt = RDKit::SLNQueryToMol(sln);
   TEST_ASSERT(patt);
   TEST_ASSERT(patt->getNumAtoms() == 1);
-  TEST_ASSERT(!patt->getAtomWithIdx(0)->hasProp("rbc"));
+  TEST_ASSERT(!patt->getAtomWithIdx(0)->hasProp(internKey("rbc")));
 
   delete mol;
   smi = "C1CC1C";
@@ -1564,7 +1565,7 @@ void test15() {
     sln = "CH4<blah>";
     mol = RDKit::SLNToMol(sln);
     TEST_ASSERT(mol);
-    TEST_ASSERT(mol->hasProp("blah"));
+    TEST_ASSERT(mol->hasProp(internKey("blah")));
     delete mol;
   }
 
@@ -1583,10 +1584,10 @@ void test15() {
     sln = "CH4<blah;foo=\"1\">";
     mol = RDKit::SLNToMol(sln);
     TEST_ASSERT(mol);
-    TEST_ASSERT(mol->hasProp("blah"));
-    TEST_ASSERT(mol->hasProp("foo"));
+    TEST_ASSERT(mol->hasProp(internKey("blah")));
+    TEST_ASSERT(mol->hasProp(internKey("foo")));
     std::string sval;
-    mol->getProp("foo", sval);
+    mol->getProp(internKey("foo"), sval);
     TEST_ASSERT(sval == "1");
     delete mol;
   }
@@ -1594,10 +1595,10 @@ void test15() {
     sln = "CH4<blah;foo=1>";
     mol = RDKit::SLNToMol(sln);
     TEST_ASSERT(mol);
-    TEST_ASSERT(mol->hasProp("blah"));
-    TEST_ASSERT(mol->hasProp("foo"));
+    TEST_ASSERT(mol->hasProp(internKey("blah")));
+    TEST_ASSERT(mol->hasProp(internKey("foo")));
     std::string sval;
-    mol->getProp("foo", sval);
+    mol->getProp(internKey("foo"), sval);
     TEST_ASSERT(sval == "1");
     delete mol;
   }
@@ -1607,15 +1608,15 @@ void test15() {
         "of special,characters all at once.>";
     mol = RDKit::SLNToMol(sln);
     TEST_ASSERT(mol);
-    TEST_ASSERT(mol->hasProp("blah"));
+    TEST_ASSERT(mol->hasProp(internKey("blah")));
     std::string sval;
     mol->getProp(RDKit::common_properties::_Name, sval);
     TEST_ASSERT(sval == "methane");
-    mol->getProp("coord2d", sval);
+    mol->getProp(internKey("coord2d"), sval);
     TEST_ASSERT(sval == "(1,0)");
-    TEST_ASSERT(mol->hasProp("too.small"));
-    TEST_ASSERT(mol->hasProp("test"));
-    mol->getProp("test", sval);
+    TEST_ASSERT(mol->hasProp(internKey("too.small")));
+    TEST_ASSERT(mol->hasProp(internKey("test")));
+    mol->getProp(internKey("test"), sval);
     TEST_ASSERT(sval == "lots and-lots of special,characters all at once.");
     delete mol;
   }
@@ -1626,12 +1627,12 @@ void test15() {
     sln = "CH4<foo=1><bar=2>";
     mol = RDKit::SLNToMol(sln);
     TEST_ASSERT(mol);
-    TEST_ASSERT(mol->hasProp("foo"));
-    TEST_ASSERT(mol->hasProp("bar"));
+    TEST_ASSERT(mol->hasProp(internKey("foo")));
+    TEST_ASSERT(mol->hasProp(internKey("bar")));
     std::string sval;
-    mol->getProp("foo", sval);
+    mol->getProp(internKey("foo"), sval);
     TEST_ASSERT(sval == "1");
-    mol->getProp("bar", sval);
+    mol->getProp(internKey("bar"), sval);
     TEST_ASSERT(sval == "2");
     delete mol;
   }

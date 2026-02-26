@@ -482,7 +482,7 @@ void testAddConformersFromTrajectory() {
     std::stringstream ss;
     ss << std::fixed << std::setprecision(4)
        << traj.getSnapshot(nConf).getEnergy();
-    mol->setProp("ENERGY", ss.str(), false);
+    mol->setProp(internKey("ENERGY"), ss.str(), false);
     w.write(*mol, nConf);
   }
   w.close();

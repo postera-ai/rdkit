@@ -166,13 +166,13 @@ TEST_CASE("substructure parameters", "[substruct]") {
   SECTION("bond properties") {
     std::unique_ptr<RWMol> m(SmilesToMol("CCCCCCCCC"));
     std::unique_ptr<RWMol> m_with_prop(SmilesToMol("CCCCCCCCC"));
-    m_with_prop->getBondWithIdx(0)->setProp("test_prop", "1");
+    m_with_prop->getBondWithIdx(0)->setProp(internKey("test_prop"), "1");
 
     std::unique_ptr<RWMol> q(SmilesToMol("CCC"));
     std::unique_ptr<RWMol> q_with_prop(SmilesToMol("CCC"));
     std::unique_ptr<RWMol> q_with_prop2(SmilesToMol("CCC"));
-    q_with_prop->getBondWithIdx(0)->setProp("test_prop", "1");
-    q_with_prop2->getBondWithIdx(0)->setProp("test_prop", "2");
+    q_with_prop->getBondWithIdx(0)->setProp(internKey("test_prop"), "1");
+    q_with_prop2->getBondWithIdx(0)->setProp(internKey("test_prop"), "2");
 
     SubstructMatchParameters ps;
     ps.bondProperties = {"test_prop"};
@@ -183,8 +183,8 @@ TEST_CASE("substructure parameters", "[substruct]") {
     CHECK(SubstructMatch(*m, *q_with_prop, ps).size() == 0);
 
     // now check with bond and atom properties
-    m_with_prop->getAtomWithIdx(0)->setProp("test_prop", "1");
-    q_with_prop->getAtomWithIdx(0)->setProp("test_prop", "1");
+    m_with_prop->getAtomWithIdx(0)->setProp(internKey("test_prop"), "1");
+    q_with_prop->getAtomWithIdx(0)->setProp(internKey("test_prop"), "1");
 
     ps.atomProperties = {"test_prop"};
     CHECK(SubstructMatch(*m_with_prop, *q_with_prop, ps).size() == 1);
@@ -195,8 +195,8 @@ TEST_CASE("substructure parameters", "[substruct]") {
     // Currently, a property set as an int will match to a property
     // set as a different type if they cast to the same value
     // TODO: Ensure property types are the same in substructure matching
-    q_with_prop->getBondWithIdx(0)->clearProp("test_prop");
-    q_with_prop->getBondWithIdx(0)->setProp<int>("test_prop", 1);
+    q_with_prop->getBondWithIdx(0)->clearProp(internKey("test_prop"));
+    q_with_prop->getBondWithIdx(0)->setProp<int>(internKey("test_prop"), 1);
     CHECK(SubstructMatch(*m_with_prop, *q_with_prop, ps).size() == 1);
   }
 }
@@ -567,8 +567,8 @@ TEST_CASE("pickling HasPropWithValue queries") {
     CHECK(SubstructMatch(*target, *mol, ps).size() == 0);
     CHECK(SubstructMatch(*target, mol2, ps).size() == 0);
     CHECK(SubstructMatch(*target, mol3, ps).size() == 0);
-    target->getAtomWithIdx(0)->setProp<int>("foo", 2);
-    target->getBondWithIdx(0)->setProp<int>("bar", 1);
+    target->getAtomWithIdx(0)->setProp<int>(internKey("foo"), 2);
+    target->getBondWithIdx(0)->setProp<int>(internKey("bar"), 1);
     CHECK(SubstructMatch(*target, *mol, ps).size() == 1);
     CHECK(SubstructMatch(*target, mol2, ps).size() == 0);
     CHECK(SubstructMatch(*target, mol3, ps).size() == 0);
@@ -630,8 +630,8 @@ TEST_CASE("pickling HasPropWithValue queries") {
     CHECK(SubstructMatch(*target, *mol, ps).size() == 0);
     CHECK(SubstructMatch(*target, mol2, ps).size() == 0);
     CHECK(SubstructMatch(*target, mol3, ps).size() == 0);
-    target->getAtomWithIdx(0)->setProp<std::string>("foo", "asdfs");
-    target->getBondWithIdx(0)->setProp<std::string>("bar", "dsafasdf");
+    target->getAtomWithIdx(0)->setProp<std::string>(internKey("foo"), "asdfs");
+    target->getBondWithIdx(0)->setProp<std::string>(internKey("bar"), "dsafasdf");
     CHECK(SubstructMatch(*target, *mol, ps).size() == 1);
     CHECK(SubstructMatch(*target, mol2, ps).size() == 0);
     CHECK(SubstructMatch(*target, mol3, ps).size() == 0);
@@ -699,8 +699,8 @@ TEST_CASE("pickling HasPropWithValue queries") {
     CHECK(SubstructMatch(*target, mol2, ps).size() == 0);
     CHECK(SubstructMatch(*target, mol3, ps).size() == 0);
 
-    target->getAtomWithIdx(0)->setProp<ExplicitBitVect>("foo", bv);
-    target->getBondWithIdx(0)->setProp<ExplicitBitVect>("bar", bv);
+    target->getAtomWithIdx(0)->setProp<ExplicitBitVect>(internKey("foo"), bv);
+    target->getBondWithIdx(0)->setProp<ExplicitBitVect>(internKey("bar"), bv);
     CHECK(SubstructMatch(*target, *mol, ps).size() == 1);
     CHECK(SubstructMatch(*target, mol2, ps).size() == 0);
     CHECK(SubstructMatch(*target, mol3, ps).size() == 0);

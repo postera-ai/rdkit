@@ -326,7 +326,7 @@ void addSubstanceGroup(const SubstanceGroup &sg, bj::object &bjSG) {
     for (const auto &cs : sg.getCStates()) {
       bj::object bjCS;
       bjCS["bond"] = cs.bondIdx;
-      if ("SUP" == sg.getProp<std::string>("TYPE")) {
+      if ("SUP" == sg.getProp<std::string>(internKey("TYPE"))) {
         bj::array bjLoc;
         bjLoc.push_back(cs.vector.x);
         bjLoc.push_back(cs.vector.y);

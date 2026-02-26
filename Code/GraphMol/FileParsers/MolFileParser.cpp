@@ -470,8 +470,7 @@ void ParsePXALine(RWMol *mol, const std::string &text, unsigned int line) {
     auto atIdx =
         FileParserUtils::stripSpacesAndCast<unsigned int>(text.substr(pos, 3));
     pos += 3;
-    mol->getAtomWithIdx(atIdx - 1)->setProp(
-        "_MolFile_PXA", text.substr(pos, text.length() - pos));
+    mol->getAtomWithIdx(atIdx - 1)->setProp(internKey("_MolFile_PXA"), text.substr(pos, text.length() - pos));
   } catch (boost::bad_lexical_cast &) {
     std::ostringstream errout;
     errout << "Cannot convert '" << text.substr(pos, 3) << "' to int on line "
@@ -808,7 +807,7 @@ void ParseHYDLine(RWMol *mol, const std::string &text, unsigned int line) {
         throw FileParseException(errout.str());
       } else {
         if (val >= 0) {
-          atom->setProp("_ZBO_H", true);
+          atom->setProp(internKey("_ZBO_H"), true);
           atom->setNumExplicitHs(val);
         }
       }
@@ -1820,7 +1819,7 @@ Bond *ParseMolFileBondLine(const std::string_view text, unsigned int line) {
   if (text.size() >= 21 && text.substr(18, 3) != "  0") {
     try {
       int reactStatus = FileParserUtils::toInt(text.substr(18, 3));
-      res->setProp("molReactStatus", reactStatus);
+      res->setProp(internKey("molReactStatus"), reactStatus);
     } catch (boost::bad_lexical_cast &) {
       ;
     }
@@ -2067,7 +2066,7 @@ bool ParseMolBlockProperties(std::istream *inStream, unsigned int &line,
     // All went well, make final updates to SGroups, and add them to Mol
     for (auto &sgroup : sGroupMap) {
       if (sgroup.second.getIsValid()) {
-        sgroup.second.setProp("DATAFIELDS", dataFieldsMap[sgroup.first]);
+        sgroup.second.setProp(internKey("DATAFIELDS"), dataFieldsMap[sgroup.first]);
         sgroup.second.setIsValid(checkAttachmentPointsAreValid(mol, sgroup));
       }
       if (sgroup.second.getIsValid()) {
@@ -2863,7 +2862,7 @@ void ParseV3000BondBlock(std::istream *inStream, unsigned int &line,
 
 void processMrvCoordinateBond(RWMol &mol, const SubstanceGroup &sg) {
   std::vector<std::string> dataFields;
-  if (sg.getPropIfPresent("DATAFIELDS", dataFields)) {
+  if (sg.getPropIfPresent(internKey("DATAFIELDS"), dataFields)) {
     if (dataFields.empty()) {
       BOOST_LOG(rdWarningLog)
           << "ignoring MRV_COORDINATE_BOND_TYPE SGroup without data fields."
@@ -2908,13 +2907,13 @@ void processMrvCoordinateBond(RWMol &mol, const SubstanceGroup &sg) {
 
 void processSMARTSQ(RWMol &mol, const SubstanceGroup &sg) {
   std::string field;
-  if (sg.getPropIfPresent("QUERYOP", field) && field != "=") {
+  if (sg.getPropIfPresent(internKey("QUERYOP"), field) && field != "=") {
     BOOST_LOG(rdWarningLog) << "unrecognized QUERYOP '" << field
                             << "' for SMARTSQ. Query ignored." << std::endl;
     return;
   }
   std::vector<std::string> dataFields;
-  if (!sg.getPropIfPresent("DATAFIELDS", dataFields) || dataFields.empty()) {
+  if (!sg.getPropIfPresent(internKey("DATAFIELDS"), dataFields) || dataFields.empty()) {
     BOOST_LOG(rdWarningLog)
         << "empty FIELDDATA for SMARTSQ. Query ignored." << std::endl;
     return;
@@ -2968,7 +2967,7 @@ void processSMARTSQ(RWMol &mol, const SubstanceGroup &sg) {
 
 void processMrvImplicitH(RWMol &mol, const SubstanceGroup &sg) {
   std::vector<std::string> dataFields;
-  if (sg.getPropIfPresent("DATAFIELDS", dataFields)) {
+  if (sg.getPropIfPresent(internKey("DATAFIELDS"), dataFields)) {
     for (const auto &df : dataFields) {
       if (df.substr(0, 6) == "IMPL_H") {
         auto val = FileParserUtils::toInt(df.substr(6));
@@ -3017,7 +3016,7 @@ void processZBO(RWMol &mol, const SubstanceGroup &sg) {
 void processZCH(RWMol &mol, const SubstanceGroup &sg) {
   RDUNUSED_PARAM(mol);
   std::vector<std::string> dataFields;
-  if (sg.getPropIfPresent("DATAFIELDS", dataFields)) {
+  if (sg.getPropIfPresent(internKey("DATAFIELDS"), dataFields)) {
     if (dataFields.empty()) {
       BOOST_LOG(rdWarningLog)
           << "ignoring ZCHG SGroup without data fields." << std::endl;
@@ -3049,7 +3048,7 @@ void processZCH(RWMol &mol, const SubstanceGroup &sg) {
 }
 void processHYD(RWMol &mol, const SubstanceGroup &sg) {
   std::vector<std::string> dataFields;
-  if (sg.getPropIfPresent("DATAFIELDS", dataFields)) {
+  if (sg.getPropIfPresent(internKey("DATAFIELDS"), dataFields)) {
     if (dataFields.empty()) {
       BOOST_LOG(rdWarningLog)
           << "ignoring HYD SGroup without data fields." << std::endl;
@@ -3074,7 +3073,7 @@ void processHYD(RWMol &mol, const SubstanceGroup &sg) {
         if (!splitLine[i].empty()) {
           val = FileParserUtils::toInt(splitLine[i]);
         }
-        atom->setProp("_ZBO_H", true);
+        atom->setProp(internKey("_ZBO_H"), true);
         atom->setNumExplicitHs(val);
       }
     }
@@ -3087,9 +3086,9 @@ void processSGroups(RWMol *mol) {
   std::vector<unsigned int> sgsToRemove;
   unsigned int sgIdx = 0;
   for (auto &sg : getSubstanceGroups(*mol)) {
-    if (sg.getProp<std::string>("TYPE") == "DAT") {
+    if (sg.getProp<std::string>(internKey("TYPE")) == "DAT") {
       std::string field;
-      if (sg.getPropIfPresent("FIELDNAME", field)) {
+      if (sg.getPropIfPresent(internKey("FIELDNAME"), field)) {
         if (field == "MRV_COORDINATE_BOND_TYPE") {
           // V2000 support for coordinate bonds
           processMrvCoordinateBond(*mol, sg);
@@ -3118,7 +3117,7 @@ void processSGroups(RWMol *mol) {
           continue;
         }
       }
-      if (sg.getPropIfPresent("QUERYTYPE", field) &&
+      if (sg.getPropIfPresent(internKey("QUERYTYPE"), field) &&
           (field == "SMARTSQ" || field == "SQ")) {
         processSMARTSQ(*mol, sg);
         sgsToRemove.push_back(sgIdx);
@@ -3170,7 +3169,7 @@ void ProcessMolProps(RWMol *mol) {
       }
     }
     if (atom->getPropIfPresent(common_properties::molTotValence, ival) &&
-        ival != 0 && !atom->hasProp("_ZBO_H")) {
+        ival != 0 && !atom->hasProp(internKey("_ZBO_H"))) {
       atom->setNoImplicit(true);
       if (ival == 15     // V2000
           || ival == -1  // v3000
@@ -3547,7 +3546,7 @@ std::unique_ptr<RWMol> MolFromMolDataStream(std::istream &inStream,
   // info
   line++;
   tempStr = getLine(inStream);
-  res->setProp("_MolFileInfo", tempStr);
+  res->setProp(internKey("_MolFileInfo"), tempStr);
   if (tempStr.length() >= 22) {
     std::string dimLabel = tempStr.substr(20, 2);
     // Unless labelled as 3D we assume 2D
@@ -3558,7 +3557,7 @@ std::unique_ptr<RWMol> MolFromMolDataStream(std::istream &inStream,
   // comments
   line++;
   tempStr = getLine(inStream);
-  res->setProp("_MolFileComments", tempStr);
+  res->setProp(internKey("_MolFileComments"), tempStr);
 
   unsigned int nAtoms = 0, nBonds = 0, nLists = 0, chiralFlag = 0, nsText = 0,
                nRxnComponents = 0;

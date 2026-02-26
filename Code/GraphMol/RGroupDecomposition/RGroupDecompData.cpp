@@ -231,18 +231,18 @@ std::vector<RGroupMatch> RGroupDecompData::GetCurrentBestPermutation() const {
   for (auto &position : results) {
     for (auto atom : position.matchedCore->atoms()) {
       if (int atomLabel; atom->getAtomicNum() == 0 &&
-                         atom->getPropIfPresent(RLABEL, atomLabel)) {
+                         atom->getPropIfPresent(internKey(RLABEL), atomLabel)) {
         if (atomLabel > 0 && !params.removeAllHydrogenRGroupsAndLabels) {
           continue;
         }
         if (labelsToErase.find(atomLabel) != labelsToErase.end()) {
           atom->setAtomicNum(1);
-          atom->clearProp(RLABEL);
-          if (atom->hasProp(RLABEL_TYPE)) {
-            atom->clearProp(RLABEL_TYPE);
+          atom->clearProp(internKey(RLABEL));
+          if (atom->hasProp(internKey(RLABEL_TYPE))) {
+            atom->clearProp(internKey(RLABEL_TYPE));
           }
-          if (atom->hasProp(UNLABELED_CORE_ATTACHMENT)) {
-            atom->clearProp(UNLABELED_CORE_ATTACHMENT);
+          if (atom->hasProp(internKey(UNLABELED_CORE_ATTACHMENT))) {
+            atom->clearProp(internKey(UNLABELED_CORE_ATTACHMENT));
           }
           atom->updatePropertyCache(false);
         }
@@ -434,8 +434,8 @@ void RGroupDecompData::relabelCore(
   addAtoms(core, atomsToAdd);
   for (const auto &rlabels : atoms) {
     auto atom = rlabels.second;
-    atom->clearProp(RLABEL);
-    atom->clearProp(RLABEL_TYPE);
+    atom->clearProp(internKey(RLABEL));
+    atom->clearProp(internKey(RLABEL_TYPE));
   }
 
   // Delay removing hydrogens from core until outputCoreMolecule is called,
@@ -451,22 +451,22 @@ void RGroupDecompData::relabelRGroup(RGroupData &rgroup,
 
   RWMol &mol = *rgroup.combinedMol.get();
 
-  if (rgroup.combinedMol->hasProp(done)) {
+  if (rgroup.combinedMol->hasProp(internKey(done))) {
     rgroup.labelled = true;
     return;
   }
 
-  mol.setProp(done, true);
+  mol.setProp(internKey(done), true);
   std::vector<std::pair<Atom *, Atom *>> atomsToAdd;  // adds -R if necessary
   std::map<int, int> rLabelCoreIndexToAtomicWt;
 
   for (RWMol::AtomIterator atIt = mol.beginAtoms(); atIt != mol.endAtoms();
        ++atIt) {
     Atom *atom = *atIt;
-    if (atom->hasProp(SIDECHAIN_RLABELS)) {
+    if (atom->hasProp(internKey(SIDECHAIN_RLABELS))) {
       atom->setIsotope(0);
       const std::vector<int> &rlabels =
-          atom->getProp<std::vector<int>>(SIDECHAIN_RLABELS);
+          atom->getProp<std::vector<int>>(internKey(SIDECHAIN_RLABELS));
       // switch on atom mappings or rlabels....
 
       for (int rlabel : rlabels) {
@@ -474,10 +474,10 @@ void RGroupDecompData::relabelRGroup(RGroupData &rgroup,
         CHECK_INVARIANT(label != mappings.end(), "Unprocessed mapping");
 
         if (atom->getAtomicNum() == 0) {
-          if (!atom->hasProp(_rgroupInputDummy)) {
+          if (!atom->hasProp(internKey(_rgroupInputDummy))) {
             setRlabel(atom, label->second);
           }
-        } else if (atom->hasProp(RLABEL_CORE_INDEX)) {
+        } else if (atom->hasProp(internKey(RLABEL_CORE_INDEX))) {
           atom->setAtomicNum(0);
           setRlabel(atom, label->second);
         } else {
@@ -487,10 +487,10 @@ void RGroupDecompData::relabelRGroup(RGroupData &rgroup,
         }
       }
     }
-    if (atom->hasProp(RLABEL_CORE_INDEX)) {
+    if (atom->hasProp(internKey(RLABEL_CORE_INDEX))) {
       // convert to dummy as we don't want to collapse hydrogens onto the core
       // match
-      auto rLabelCoreIndex = atom->getProp<int>(RLABEL_CORE_INDEX);
+      auto rLabelCoreIndex = atom->getProp<int>(internKey(RLABEL_CORE_INDEX));
       rLabelCoreIndexToAtomicWt[rLabelCoreIndex] = atom->getAtomicNum();
       atom->setAtomicNum(0);
     }
@@ -510,14 +510,14 @@ void RGroupDecompData::relabelRGroup(RGroupData &rgroup,
 
   // Restore any core matches that we have set to dummy
   for (auto atom : mol.atoms()) {
-    if (atom->hasProp(RLABEL_CORE_INDEX)) {
+    if (atom->hasProp(internKey(RLABEL_CORE_INDEX))) {
       // don't need to set IsAromatic on atom - that seems to have been saved
       atom->setAtomicNum(
-          rLabelCoreIndexToAtomicWt[atom->getProp<int>(RLABEL_CORE_INDEX)]);
+          rLabelCoreIndexToAtomicWt[atom->getProp<int>(internKey(RLABEL_CORE_INDEX))]);
       atom->setNoImplicit(true);
-      atom->clearProp(RLABEL_CORE_INDEX);
+      atom->clearProp(internKey(RLABEL_CORE_INDEX));
     }
-    atom->clearProp(SIDECHAIN_RLABELS);
+    atom->clearProp(internKey(SIDECHAIN_RLABELS));
   }
 
 #ifdef VERBOSE

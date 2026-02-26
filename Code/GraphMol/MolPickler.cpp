@@ -132,7 +132,7 @@ inline void unpickleExplicitProperties(std::istream &ss, RDProps &props,
       if (bprops & pr.second) {
         SAVEAS bv;
         streamRead(ss, bv, version);
-        props.setProp(pr.first, static_cast<STOREAS>(bv));
+        props.setProp(internKey(pr.first), static_cast<STOREAS>(bv));
       }
     }
   }
@@ -145,7 +145,7 @@ inline bool pickleExplicitProperties(std::ostream &ss, const RDProps &props,
   std::vector<SAVEAS> ps;
   SAVEAS bv;
   for (const auto &pr : explicitProps) {
-    if (props.getPropIfPresent(pr.first, bv)) {
+    if (props.getPropIfPresent(internKey(pr.first), bv)) {
       bprops |= pr.second;
       ps.push_back(bv);
     }
@@ -2377,7 +2377,7 @@ void MolPickler::_pickleSubstanceGroup(std::ostream &ss,
     streamWrite(ss, tmpT);
 
     // Vector -- existence depends on SubstanceGroup type
-    if ("SUP" == sgroup.getProp<std::string>("TYPE")) {
+    if ("SUP" == sgroup.getProp<std::string>(internKey("TYPE"))) {
       float tmpFloat;
       tmpFloat = static_cast<float>(cstate.vector.x);
       streamWrite(ss, tmpFloat);
@@ -2468,7 +2468,7 @@ SubstanceGroup MolPickler::_getSubstanceGroupFromPickle(std::istream &ss,
     streamRead(ss, tmpT, version);
     RDGeom::Point3D vector;
 
-    if ("SUP" == sgroup.getProp<std::string>("TYPE")) {
+    if ("SUP" == sgroup.getProp<std::string>(internKey("TYPE"))) {
       streamRead(ss, tmpFloat, version);
       vector.x = static_cast<double>(tmpFloat);
       streamRead(ss, tmpFloat, version);

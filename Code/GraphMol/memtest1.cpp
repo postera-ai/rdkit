@@ -107,43 +107,43 @@ void testProps() {
   m = SmilesToMol(smi, 0, false);
   for (ROMol::AtomIterator ai = m->beginAtoms(); ai != m->endAtoms(); ++ai) {
     unsigned int v = 1;
-    (*ai)->setProp("foo", v, true);
+    (*ai)->setProp(internKey("foo"), v, true);
   }
   m = SmilesToMol(smi, 0, false);
   for (ROMol::BondIterator ai = m->beginBonds(); ai != m->endBonds(); ++ai) {
     unsigned int v = 1;
-    (*ai)->setProp("foo", v, true);
+    (*ai)->setProp(internKey("foo"), v, true);
   }
   m = SmilesToMol(smi, 0, false);
   for (ROMol::AtomIterator ai = m->beginAtoms(); ai != m->endAtoms(); ++ai) {
     unsigned int v = 1;
-    (*ai)->setProp("foo", v, true);
-    (*ai)->setProp("bar", v, true);
+    (*ai)->setProp(internKey("foo"), v, true);
+    (*ai)->setProp(internKey("bar"), v, true);
   }
   m = SmilesToMol(smi, 0, false);
   for (ROMol::AtomIterator ai = m->beginAtoms(); ai != m->endAtoms(); ++ai) {
     unsigned int v = 1;
-    (*ai)->setProp("foo", v, true);
-    (*ai)->setProp("bar", v, true);
-    (*ai)->setProp("baz", v, true);
+    (*ai)->setProp(internKey("foo"), v, true);
+    (*ai)->setProp(internKey("bar"), v, true);
+    (*ai)->setProp(internKey("baz"), v, true);
   }
   m = SmilesToMol(smi, 0, false);
   for (ROMol::AtomIterator ai = m->beginAtoms(); ai != m->endAtoms(); ++ai) {
     unsigned int v = 1;
-    (*ai)->setProp("foo", v, false);
+    (*ai)->setProp(internKey("foo"), v, false);
   }
   m = SmilesToMol(smi, 0, false);
   for (ROMol::AtomIterator ai = m->beginAtoms(); ai != m->endAtoms(); ++ai) {
     unsigned int v = 1;
-    (*ai)->setProp("foo", v, false);
-    (*ai)->setProp("bar", v, false);
+    (*ai)->setProp(internKey("foo"), v, false);
+    (*ai)->setProp(internKey("bar"), v, false);
   }
   m = SmilesToMol(smi, 0, false);
   for (ROMol::AtomIterator ai = m->beginAtoms(); ai != m->endAtoms(); ++ai) {
     unsigned int v = 1;
-    (*ai)->setProp("foo", v, false);
-    (*ai)->setProp("bar", v, false);
-    (*ai)->setProp("baz", v, false);
+    (*ai)->setProp(internKey("foo"), v, false);
+    (*ai)->setProp(internKey("bar"), v, false);
+    (*ai)->setProp(internKey("baz"), v, false);
   }
   BOOST_LOG(rdInfoLog) << "Finished" << std::endl;
 }

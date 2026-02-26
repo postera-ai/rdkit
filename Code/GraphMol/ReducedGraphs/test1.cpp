@@ -181,7 +181,7 @@ void testCanRetrieveProp() {
       ReducedGraphs::generateMolExtendedReducedGraph(*m));
   for (const auto atom : mrg->atoms()) {
     std::vector<int> atomTypes;
-    TEST_ASSERT(atom->getPropIfPresent("_ErGAtomTypes", atomTypes));
+    TEST_ASSERT(atom->getPropIfPresent(internKey("_ErGAtomTypes"), atomTypes));
     res.push_back(atomTypes);
   }
   TEST_ASSERT(res == expected);

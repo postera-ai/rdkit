@@ -31,7 +31,7 @@ StereoisomerEnumerator::StereoisomerEnumerator(
   buildFlippers();
   // Clear unhelpful stuff out
   for (auto atom : d_mol.atoms()) {
-    atom->clearProp("_CIPCode");
+    atom->clearProp(internKey("_CIPCode"));
   }
   for (auto bond : d_mol.bonds()) {
     if (bond->getBondDir() == Bond::BondDir::EITHERDOUBLE ||
@@ -42,7 +42,7 @@ StereoisomerEnumerator::StereoisomerEnumerator(
   if (d_flippers.empty()) {
     d_totalPoss = 1;
   } else {
-    d_mol.setProp<std::string>("_MolFileChiralFlag", "1");
+    d_mol.setProp<std::string>(internKey("_MolFileChiralFlag"), "1");
     try {
       d_totalPoss = boost::numeric_cast<unsigned long>(std::pow(
           std::uint64_t(2), static_cast<std::uint64_t>(d_flippers.size())));

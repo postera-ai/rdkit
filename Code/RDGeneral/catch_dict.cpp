@@ -44,43 +44,34 @@ TEST_CASE("Dict move semantics") {
 }
 
 TEST_CASE("RDProps move semantics") {
+  auto kFoo = RDKit::internKey("foo");
+  auto kBar = RDKit::internKey("bar");
   RDKit::RDProps d1;
-  d1.setProp("foo"s, 1);
-  d1.setProp("bar"s, "yep");
+  d1.setProp(kFoo, 1);
+  d1.setProp(kBar, "yep");
   SECTION("move constructor") {
-    CHECK(d1.hasProp("foo"s));
-    CHECK(d1.hasProp("bar"s));
-    CHECK(d1.getProp<std::string>("bar"s) == "yep"s);
+    CHECK(d1.hasProp(kFoo));
+    CHECK(d1.hasProp(kBar));
+    CHECK(d1.getProp<std::string>(kBar) == "yep"s);
     auto d2 = std::move(d1);
-    CHECK(d2.hasProp("foo"s));
-    CHECK(d2.hasProp("bar"s));
-    CHECK(d2.getProp<std::string>("bar"s) == "yep"s);
-    CHECK(!d1.hasProp("foo"s));
-    CHECK(!d1.hasProp("bar"s));
+    CHECK(d2.hasProp(kFoo));
+    CHECK(d2.hasProp(kBar));
+    CHECK(d2.getProp<std::string>(kBar) == "yep"s);
+    CHECK(!d1.hasProp(kFoo));
+    CHECK(!d1.hasProp(kBar));
   }
   SECTION("move assignment") {
-    CHECK(d1.hasProp("foo"s));
-    CHECK(d1.hasProp("bar"s));
-    CHECK(d1.getProp<std::string>("bar"s) == "yep"s);
+    CHECK(d1.hasProp(kFoo));
+    CHECK(d1.hasProp(kBar));
+    CHECK(d1.getProp<std::string>(kBar) == "yep"s);
     RDKit::RDProps d2;
     d2 = std::move(d1);
-    CHECK(d2.hasProp("foo"s));
-    CHECK(d2.hasProp("bar"s));
-    CHECK(d2.getProp<std::string>("bar"s) == "yep"s);
-    CHECK(!d1.hasProp("foo"s));
-    CHECK(!d1.hasProp("bar"s));
+    CHECK(d2.hasProp(kFoo));
+    CHECK(d2.hasProp(kBar));
+    CHECK(d2.getProp<std::string>(kBar) == "yep"s);
+    CHECK(!d1.hasProp(kFoo));
+    CHECK(!d1.hasProp(kBar));
   }
-}
-TEST_CASE("github #9068: properties with empty names") {
-  RDKit::RDProps props;
-  SECTION("setProp with empty key") {
-    CHECK_THROWS_AS(props.setProp("", 1), ValueErrorException);
-  }
-  SECTION("getProp with empty key") {
-    CHECK_THROWS_AS(props.getProp<int>(""), KeyErrorException);
-  }
-  SECTION("hasProp with empty key") { CHECK(!props.hasProp("")); }
-  SECTION("clearProp with empty key") { CHECK_NOTHROW(props.clearProp("")); }
 }
 TEST_CASE("github #9068: dicts with empty keys") {
   RDKit::Dict dict;

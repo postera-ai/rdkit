@@ -51,16 +51,16 @@ void enumerateVariations(std::vector<std::vector<size_t>> &variations,
 namespace detail {
 const std::string idxPropName = "_enumeratorOrigIdx";
 void preserveOrigIndices(ROMol &mol) {
-  mol.setProp(idxPropName, 1);
+  mol.setProp(internKey(idxPropName), 1);
   for (auto atom : mol.atoms()) {
-    atom->setProp(idxPropName, atom->getIdx());
+    atom->setProp(internKey(idxPropName), atom->getIdx());
   }
 }
 void removeOrigIndices(ROMol &mol) {
   for (auto atom : mol.atoms()) {
-    atom->clearProp(idxPropName);
+    atom->clearProp(internKey(idxPropName));
   }
-  mol.clearProp(idxPropName);
+  mol.clearProp(internKey(idxPropName));
 }
 }  // namespace detail
 
@@ -71,7 +71,7 @@ void clearReactionProps(ROMol &mol) {
   for (auto atom : mol.atoms()) {
     atom->clearProp(common_properties::reactantAtomIdx);
     atom->clearProp(common_properties::reactantIdx);
-    atom->clearProp("was_dummy");
+    atom->clearProp(internKey("was_dummy"));
     atom->clearProp(common_properties::reactionMapNum);
   }
 }

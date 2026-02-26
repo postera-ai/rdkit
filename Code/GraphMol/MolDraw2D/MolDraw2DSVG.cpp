@@ -32,9 +32,9 @@ void outputTagClasses(const t_obj *obj, std::ostream &d_os,
   if (!d_activeClass.empty()) {
     d_os << " " << d_activeClass;
   }
-  if (obj->hasProp("_tagClass")) {
+  if (obj->hasProp(internKey("_tagClass"))) {
     std::string value;
-    obj->getProp("_tagClass", value);
+    obj->getProp(internKey("_tagClass"), value);
     std::replace(value.begin(), value.end(), '\"', '_');
     std::replace(value.begin(), value.end(), '\'', '_');
     std::replace(value.begin(), value.end(), '.', '_');
@@ -49,7 +49,7 @@ void outputMetaData(const t_obj *obj, std::ostream &d_os) {
     if (prop.length() < 11 || prop.rfind("_metaData-", 0) != 0) {
       continue;
     }
-    obj->getProp(prop, value);
+    obj->getProp(internKey(prop), value);
     boost::replace_all(value, "\"", "&quot;");
     d_os << " " << prop.substr(10) << "=\"" << value << "\"";
   }
@@ -356,8 +356,8 @@ void MolDraw2DSVG::addMoleculeMetadata(const ROMol &mol, int confId) const {
     RDGeom::Point3D pos = conf.getAtomPos(atom->getIdx());
 
     Point2D dpos(pos.x, pos.y);
-    if (atom->hasProp(tag)) {
-      dpos = atom->getProp<Point2D>(tag);
+    if (atom->hasProp(internKey(tag))) {
+      dpos = atom->getProp<Point2D>(internKey(tag));
     } else {
       dpos = getDrawCoords(dpos);
     }

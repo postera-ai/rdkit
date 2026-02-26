@@ -1474,7 +1474,7 @@ void testGithub568() {
         TEST_ASSERT(cid >= 0);
         MolOps::assignChiralTypesFrom3D(m2);
 
-        // m2.setProp("_Name",smis[idx]);
+        // m2.setProp(internKey("_Name"),smis[idx]);
         // std::cerr<<MolToMolBlock(m2)<<std::endl;
         // TEST_ASSERT(0);
         MolOps::removeHs(m2);
@@ -1483,7 +1483,7 @@ void testGithub568() {
           std::cerr << "-------------" << std::endl;
           std::cerr << smis[idx] << " " << i << std::endl;
           std::cerr << smi << "\n" << csmi << std::endl;
-          m2.setProp("_Name", smis[idx]);
+          m2.setProp(internKey("_Name"), smis[idx]);
           std::cerr << MolToMolBlock(m2) << std::endl;
         }
         TEST_ASSERT(smi == csmi);

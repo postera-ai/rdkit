@@ -319,10 +319,10 @@ const std::string GetMolFileAliasInfo(const RWMol &mol) {
 const std::string GetMolFilePXAInfo(const RWMol &mol) {
   std::string res;
   for (const auto atom : mol.atoms()) {
-    if (atom->hasProp("_MolFile_PXA")) {
+    if (atom->hasProp(internKey("_MolFile_PXA"))) {
       res +=
           boost::str(boost::format("M  PXA % 3d%s\n") % (atom->getIdx() + 1) %
-                     atom->getProp<std::string>("_MolFile_PXA"));
+                     atom->getProp<std::string>(internKey("_MolFile_PXA")));
     }
   }
   return res;
@@ -985,10 +985,10 @@ void createSMARTSQSubstanceGroups(ROMol &mol) {
       }
       if (!sma.empty()) {
         SubstanceGroup sg(&mol, "DAT");
-        sg.setProp("QUERYTYPE", "SMARTSQ");
-        sg.setProp("QUERYOP", "=");
+        sg.setProp(internKey("QUERYTYPE"), "SMARTSQ");
+        sg.setProp(internKey("QUERYOP"), "=");
         std::vector<std::string> dataFields{sma};
-        sg.setProp("DATAFIELDS", dataFields);
+        sg.setProp(internKey("DATAFIELDS"), dataFields);
         sg.addAtomWithIdx(atom->getIdx());
         addSubstanceGroup(mol, sg);
       }
@@ -998,7 +998,7 @@ void createSMARTSQSubstanceGroups(ROMol &mol) {
 
 void createZBOSubstanceGroups(ROMol &mol) {
   SubstanceGroup bsg(&mol, "DAT");
-  bsg.setProp("FIELDNAME", "ZBO");
+  bsg.setProp(internKey("FIELDNAME"), "ZBO");
   boost::dynamic_bitset<> atomsAffected(mol.getNumAtoms(), 0);
   for (const auto bond : mol.bonds()) {
     if (bond->getBondType() == Bond::ZERO) {
@@ -1014,9 +1014,9 @@ void createZBOSubstanceGroups(ROMol &mol) {
       }
     }
     SubstanceGroup asg(&mol, "DAT");
-    asg.setProp("FIELDNAME", "HYD");
+    asg.setProp(internKey("FIELDNAME"), "HYD");
     SubstanceGroup zsg(&mol, "DAT");
-    zsg.setProp("FIELDNAME", "ZCH");
+    zsg.setProp(internKey("FIELDNAME"), "ZCH");
     std::string asgText;
     std::string zsgText;
     for (auto i = 0u; i < atomsAffected.size(); ++i) {
@@ -1038,10 +1038,10 @@ void createZBOSubstanceGroups(ROMol &mol) {
 
     std::vector<std::string> aDataFields{asgText};
 
-    asg.setProp("DATAFIELDS", aDataFields);
+    asg.setProp(internKey("DATAFIELDS"), aDataFields);
     addSubstanceGroup(mol, asg);
     std::vector<std::string> zDataFields{zsgText};
-    zsg.setProp("DATAFIELDS", zDataFields);
+    zsg.setProp(internKey("DATAFIELDS"), zDataFields);
     addSubstanceGroup(mol, zsg);
   }
 }

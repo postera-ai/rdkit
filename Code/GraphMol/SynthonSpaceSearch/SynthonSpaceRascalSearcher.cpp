@@ -188,7 +188,7 @@ bool SynthonSpaceRascalSearcher::verifyHit(ROMol &hit) const {
   // We only want those over the threshold.
   if (!res.empty() &&
       res.front().getSimilarity() >= d_rascalOptions.similarityThreshold) {
-    hit.setProp<double>("Similarity", res.front().getSimilarity());
+    hit.setProp<double>(internKey("Similarity"), res.front().getSimilarity());
     return true;
   }
   return false;

@@ -135,7 +135,7 @@ TEST_CASE("Coulomb") {
   Conformer conf = mol->getConformer(0);
   for (auto i = 0u; i < mol->getNumAtoms(); ++i) {
     charges.push_back(
-        mol->getAtomWithIdx(i)->getProp<double>("_GasteigerCharge"));
+        mol->getAtomWithIdx(i)->getProp<double>(internKey("_GasteigerCharge")));
     pos.push_back(conf.getAtomPos(i));
   }
 
@@ -188,7 +188,7 @@ TEST_CASE("CoulombDielectric") {
   Conformer conf = mol->getConformer(0);
   for (auto i = 0u; i < mol->getNumAtoms(); ++i) {
     charges.push_back(
-        mol->getAtomWithIdx(i)->getProp<double>("_GasteigerCharge"));
+        mol->getAtomWithIdx(i)->getProp<double>(internKey("_GasteigerCharge")));
     pos.push_back(conf.getAtomPos(i));
   }
 

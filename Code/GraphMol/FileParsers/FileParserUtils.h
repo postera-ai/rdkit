@@ -116,7 +116,7 @@ void applyMolListProp(ROMol &mol, const std::string &pn,
                       const std::string &missingValueMarker, size_t nItems,
                       U getter) {
   std::string itempn = pn.substr(prefix.size());
-  std::string strVect = mol.getProp<std::string>(pn);
+  std::string strVect = mol.getProp<std::string>(internKey(pn));
   std::vector<std::string> tokens;
   boost::split(tokens, strVect, boost::is_any_of(" \t\n"),
                boost::token_compress_on);
@@ -142,7 +142,7 @@ void applyMolListProp(ROMol &mol, const std::string &pn,
       unsigned int itemid = i - first_token;
       try {
         T apv = boost::lexical_cast<T>(tokens[i]);
-        getter(itemid)->setProp(itempn, apv);
+        getter(itemid)->setProp(internKey(itempn), apv);
       } catch (const boost::bad_lexical_cast &) {
         BOOST_LOG(rdWarningLog)
             << "Value " << tokens[i] << " for property " << pn << " of item "
@@ -265,7 +265,7 @@ std::string getPropertyList(U getter, const std::string &propName,
   for (const auto item : getter()) {
     std::string apVal = missingValueMarker;
     T tVal;
-    if (item->getPropIfPresent(propName, tVal)) {
+    if (item->getPropIfPresent(internKey(propName), tVal)) {
       apVal = boost::lexical_cast<std::string>(tVal);
     }
     if (propVal.length() + apVal.length() + 1 >= lineSize) {
@@ -300,8 +300,8 @@ void createPropertyList(ROMol &mol, U getter, const std::string &prefix,
                         const std::string &missingValueMarker = "",
                         unsigned int lineSize = DEFAULT_LINESIZE) {
   std::string molPropName = prefix + "." + typeMarker + "." + propName;
-  mol.setProp(molPropName, getPropertyList<T>(getter, propName,
-                                              missingValueMarker, lineSize));
+  mol.setProp(internKey(molPropName), getPropertyList<T>(getter, propName,
+                                                        missingValueMarker, lineSize));
 }
 
 inline void createAtomIntPropertyList(

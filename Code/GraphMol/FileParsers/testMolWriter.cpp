@@ -45,7 +45,7 @@ void testSmilesWriter() {
   while (mol) {
     std::string mname, pval;
     mol->getProp(common_properties::_Name, mname);
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     names.push_back(mname);
     props.push_back(pval);
     writer->write(*mol);
@@ -67,7 +67,7 @@ void testSmilesWriter() {
   while (mol) {
     std::string mname, pval;
     mol->getProp(common_properties::_Name, mname);
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     CHECK_INVARIANT(mname == names[i], "");
     CHECK_INVARIANT(pval == props[i], "");
     i++;
@@ -139,7 +139,7 @@ void testSmilesWriterNoNames() {
   ROMol *mol = nSup->next();
   while (mol) {
     std::string mname, pval;
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     mol->setProp(common_properties::_Name, "bogus");
     props.push_back(pval);
     writer->write(*mol);
@@ -160,7 +160,7 @@ void testSmilesWriterNoNames() {
   while (mol) {
     std::string mname, pval;
     mol->getProp(common_properties::_Name, mname);
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     delete mol;
     TEST_ASSERT(mname != "bogus");
     TEST_ASSERT(pval == props[i]);
@@ -194,7 +194,7 @@ void testSmilesWriterClose() {
   ROMol *mol = nSup->next();
   while (mol) {
     std::string mname, pval;
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     mol->setProp(common_properties::_Name, "bogus");
     props.push_back(pval);
     writer->write(*mol);
@@ -215,7 +215,7 @@ void testSmilesWriterClose() {
   while (mol) {
     std::string mname, pval;
     mol->getProp(common_properties::_Name, mname);
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     delete mol;
     TEST_ASSERT(mname != "bogus");
     TEST_ASSERT(pval == props[i]);
@@ -304,7 +304,7 @@ void testTDTWriter() {
   while (!sdsup.atEnd()) {
     ROMol *mol = sdsup.next();
     std::string mname;
-    mol->getProp("CAS_RN", mname);
+    mol->getProp(internKey("CAS_RN"), mname);
     names.push_back(mname);
 
     writer->write(*mol);
@@ -321,7 +321,7 @@ void testTDTWriter() {
     ROMol *mol = reader.next();
     if (mol) {
       std::string mname;
-      mol->getProp("CAS_RN", mname);
+      mol->getProp(internKey("CAS_RN"), mname);
       CHECK_INVARIANT(mname == names[i], "");
       delete mol;
     }
@@ -350,7 +350,7 @@ void testSmilesWriterStrm() {
   while (mol) {
     std::string mname, pval;
     mol->getProp(common_properties::_Name, mname);
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     names.push_back(mname);
     props.push_back(pval);
     writer->write(*mol);
@@ -373,7 +373,7 @@ void testSmilesWriterStrm() {
   while (mol) {
     std::string mname, pval;
     mol->getProp(common_properties::_Name, mname);
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     CHECK_INVARIANT(mname == names[i], "");
     CHECK_INVARIANT(pval == props[i], "");
     i++;
@@ -464,7 +464,7 @@ void testTDTWriterStrm() {
   while (!sdsup.atEnd()) {
     ROMol *mol = sdsup.next();
     std::string mname;
-    mol->getProp("CAS_RN", mname);
+    mol->getProp(internKey("CAS_RN"), mname);
     names.push_back(mname);
 
     writer->write(*mol);
@@ -483,7 +483,7 @@ void testTDTWriterStrm() {
     ROMol *mol = reader.next();
     if (mol) {
       std::string mname;
-      mol->getProp("CAS_RN", mname);
+      mol->getProp(internKey("CAS_RN"), mname);
       CHECK_INVARIANT(mname == names[i], "");
       delete mol;
     }
@@ -1464,15 +1464,15 @@ void testGithub488() {
   {
     ROMol *m1 = SmilesToMol("O");
     TEST_ASSERT(m1);
-    m1->setProp("_Name", "");
+    m1->setProp(internKey("_Name"), "");
     std::stringstream ss;
     SmilesWriter w(&ss);
     w.write(*m1);
-    m1->setProp("_Name", "foo");
+    m1->setProp(internKey("_Name"), "foo");
     w.write(*m1);
-    m1->clearProp("_Name");
+    m1->clearProp(internKey("_Name"));
     w.write(*m1);
-    m1->setProp("_Name", " ");
+    m1->setProp(internKey("_Name"), " ");
     w.write(*m1);
     w.close();
     std::string txt = ss.str();
@@ -1526,9 +1526,9 @@ void testGetSDText() {
       TEST_ASSERT(csmi1 == csmi2);
       STR_VECT pns = mol->getPropList(false, false);
       for (const auto &pn : pns) {
-        TEST_ASSERT(mol2->hasProp(pn));
-        TEST_ASSERT(mol->getProp<std::string>(pn) ==
-                    mol2->getProp<std::string>(pn));
+        TEST_ASSERT(mol2->hasProp(internKey(pn)));
+        TEST_ASSERT(mol->getProp<std::string>(internKey(pn)) ==
+                    mol2->getProp<std::string>(internKey(pn)));
       }
       delete mol;
       delete mol2;

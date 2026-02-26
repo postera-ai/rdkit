@@ -178,7 +178,7 @@ ROMol *createAbbreviationMol(const std::string &txt, bool removeExtraDummies,
     }
     q->commitBatchEdit();
   }
-  q->setProp(common_properties::numDummies, nDummies);
+  q->setProp(internKey(common_properties::numDummies), nDummies);
   return q;
 }
 }  // namespace detail

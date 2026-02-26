@@ -368,10 +368,10 @@ void testPDB() {
     Atom *atom = (*at);
     unsigned int idx = atom->getIdx();
     TEST_ASSERT(idx == ExpectedProtor1d3z[idx].idx);
-    TEST_ASSERT(atom->getProp<int>(common_properties::Atom::SASAClass) ==
+    TEST_ASSERT(atom->getProp<int>(internKey(common_properties::Atom::SASAClass)) ==
                 ExpectedProtor1d3z[idx].cls);
     TEST_ASSERT(
-        atom->getProp<std::string>(common_properties::Atom::SASAClassName) ==
+        atom->getProp<std::string>(internKey(common_properties::Atom::SASAClassName)) ==
         ExpectedProtor1d3z[idx].clsname);
     TEST_ASSERT(radii[idx] == ExpectedProtor1d3z[idx].radius);
   }

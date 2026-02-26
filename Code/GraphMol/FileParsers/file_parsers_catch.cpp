@@ -328,8 +328,8 @@ M  END
   std::unique_ptr<ROMol> mol(MolBlockToMol(molblock));
   SECTION("basics, make sure we can parse the original data") {
     REQUIRE(mol);
-    CHECK(mol->getAtomWithIdx(10)->hasProp("_MolFile_PXA"));
-    CHECK(!mol->getAtomWithIdx(11)->hasProp("_MolFile_PXA"));
+    CHECK(mol->getAtomWithIdx(10)->hasProp(internKey("_MolFile_PXA")));
+    CHECK(!mol->getAtomWithIdx(11)->hasProp(internKey("_MolFile_PXA")));
   }
   SECTION("basics, can we write it?") {
     REQUIRE(mol);
@@ -1323,10 +1323,10 @@ M  END
     REQUIRE(mol);
     const auto &sgroups = getSubstanceGroups(*mol);
     CHECK(sgroups.size() == 1);
-    CHECK(sgroups[0].hasProp("TYPE"));
-    CHECK(sgroups[0].getProp<std::string>("TYPE") == "DAT");
-    CHECK(sgroups[0].hasProp("FIELDNAME"));
-    CHECK(sgroups[0].getProp<std::string>("FIELDNAME") ==
+    CHECK(sgroups[0].hasProp(internKey("TYPE")));
+    CHECK(sgroups[0].getProp<std::string>(internKey("TYPE")) == "DAT");
+    CHECK(sgroups[0].hasProp(internKey("FIELDNAME")));
+    CHECK(sgroups[0].getProp<std::string>(internKey("FIELDNAME")) ==
           "FAKE_MRV_IMPLICIT_H");
   }
 }
@@ -2342,14 +2342,14 @@ TEST_CASE(
 
     const auto &sgroups = getSubstanceGroups(*mol);
     CHECK(sgroups.size() == 3);
-    CHECK(sgroups[0].hasProp("TYPE"));
-    CHECK(sgroups[0].getProp<std::string>("TYPE") == "SUP");
+    CHECK(sgroups[0].hasProp(internKey("TYPE")));
+    CHECK(sgroups[0].getProp<std::string>(internKey("TYPE")) == "SUP");
     CHECK(sgroups[0].getAttachPoints().size() == 1);
-    CHECK(sgroups[1].hasProp("TYPE"));
-    CHECK(sgroups[1].getProp<std::string>("TYPE") == "SUP");
+    CHECK(sgroups[1].hasProp(internKey("TYPE")));
+    CHECK(sgroups[1].getProp<std::string>(internKey("TYPE")) == "SUP");
     CHECK(sgroups[1].getAttachPoints().size() == 1);
-    CHECK(sgroups[2].hasProp("TYPE"));
-    CHECK(sgroups[2].getProp<std::string>("TYPE") == "SUP");
+    CHECK(sgroups[2].hasProp(internKey("TYPE")));
+    CHECK(sgroups[2].getProp<std::string>(internKey("TYPE")) == "SUP");
     CHECK(sgroups[2].getAttachPoints().size() == 2);
   }
 }
@@ -2413,16 +2413,16 @@ TEST_CASE("XBHEAD and XBCORR causing parser failures", "[bug][reader]") {
     REQUIRE(mol);
     const auto &sgroups = getSubstanceGroups(*mol);
     CHECK(sgroups.size() == 1);
-    CHECK(sgroups[0].hasProp("TYPE"));
-    CHECK(sgroups[0].getProp<std::string>("TYPE") == "SRU");
-    CHECK(sgroups[0].hasProp("XBHEAD"));
-    auto v = sgroups[0].getProp<std::vector<unsigned int>>("XBHEAD");
+    CHECK(sgroups[0].hasProp(internKey("TYPE")));
+    CHECK(sgroups[0].getProp<std::string>(internKey("TYPE")) == "SRU");
+    CHECK(sgroups[0].hasProp(internKey("XBHEAD")));
+    auto v = sgroups[0].getProp<std::vector<unsigned int>>(internKey("XBHEAD"));
     CHECK(v.size() == 2);
     CHECK(v[0] == 5);
     CHECK(v[1] == 0);
 
-    CHECK(sgroups[0].hasProp("XBCORR"));
-    CHECK(sgroups[0].getProp<std::vector<unsigned int>>("XBCORR").size() == 4);
+    CHECK(sgroups[0].hasProp(internKey("XBCORR")));
+    CHECK(sgroups[0].getProp<std::vector<unsigned int>>(internKey("XBCORR")).size() == 4);
 
     auto mb = MolToV3KMolBlock(*mol);
     CHECK(mb.find("XBHEAD=(2 6 1)") != std::string::npos);
@@ -2768,7 +2768,7 @@ TEST_CASE("write molecule to PNG", "[writer][PNG]") {
     CHECK(colchicine->getNumConformers() == 1);
     static const std::string propertyName("property");
     static const std::string propertyValue("value");
-    colchicine->setProp<std::string>(propertyName, propertyValue);
+    colchicine->setProp<std::string>(internKey(propertyName), propertyValue);
     PNGMetadataParams params;
     params.includePkl = true;
     params.includeSmiles = false;
@@ -2782,7 +2782,7 @@ TEST_CASE("write molecule to PNG", "[writer][PNG]") {
       REQUIRE(mol);
       CHECK(mol->getNumAtoms() == 29);
       CHECK(mol->getNumConformers() == 1);
-      CHECK(!mol->hasProp(propertyName));
+      CHECK(!mol->hasProp(internKey(propertyName)));
     }
     {
       std::ifstream strm(fname, std::ios::in | std::ios::binary);
@@ -2793,8 +2793,8 @@ TEST_CASE("write molecule to PNG", "[writer][PNG]") {
       REQUIRE(mol);
       CHECK(mol->getNumAtoms() == 29);
       CHECK(mol->getNumConformers() == 1);
-      CHECK(mol->hasProp(propertyName));
-      CHECK(mol->getProp<std::string>(propertyName) == propertyValue);
+      CHECK(mol->hasProp(internKey(propertyName)));
+      CHECK(mol->getProp<std::string>(internKey(propertyName)) == propertyValue);
     }
     {
       std::ifstream strm(fname, std::ios::in | std::ios::binary);
@@ -2807,7 +2807,7 @@ TEST_CASE("write molecule to PNG", "[writer][PNG]") {
       REQUIRE(mol);
       CHECK(mol->getNumAtoms() == 29);
       CHECK(mol->getNumConformers() == 0);
-      CHECK(!mol->hasProp(propertyName));
+      CHECK(!mol->hasProp(internKey(propertyName)));
     }
   }
   SECTION("use original wedging") {
@@ -3120,9 +3120,9 @@ M  END
     CHECK(m->getNumBonds() == 6);
     auto sgs = getSubstanceGroups(*m);
     REQUIRE(sgs.size() == 1);
-    CHECK(sgs[0].getProp<std::string>("TYPE") == "DAT");
-    CHECK(sgs[0].getProp<std::string>("FIELDINFO") == "\"");
-    CHECK(sgs[0].getProp<std::string>("QUERYOP") == "\"");
+    CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "DAT");
+    CHECK(sgs[0].getProp<std::string>(internKey("FIELDINFO")) == "\"");
+    CHECK(sgs[0].getProp<std::string>(internKey("QUERYOP")) == "\"");
   }
   SECTION("empty string") {
     auto m = R"CTAB(
@@ -3160,9 +3160,9 @@ M  END
     CHECK(m->getNumBonds() == 6);
     auto sgs = getSubstanceGroups(*m);
     REQUIRE(sgs.size() == 1);
-    CHECK(sgs[0].getProp<std::string>("TYPE") == "DAT");
-    CHECK(sgs[0].getProp<std::string>("FIELDINFO").empty());
-    CHECK(sgs[0].getProp<std::string>("QUERYOP") == "\"");
+    CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "DAT");
+    CHECK(sgs[0].getProp<std::string>(internKey("FIELDINFO")).empty());
+    CHECK(sgs[0].getProp<std::string>(internKey("QUERYOP")) == "\"");
   }
 }
 
@@ -3528,8 +3528,8 @@ M  END
     auto sgs = getSubstanceGroups(*m);
     REQUIRE(sgs.size() == 1);
     auto sg = sgs[0];
-    CHECK(sg.getProp<std::string>("FIELDINFO") == "\"");
-    CHECK(sg.getProp<std::string>("QUERYOP") == "\"\"");
+    CHECK(sg.getProp<std::string>(internKey("FIELDINFO")) == "\"");
+    CHECK(sg.getProp<std::string>(internKey("QUERYOP")) == "\"\"");
     auto mb = MolToV3KMolBlock(*m);
     CHECK(mb.find("FIELDINFO=\"\"\"\"") != std::string::npos);
     CHECK(mb.find("QUERYOP=\"\"\"\"\"") != std::string::npos);
@@ -3560,8 +3560,8 @@ M  END
     auto sgs = getSubstanceGroups(*m);
     REQUIRE(sgs.size() == 1);
     auto sg = sgs[0];
-    CHECK(sg.getProp<std::string>("FIELDINFO") == "foo\"");
-    CHECK(sg.getProp<std::string>("QUERYOP") == "(bar)");
+    CHECK(sg.getProp<std::string>(internKey("FIELDINFO")) == "foo\"");
+    CHECK(sg.getProp<std::string>(internKey("QUERYOP")) == "(bar)");
     auto mb = MolToV3KMolBlock(*m);
     CHECK(mb.find("FIELDINFO=\"foo\"\"\"") != std::string::npos);
     CHECK(mb.find("QUERYOP=\"(bar)\"") != std::string::npos);
@@ -4381,10 +4381,10 @@ M  END
     REQUIRE(m);
     REQUIRE(getSubstanceGroups(*m).size() == 1);
     const auto sg = getSubstanceGroups(*m)[0];
-    CHECK(sg.hasProp("QUERYTYPE"));
-    CHECK(sg.getProp<std::string>("QUERYTYPE") == "PQ");
-    CHECK(sg.hasProp("QUERYOP"));
-    CHECK(sg.getProp<std::string>("QUERYOP") == "=");
+    CHECK(sg.hasProp(internKey("QUERYTYPE")));
+    CHECK(sg.getProp<std::string>(internKey("QUERYTYPE")) == "PQ");
+    CHECK(sg.hasProp(internKey("QUERYOP")));
+    CHECK(sg.getProp<std::string>(internKey("QUERYOP")) == "=");
   }
 }
 
@@ -5677,11 +5677,11 @@ M  END
 )CTAB"_ctab;
   REQUIRE(m);
   SECTION("basics") {
-    m->setProp("foo", "fooprop");
-    m->setProp("bar", "foo\n\nprop");
-    m->setProp("baz", "foo\r\n\r\nprop");
-    m->setProp("bletch\nnope", "fooprop");
-    m->setProp("bletch\r\nnope2", "fooprop");
+    m->setProp(internKey("foo"), "fooprop");
+    m->setProp(internKey("bar"), "foo\n\nprop");
+    m->setProp(internKey("baz"), "foo\r\n\r\nprop");
+    m->setProp(internKey("bletch\nnope"), "fooprop");
+    m->setProp(internKey("bletch\r\nnope2"), "fooprop");
     std::ostringstream oss;
     SDWriter sdw(&oss);
     sdw.write(*m);
@@ -6058,7 +6058,7 @@ TEST_CASE("MaeMolSupplier setData and reset methods",
       REQUIRE(mol != nullptr);
 
       std::string mol_name;
-      REQUIRE(mol->getPropIfPresent("_Name", mol_name) == true);
+      REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
       REQUIRE(j < mol_names1.size());
       CHECK(mol_name == mol_names1[j]);
 
@@ -6111,7 +6111,7 @@ TEST_CASE("MaeMolSupplier length", "[mae][MaeMolSupplier][reader]") {
     std::unique_ptr<ROMol> mol(supplier.next());
 
     std::string mol_name;
-    REQUIRE(mol->getPropIfPresent("_Name", mol_name) == true);
+    REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
     CHECK(mol_name == mol_names[i]);
   }
 
@@ -6121,7 +6121,7 @@ TEST_CASE("MaeMolSupplier length", "[mae][MaeMolSupplier][reader]") {
     std::unique_ptr<ROMol> mol(supplier.next());
 
     std::string mol_name;
-    REQUIRE(mol->getPropIfPresent("_Name", mol_name) == true);
+    REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
     CHECK(mol_name == mol_names[i]);
     ++i;
   }
@@ -6146,12 +6146,12 @@ TEST_CASE("MaeMolSupplier and operator[]", "[mae][MaeMolSupplier][reader]") {
   std::string mol_name;
   for (unsigned i = 0; i < mols_in_file; ++i) {
     std::unique_ptr<ROMol> mol(supplier[i]);
-    REQUIRE(mol->getPropIfPresent("_Name", mol_name) == true);
+    REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
     CHECK(mol_name == mol_names[i]);
 
     auto j = mols_in_file - (i + 1);
     mol.reset(supplier[j]);
-    REQUIRE(mol->getPropIfPresent("_Name", mol_name) == true);
+    REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
     CHECK(mol_name == mol_names[j]);
   }
 
@@ -6169,7 +6169,7 @@ TEST_CASE("MaeMolSupplier is3D flag", "[mae][MaeMolSupplier][reader]") {
   std::unique_ptr<ROMol> mol(supplier[0]);
 
   std::string mol_name;
-  REQUIRE(mol->getPropIfPresent("_Name", mol_name) == true);
+  REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
   CHECK(mol_name == "48");
 
   CHECK(mol->getConformer().is3D() == true);
@@ -6181,7 +6181,7 @@ TEST_CASE("MaeMolSupplier is3D flag", "[mae][MaeMolSupplier][reader]") {
 
   mol.reset(supplier[0]);
 
-  REQUIRE(mol->getPropIfPresent("_Name", mol_name) == true);
+  REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
   CHECK(mol_name == "Structure1");
 
   CHECK(mol->getConformer().is3D() == false);
@@ -6213,22 +6213,22 @@ void check_roundtripped_properties(RDProps &original, RDProps &roundtrip) {
 
     switch (o.val.getTag()) {
       case RDTypeTag::BoolTag:
-        CHECK(rdvalue_cast<bool>(o.val) == roundtrip.getProp<bool>(o.key));
+        CHECK(rdvalue_cast<bool>(o.val) == roundtrip.getProp<bool>(internKey(o.key)));
         break;
 
       case RDTypeTag::IntTag:
       case RDTypeTag::UnsignedIntTag:
-        CHECK(rdvalue_cast<int>(o.val) == roundtrip.getProp<int>(o.key));
+        CHECK(rdvalue_cast<int>(o.val) == roundtrip.getProp<int>(internKey(o.key)));
         break;
 
       case RDTypeTag::DoubleTag:
       case RDTypeTag::FloatTag:
-        CHECK(rdvalue_cast<double>(o.val) == roundtrip.getProp<double>(o.key));
+        CHECK(rdvalue_cast<double>(o.val) == roundtrip.getProp<double>(internKey(o.key)));
         break;
 
       case RDTypeTag::StringTag:
         CHECK(rdvalue_cast<std::string>(o.val) ==
-              roundtrip.getProp<std::string>(o.key));
+              roundtrip.getProp<std::string>(internKey(o.key)));
         break;
 
       default:
@@ -6310,10 +6310,10 @@ TEST_CASE("MaeWriter basic testing", "[mae][MaeWriter][writer]") {
   REQUIRE(mol);
 
   auto add_some_props = [](RDProps &obj, const std::string &prefix) {
-    obj.setProp(prefix + "_bool_prop", false);
-    obj.setProp(prefix + "_int_prop", 42);
-    obj.setProp(prefix + "_real_prop", 3.141592);
-    obj.setProp(prefix + "_string_prop", "this is just a dummy property");
+    obj.setProp(internKey(prefix + "_bool_prop"), false);
+    obj.setProp(internKey(prefix + "_int_prop"), 42);
+    obj.setProp(internKey(prefix + "_real_prop"), 3.141592);
+    obj.setProp(internKey(prefix + "_string_prop"), "this is just a dummy property");
   };
 
   add_some_props(*mol, "mol");
@@ -6923,7 +6923,7 @@ TEST_CASE("MaeWriter should not prefix Maestro-formatted properties") {
 
   // MaeMolSupplier should ignore the i_m_ct_enhanced_stereo_status property
   // (it's meaningless to the RDKit)
-  CHECK(mol->hasProp("i_m_ct_enhanced_stereo_status") == false);
+  CHECK(mol->hasProp(internKey("i_m_ct_enhanced_stereo_status")) == false);
 
   std::string mae_block;
   {
@@ -7382,9 +7382,8 @@ void testFragmentation(const std::string &fileName,
     // same
     for (unsigned int sgIndex = 0;
          sgIndex < getSubstanceGroups(*largestFrag).size(); ++sgIndex) {
-      CHECK(getSubstanceGroups(*largestFrag)[sgIndex].getProp<std::string>(
-                "TYPE") ==
-            getSubstanceGroups(*mol)[sgIndex].getProp<std::string>("TYPE"));
+      CHECK(getSubstanceGroups(*largestFrag)[sgIndex].getProp<std::string>(internKey("TYPE")) ==
+            getSubstanceGroups(*mol)[sgIndex].getProp<std::string>(internKey("TYPE")));
     }
   }
 }
@@ -7537,7 +7536,7 @@ TEST_CASE("ZBOs in V3K blocks") {
       CHECK(m->getAtomWithIdx(1)->getFormalCharge() == 0);
       CHECK(m->getAtomWithIdx(0)->getTotalNumHs() == 3);
       CHECK(m->getAtomWithIdx(1)->getTotalNumHs() == 3);
-      CHECK(m->getAtomWithIdx(0)->hasProp("_ZBO_H"));
+      CHECK(m->getAtomWithIdx(0)->hasProp(internKey("_ZBO_H")));
     };
     std::string fName;
     fName = rdbase + "H3BNH3.mol";

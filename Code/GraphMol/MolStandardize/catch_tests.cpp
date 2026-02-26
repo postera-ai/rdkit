@@ -701,7 +701,7 @@ TEST_CASE("github #2965: molecules properties not retained after cleanup",
     MolStandardize::CleanupParameters params;
     std::unique_ptr<RWMol> m(SmilesToMol("Cl.c1cnc(OCCCC2CCNCC2)cn1"));
     REQUIRE(m);
-    m->setProp("testing_prop", "1234");
+    m->setProp(internKey("testing_prop"), "1234");
     std::unique_ptr<RWMol> res(MolStandardize::cleanup(*m, params));
     REQUIRE(res);
     auto x = res->getDict();

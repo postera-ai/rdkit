@@ -246,14 +246,14 @@ TEST_CASE("github #2257: writing cxsmiles", "[smiles][cxsmiles]") {
     auto mol = "N1CC1C |atomProp:0.p2.v2:0.p1.v1:1.p2.v2:1.p1.v1;2;3|"_smiles;
     REQUIRE(mol);
     CHECK(mol->getNumAtoms() == 4);
-    CHECK(mol->getAtomWithIdx(0)->hasProp("p1"));
-    CHECK(mol->getAtomWithIdx(0)->getProp<std::string>("p1") == "v1");
-    CHECK(mol->getAtomWithIdx(0)->hasProp("p2"));
-    CHECK(mol->getAtomWithIdx(0)->getProp<std::string>("p2") == "v2");
-    CHECK(mol->getAtomWithIdx(1)->hasProp("p2"));
-    CHECK(mol->getAtomWithIdx(1)->getProp<std::string>("p2") == "v2");
-    CHECK(mol->getAtomWithIdx(1)->hasProp("p1"));
-    CHECK(mol->getAtomWithIdx(1)->getProp<std::string>("p1") == "v1;2;3");
+    CHECK(mol->getAtomWithIdx(0)->hasProp(internKey("p1")));
+    CHECK(mol->getAtomWithIdx(0)->getProp<std::string>(internKey("p1")) == "v1");
+    CHECK(mol->getAtomWithIdx(0)->hasProp(internKey("p2")));
+    CHECK(mol->getAtomWithIdx(0)->getProp<std::string>(internKey("p2")) == "v2");
+    CHECK(mol->getAtomWithIdx(1)->hasProp(internKey("p2")));
+    CHECK(mol->getAtomWithIdx(1)->getProp<std::string>(internKey("p2")) == "v2");
+    CHECK(mol->getAtomWithIdx(1)->hasProp(internKey("p1")));
+    CHECK(mol->getAtomWithIdx(1)->getProp<std::string>(internKey("p1")) == "v1;2;3");
 
     auto smi = MolToCXSmiles(*mol);
     CHECK(smi == "CC1CN1 |atomProp:2.p2.v2:2.p1.v1;2;3:3.p2.v2:3.p1.v1|");
@@ -316,9 +316,9 @@ TEST_CASE("github #2257: writing cxsmiles", "[smiles][cxsmiles]") {
     auto mol = "Cl.N1CC1C |atomProp:1.p2.v1:1.p1.v1:2.p2.v2:2.p1.v2|"_smiles;
     REQUIRE(mol);
     CHECK(mol->getNumAtoms() == 5);
-    CHECK(!mol->getAtomWithIdx(0)->hasProp("p1"));
-    CHECK(mol->getAtomWithIdx(1)->hasProp("p1"));
-    CHECK(mol->getAtomWithIdx(1)->getProp<std::string>("p1") == "v1");
+    CHECK(!mol->getAtomWithIdx(0)->hasProp(internKey("p1")));
+    CHECK(mol->getAtomWithIdx(1)->hasProp(internKey("p1")));
+    CHECK(mol->getAtomWithIdx(1)->getProp<std::string>(internKey("p1")) == "v1");
 
     std::vector<int> atomsToUse = {1, 2, 3, 4};
     auto smi = MolFragmentToCXSmiles(*mol, atomsToUse);
@@ -1018,9 +1018,9 @@ TEST_CASE("Github #4233: data groups in CXSMILES neither parsed nor written") {
       const auto &sgs = getSubstanceGroups(*mol);
       REQUIRE(sgs.size() == 1);
       CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{2, 1});
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "DAT");
-      CHECK(sgs[0].getProp<std::string>("FIELDNAME") == "FIELD");
-      CHECK(sgs[0].getProp<std::vector<std::string>>("DATAFIELDS") ==
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "DAT");
+      CHECK(sgs[0].getProp<std::string>(internKey("FIELDNAME")) == "FIELD");
+      CHECK(sgs[0].getProp<std::vector<std::string>>(internKey("DATAFIELDS")) ==
             std::vector<std::string>{"info"});
       CHECK(MolToCXSmiles(*mol) == "C/C=C/C |SgD:2,1:FIELD:info::::|");
     }
@@ -1030,13 +1030,13 @@ TEST_CASE("Github #4233: data groups in CXSMILES neither parsed nor written") {
       const auto &sgs = getSubstanceGroups(*mol);
       REQUIRE(sgs.size() == 1);
       CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{2, 1});
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "DAT");
-      CHECK(sgs[0].getProp<std::string>("FIELDNAME") == "FIELD");
-      CHECK(sgs[0].getProp<std::vector<std::string>>("DATAFIELDS") ==
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "DAT");
+      CHECK(sgs[0].getProp<std::string>(internKey("FIELDNAME")) == "FIELD");
+      CHECK(sgs[0].getProp<std::vector<std::string>>(internKey("DATAFIELDS")) ==
             std::vector<std::string>{"foo"});
-      CHECK(sgs[0].getProp<std::string>("QUERYOP") == "like");
-      CHECK(sgs[0].getProp<std::string>("FIELDINFO") == "info");
-      CHECK(sgs[0].getProp<std::string>("FIELDTAG") == "tag");
+      CHECK(sgs[0].getProp<std::string>(internKey("QUERYOP")) == "like");
+      CHECK(sgs[0].getProp<std::string>(internKey("FIELDINFO")) == "info");
+      CHECK(sgs[0].getProp<std::string>(internKey("FIELDTAG")) == "tag");
       CHECK(MolToCXSmiles(*mol) ==
             "C/C=C/C |SgD:2,1:FIELD:foo:like:info:tag:|");
     }
@@ -1047,8 +1047,8 @@ TEST_CASE("Github #4233: data groups in CXSMILES neither parsed nor written") {
       REQUIRE(sgs.size() == 1);
       CHECK(sgs[0].getAtoms().size() == 1);
       CHECK(sgs[0].getAtoms()[0] == 2);
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "DAT");
-      CHECK(sgs[0].getProp<std::vector<std::string>>("DATAFIELDS") ==
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "DAT");
+      CHECK(sgs[0].getProp<std::vector<std::string>>(internKey("DATAFIELDS")) ==
             std::vector<std::string>{"val"});
       CHECK(MolToCXSmiles(*mol) == "*CC |$star_e;;$,SgD:0:querydata:val::::|");
     }
@@ -1059,14 +1059,14 @@ TEST_CASE("Github #4233: data groups in CXSMILES neither parsed nor written") {
       const auto &sgs = getSubstanceGroups(*mol);
       REQUIRE(sgs.size() == 2);
       CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{8, 9, 11, 10, 7, 6});
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "DAT");
-      CHECK(sgs[0].getProp<std::string>("FIELDNAME") == "PieceName");
-      CHECK(sgs[0].getProp<std::vector<std::string>>("DATAFIELDS") ==
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "DAT");
+      CHECK(sgs[0].getProp<std::string>(internKey("FIELDNAME")) == "PieceName");
+      CHECK(sgs[0].getProp<std::vector<std::string>>(internKey("DATAFIELDS")) ==
             std::vector<std::string>{"Ring1"});
       CHECK(sgs[1].getAtoms() == std::vector<unsigned int>{1, 2, 3, 4, 5, 0});
-      CHECK(sgs[1].getProp<std::string>("TYPE") == "DAT");
-      CHECK(sgs[1].getProp<std::string>("FIELDNAME") == "PieceName");
-      CHECK(sgs[1].getProp<std::vector<std::string>>("DATAFIELDS") ==
+      CHECK(sgs[1].getProp<std::string>(internKey("TYPE")) == "DAT");
+      CHECK(sgs[1].getProp<std::string>(internKey("FIELDNAME")) == "PieceName");
+      CHECK(sgs[1].getProp<std::vector<std::string>>(internKey("DATAFIELDS")) ==
             std::vector<std::string>{"Ring2"});
 
       CHECK(MolToCXSmiles(*mol) ==
@@ -1082,14 +1082,14 @@ TEST_CASE("Github #4233: data groups in CXSMILES neither parsed nor written") {
       REQUIRE(sgs2.size() == 2);
       CHECK(sgs2[0].getAtoms() ==
             std::vector<unsigned int>{8, 9, 11, 10, 7, 6});
-      CHECK(sgs2[0].getProp<std::string>("TYPE") == "DAT");
-      CHECK(sgs2[0].getProp<std::string>("FIELDNAME") == "PieceName");
-      CHECK(sgs2[0].getProp<std::vector<std::string>>("DATAFIELDS") ==
+      CHECK(sgs2[0].getProp<std::string>(internKey("TYPE")) == "DAT");
+      CHECK(sgs2[0].getProp<std::string>(internKey("FIELDNAME")) == "PieceName");
+      CHECK(sgs2[0].getProp<std::vector<std::string>>(internKey("DATAFIELDS")) ==
             std::vector<std::string>{"Ring1"});
       CHECK(sgs2[1].getAtoms() == std::vector<unsigned int>{1, 2, 3, 4, 5, 0});
-      CHECK(sgs2[1].getProp<std::string>("TYPE") == "DAT");
-      CHECK(sgs2[1].getProp<std::string>("FIELDNAME") == "PieceName");
-      CHECK(sgs2[1].getProp<std::vector<std::string>>("DATAFIELDS") ==
+      CHECK(sgs2[1].getProp<std::string>(internKey("TYPE")) == "DAT");
+      CHECK(sgs2[1].getProp<std::string>(internKey("FIELDNAME")) == "PieceName");
+      CHECK(sgs2[1].getProp<std::vector<std::string>>(internKey("DATAFIELDS")) ==
             std::vector<std::string>{"Ring2"});
     }
   }
@@ -1105,13 +1105,13 @@ TEST_CASE("polymer SGroups") {
       REQUIRE(sgs.size() == 1);
       CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{6, 1, 2, 4});
       CHECK(sgs[0].getBonds() == std::vector<unsigned int>{6, 0, 4, 2});
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBHEAD") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBHEAD")) ==
             std::vector<unsigned int>{6, 0});
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBCORR") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBCORR")) ==
             std::vector<unsigned int>{6, 4, 0, 2});
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "SRU");
-      CHECK(sgs[0].getProp<std::string>("CONNECT") == "HT");
-      CHECK(sgs[0].getProp<unsigned int>("index") == 1);
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "SRU");
+      CHECK(sgs[0].getProp<std::string>(internKey("CONNECT")) == "HT");
+      CHECK(sgs[0].getProp<unsigned int>(internKey("index")) == 1);
 
       auto smi = MolToCXSmiles(*mol);
       CHECK(smi ==
@@ -1126,13 +1126,13 @@ TEST_CASE("polymer SGroups") {
       REQUIRE(sgs.size() == 1);
       CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{6, 1, 2, 4});
       CHECK(sgs[0].getBonds() == std::vector<unsigned int>{6, 0, 4, 2});
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBHEAD") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBHEAD")) ==
             std::vector<unsigned int>{6, 0});
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBCORR") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBCORR")) ==
             std::vector<unsigned int>{6, 2, 0, 4});
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "SRU");
-      CHECK(sgs[0].getProp<std::string>("CONNECT") == "HH");
-      CHECK(sgs[0].getProp<unsigned int>("index") == 1);
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "SRU");
+      CHECK(sgs[0].getProp<std::string>(internKey("CONNECT")) == "HH");
+      CHECK(sgs[0].getProp<unsigned int>(internKey("index")) == 1);
 
       auto smi = MolToCXSmiles(*mol);
       CHECK(smi ==
@@ -1146,13 +1146,13 @@ TEST_CASE("polymer SGroups") {
       REQUIRE(sgs.size() == 1);
       CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{1, 2, 3});
       CHECK(sgs[0].getBonds() == std::vector<unsigned int>{0, 3});
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBCORR") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBCORR")) ==
             sgs[0].getBonds());
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBHEAD") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBHEAD")) ==
             std::vector<unsigned int>{0});
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "SRU");
-      CHECK(sgs[0].getProp<std::string>("CONNECT") == "EU");
-      CHECK(sgs[0].getProp<unsigned int>("index") == 1);
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "SRU");
+      CHECK(sgs[0].getProp<std::string>(internKey("CONNECT")) == "EU");
+      CHECK(sgs[0].getProp<unsigned int>(internKey("index")) == 1);
 
       auto smi = MolToCXSmiles(*mol);
       CHECK(smi == "*CCO* |$star_e;;;;star_e$,Sg:n:1,2,3::eu:::|");
@@ -1164,13 +1164,13 @@ TEST_CASE("polymer SGroups") {
       REQUIRE(sgs.size() == 1);
       CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{1});
       CHECK(sgs[0].getBonds() == std::vector<unsigned int>{0, 1});
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBCORR") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBCORR")) ==
             sgs[0].getBonds());
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBHEAD") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBHEAD")) ==
             std::vector<unsigned int>{0});
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "SRU");
-      CHECK(sgs[0].getProp<std::string>("CONNECT") == "HT");
-      CHECK(sgs[0].getProp<unsigned int>("index") == 1);
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "SRU");
+      CHECK(sgs[0].getProp<std::string>(internKey("CONNECT")) == "HT");
+      CHECK(sgs[0].getProp<unsigned int>(internKey("index")) == 1);
 
       auto smi = MolToCXSmiles(*mol);
       CHECK(smi == "*C* |$star_e;;star_e$,Sg:n:1::ht:::|");
@@ -1185,23 +1185,23 @@ TEST_CASE("polymer SGroups") {
       REQUIRE(sgs.size() == 2);
       CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{1, 2});
       CHECK(sgs[0].getBonds() == std::vector<unsigned int>{0, 2});
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBCORR") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBCORR")) ==
             sgs[0].getBonds());
-      CHECK(sgs[0].getProp<std::vector<unsigned int>>("XBHEAD") ==
+      CHECK(sgs[0].getProp<std::vector<unsigned int>>(internKey("XBHEAD")) ==
             std::vector<unsigned int>{0});
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "SRU");
-      CHECK(sgs[0].getProp<std::string>("CONNECT") == "HT");
-      CHECK(sgs[0].getProp<unsigned int>("index") == 1);
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "SRU");
+      CHECK(sgs[0].getProp<std::string>(internKey("CONNECT")) == "HT");
+      CHECK(sgs[0].getProp<unsigned int>(internKey("index")) == 1);
 
       CHECK(sgs[1].getAtoms() == std::vector<unsigned int>{3, 4});
       CHECK(sgs[1].getBonds() == std::vector<unsigned int>{2, 4});
-      CHECK(sgs[1].getProp<std::vector<unsigned int>>("XBCORR") ==
+      CHECK(sgs[1].getProp<std::vector<unsigned int>>(internKey("XBCORR")) ==
             sgs[1].getBonds());
-      CHECK(sgs[1].getProp<std::vector<unsigned int>>("XBHEAD") ==
+      CHECK(sgs[1].getProp<std::vector<unsigned int>>(internKey("XBHEAD")) ==
             std::vector<unsigned int>{2});
-      CHECK(sgs[1].getProp<std::string>("TYPE") == "ANY");
-      CHECK(sgs[1].getProp<std::string>("CONNECT") == "HH");
-      CHECK(sgs[1].getProp<unsigned int>("index") == 2);
+      CHECK(sgs[1].getProp<std::string>(internKey("TYPE")) == "ANY");
+      CHECK(sgs[1].getProp<std::string>(internKey("CONNECT")) == "HH");
+      CHECK(sgs[1].getProp<unsigned int>(internKey("index")) == 2);
 
       auto smi = MolToCXSmiles(*mol);
       CHECK(smi ==
@@ -1216,31 +1216,31 @@ TEST_CASE("polymer SGroups") {
       const auto &sgs = getSubstanceGroups(*mol);
       REQUIRE(sgs.size() == 3);
       CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{1});
-      CHECK(sgs[0].getProp<std::string>("TYPE") == "DAT");
-      CHECK(sgs[0].getProp<std::string>("FIELDNAME") == "atomdata");
-      CHECK(sgs[0].getProp<std::vector<std::string>>("DATAFIELDS") ==
+      CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "DAT");
+      CHECK(sgs[0].getProp<std::string>(internKey("FIELDNAME")) == "atomdata");
+      CHECK(sgs[0].getProp<std::vector<std::string>>(internKey("DATAFIELDS")) ==
             std::vector<std::string>{"val"});
-      CHECK(sgs[0].getProp<unsigned int>("index") == 1);
+      CHECK(sgs[0].getProp<unsigned int>(internKey("index")) == 1);
 
       CHECK(sgs[1].getAtoms() == std::vector<unsigned int>{2, 3});
       CHECK(sgs[1].getBonds() == std::vector<unsigned int>{1, 3});
-      CHECK(sgs[1].getProp<std::vector<unsigned int>>("XBCORR") ==
+      CHECK(sgs[1].getProp<std::vector<unsigned int>>(internKey("XBCORR")) ==
             sgs[1].getBonds());
-      CHECK(sgs[1].getProp<std::vector<unsigned int>>("XBHEAD") ==
+      CHECK(sgs[1].getProp<std::vector<unsigned int>>(internKey("XBHEAD")) ==
             std::vector<unsigned int>{1});
-      CHECK(sgs[1].getProp<std::string>("TYPE") == "SRU");
-      CHECK(sgs[1].getProp<std::string>("CONNECT") == "HT");
-      CHECK(sgs[1].getProp<unsigned int>("index") == 2);
+      CHECK(sgs[1].getProp<std::string>(internKey("TYPE")) == "SRU");
+      CHECK(sgs[1].getProp<std::string>(internKey("CONNECT")) == "HT");
+      CHECK(sgs[1].getProp<unsigned int>(internKey("index")) == 2);
 
       CHECK(sgs[2].getAtoms() == std::vector<unsigned int>{4, 5});
       CHECK(sgs[2].getBonds() == std::vector<unsigned int>{3, 5});
-      CHECK(sgs[2].getProp<std::vector<unsigned int>>("XBCORR") ==
+      CHECK(sgs[2].getProp<std::vector<unsigned int>>(internKey("XBCORR")) ==
             sgs[2].getBonds());
-      CHECK(sgs[2].getProp<std::vector<unsigned int>>("XBHEAD") ==
+      CHECK(sgs[2].getProp<std::vector<unsigned int>>(internKey("XBHEAD")) ==
             std::vector<unsigned int>{3});
-      CHECK(sgs[2].getProp<std::string>("TYPE") == "ANY");
-      CHECK(sgs[2].getProp<std::string>("CONNECT") == "HH");
-      CHECK(sgs[2].getProp<unsigned int>("index") == 3);
+      CHECK(sgs[2].getProp<std::string>(internKey("TYPE")) == "ANY");
+      CHECK(sgs[2].getProp<std::string>(internKey("CONNECT")) == "HH");
+      CHECK(sgs[2].getProp<unsigned int>(internKey("index")) == 3);
 
       auto smi = MolToCXSmiles(*mol);
       CHECK(smi ==
@@ -1261,13 +1261,13 @@ TEST_CASE("SGroup hierarchy") {
     const auto &sgs = getSubstanceGroups(*mol);
     REQUIRE(sgs.size() == 2);
     CHECK(sgs[0].getAtoms() == std::vector<unsigned int>{2, 1});
-    CHECK(sgs[0].getProp<std::string>("TYPE") == "ANY");
-    CHECK(sgs[0].getProp<unsigned int>("PARENT") == 2);
-    CHECK(sgs[0].getProp<unsigned int>("index") == 1);
+    CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "ANY");
+    CHECK(sgs[0].getProp<unsigned int>(internKey("PARENT")) == 2);
+    CHECK(sgs[0].getProp<unsigned int>(internKey("index")) == 1);
     CHECK(sgs[1].getAtoms() == std::vector<unsigned int>{4, 3, 2, 1, 0, 6});
-    CHECK(sgs[1].getProp<std::string>("TYPE") == "ANY");
-    CHECK(sgs[1].getProp<unsigned int>("index") == 2);
-    CHECK(!sgs[1].hasProp("PARENT"));
+    CHECK(sgs[1].getProp<std::string>(internKey("TYPE")) == "ANY");
+    CHECK(sgs[1].getProp<unsigned int>(internKey("index")) == 2);
+    CHECK(!sgs[1].hasProp(internKey("PARENT")));
     CHECK(MolToCXSmiles(*mol) ==
           "*CNC(C*)O* "
           "|$star_e;;;;;star_e;;star_e$,Sg:any:2,1::ht:::,Sg:any:4,3,2,1,0,6:"
@@ -1283,10 +1283,10 @@ TEST_CASE("SGroup hierarchy") {
     REQUIRE(mol);
     const auto &sgs = getSubstanceGroups(*mol);
     REQUIRE(sgs.size() == 5);
-    CHECK(sgs[0].getProp<unsigned int>("PARENT") == 5);
-    CHECK(sgs[2].getProp<unsigned int>("PARENT") == 5);
-    CHECK(sgs[3].getProp<unsigned int>("PARENT") == 5);
-    CHECK(sgs[1].getProp<unsigned int>("PARENT") == 3);
+    CHECK(sgs[0].getProp<unsigned int>(internKey("PARENT")) == 5);
+    CHECK(sgs[2].getProp<unsigned int>(internKey("PARENT")) == 5);
+    CHECK(sgs[3].getProp<unsigned int>(internKey("PARENT")) == 5);
+    CHECK(sgs[1].getProp<unsigned int>(internKey("PARENT")) == 3);
     CHECK(
         MolToCXSmiles(*mol) ==
         "*CNC(CC(*)C*)O* |$star_e;;;;;;star_e;;star_e;;star_e$,SgD:4:internal "
@@ -1479,16 +1479,16 @@ TEST_CASE(
   SECTION("SMILES defaults") {
     std::unique_ptr<RWMol> m{SmilesToMol("NON sense extra")};
     CHECK(m);
-    CHECK(m->hasProp("_Name"));
-    CHECK(m->getProp<std::string>("_Name") == "sense extra");
+    CHECK(m->hasProp(internKey("_Name")));
+    CHECK(m->getProp<std::string>(internKey("_Name")) == "sense extra");
 
     CHECK_THROWS_AS(SmilesToMol("NON |sense|"), SmilesParseException);
   }
   SECTION("SMARTS defaults") {
     std::unique_ptr<RWMol> m{SmilesToMol("NON sense extra")};
     CHECK(m);
-    CHECK(m->hasProp("_Name"));
-    CHECK(m->getProp<std::string>("_Name") == "sense extra");
+    CHECK(m->hasProp(internKey("_Name")));
+    CHECK(m->getProp<std::string>(internKey("_Name")) == "sense extra");
 
     CHECK_THROWS_AS(SmartsToMol("NON |sense|"), SmilesParseException);
   }
@@ -1508,14 +1508,14 @@ TEST_CASE(
     {
       std::unique_ptr<RWMol> m{SmilesToMol("NON sense extra", ps)};
       CHECK(m);
-      CHECK(m->hasProp("_Name"));
-      CHECK(m->getProp<std::string>("_Name") == "sense extra");
+      CHECK(m->hasProp(internKey("_Name")));
+      CHECK(m->getProp<std::string>(internKey("_Name")) == "sense extra");
     }
     {
       std::unique_ptr<RWMol> m{SmilesToMol("NON |$N1;O2;N3$| sense extra", ps)};
       CHECK(m);
-      CHECK(m->hasProp("_Name"));
-      CHECK(m->getProp<std::string>("_Name") == "|$N1;O2;N3$| sense extra");
+      CHECK(m->hasProp(internKey("_Name")));
+      CHECK(m->getProp<std::string>(internKey("_Name")) == "|$N1;O2;N3$| sense extra");
     }
   }
 
@@ -1525,23 +1525,23 @@ TEST_CASE(
     {
       std::unique_ptr<RWMol> m{SmilesToMol("NON sense", ps)};
       CHECK(m);
-      CHECK(m->hasProp("_Name"));
+      CHECK(m->hasProp(internKey("_Name")));
     }
     {
       std::unique_ptr<RWMol> m{SmilesToMol("NON |sense|", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
     ps.parseName = false;
     {
       std::unique_ptr<RWMol> m{SmilesToMol("NON sense", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
     {
       std::unique_ptr<RWMol> m{SmilesToMol("NON |sense|", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
   }
   SECTION("SMARTS not strict") {
@@ -1550,23 +1550,23 @@ TEST_CASE(
     {
       std::unique_ptr<RWMol> m{SmartsToMol("NON sense", ps)};
       CHECK(m);
-      CHECK(m->hasProp("_Name"));
+      CHECK(m->hasProp(internKey("_Name")));
     }
     {
       std::unique_ptr<RWMol> m{SmartsToMol("NON |sense|", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
     ps.parseName = false;
     {
       std::unique_ptr<RWMol> m{SmartsToMol("NON sense", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
     {
       std::unique_ptr<RWMol> m{SmartsToMol("NON |sense|", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
   }
   SECTION("SMARTS CXExtensions + names") {
@@ -1575,19 +1575,19 @@ TEST_CASE(
     {  // CXSMILES + name
       std::unique_ptr<RWMol> m{SmartsToMol("NON |$_AV:bar;;foo$| name", ps)};
       CHECK(m);
-      CHECK(m->hasProp("_Name"));
-      CHECK(m->getProp<std::string>("_Name") == "name");
+      CHECK(m->hasProp(internKey("_Name")));
+      CHECK(m->getProp<std::string>(internKey("_Name")) == "name");
     }
     {  // CXSMILES fails, so we don't read the name
       std::unique_ptr<RWMol> m{SmartsToMol("NON |sense| name", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
     ps.parseName = false;
     {  // CXSMILES, skip the name
       std::unique_ptr<RWMol> m{SmartsToMol("NON |$_AV:bar;;foo$| name", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
     ps.parseName = true;
     ps.allowCXSMILES = false;
@@ -1596,8 +1596,8 @@ TEST_CASE(
        // name
       std::unique_ptr<RWMol> m{SmartsToMol("NON |$_AV:bar;;foo$| name", ps)};
       CHECK(m);
-      CHECK(m->hasProp("_Name"));
-      CHECK(m->getProp<std::string>("_Name") == "|$_AV:bar;;foo$| name");
+      CHECK(m->hasProp(internKey("_Name")));
+      CHECK(m->getProp<std::string>(internKey("_Name")) == "|$_AV:bar;;foo$| name");
     }
   }
   SECTION("SMILES CXExtensions + names") {
@@ -1605,19 +1605,19 @@ TEST_CASE(
     ps.strictCXSMILES = false;
     {  // CXSMILES + name
       std::unique_ptr<RWMol> m{SmilesToMol("NON |$_AV:bar;;foo$| name", ps)};
-      CHECK(m->hasProp("_Name"));
-      CHECK(m->getProp<std::string>("_Name") == "name");
+      CHECK(m->hasProp(internKey("_Name")));
+      CHECK(m->getProp<std::string>(internKey("_Name")) == "name");
     }
     {  // CXSMILES fails, so we don't read the name
       std::unique_ptr<RWMol> m{SmilesToMol("NON |sense| name", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
     ps.parseName = false;
     {  // CXSMILES, skip the name
       std::unique_ptr<RWMol> m{SmilesToMol("NON |$_AV:bar;;foo$| name", ps)};
       CHECK(m);
-      CHECK(!m->hasProp("_Name"));
+      CHECK(!m->hasProp(internKey("_Name")));
     }
     ps.parseName = true;
     ps.allowCXSMILES = false;
@@ -1626,8 +1626,8 @@ TEST_CASE(
        // name
       std::unique_ptr<RWMol> m{SmilesToMol("NON |$_AV:bar;;foo$| name", ps)};
       CHECK(m);
-      CHECK(m->hasProp("_Name"));
-      CHECK(m->getProp<std::string>("_Name") == "|$_AV:bar;;foo$| name");
+      CHECK(m->hasProp(internKey("_Name")));
+      CHECK(m->getProp<std::string>(internKey("_Name")) == "|$_AV:bar;;foo$| name");
     }
   }
 }
@@ -2003,12 +2003,12 @@ TEST_CASE("github #5466 writing floating point atom props cxsmiles",
     auto mol = "C"_smiles;
     REQUIRE(mol);
 
-    mol->getAtomWithIdx(0)->setProp<std::string>("foo", "7.6");
+    mol->getAtomWithIdx(0)->setProp<std::string>(internKey("foo"), "7.6");
     auto smi = MolToCXSmiles(*mol);
     CHECK(smi == "C |atomProp:0.foo.7&#46;6|");
 
     // 7.5 is exactly representable in IEEE so this helps :)
-    mol->getAtomWithIdx(0)->setProp<double>("foo", 7.5);
+    mol->getAtomWithIdx(0)->setProp<double>(internKey("foo"), 7.5);
     smi = MolToCXSmiles(*mol);
     CHECK(smi == "C |atomProp:0.foo.7&#46;5|");
   }
@@ -2016,7 +2016,7 @@ TEST_CASE("github #5466 writing floating point atom props cxsmiles",
     auto mol = "C"_smiles;
     REQUIRE(mol);
 
-    mol->getAtomWithIdx(0)->setProp<int>("foo.foo", 7);
+    mol->getAtomWithIdx(0)->setProp<int>(internKey("foo.foo"), 7);
     auto smi = MolToCXSmiles(*mol);
     CHECK(smi == "C |atomProp:0.foo&#46;foo.7|");
   }
@@ -2057,7 +2057,7 @@ TEST_CASE("wiggly and wedged bonds in CXSMILES") {
     auto m = "CC(O)F |w:1.2|"_smiles;
     REQUIRE(m);
     unsigned int bondcfg = 0;
-    CHECK(m->getBondWithIdx(2)->getPropIfPresent("_MolFileBondCfg", bondcfg));
+    CHECK(m->getBondWithIdx(2)->getPropIfPresent(internKey("_MolFileBondCfg"), bondcfg));
     CHECK(bondcfg == 2);
     // make sure we end up with a wiggly bond in output mol blocks:
     Chirality::reapplyMolBlockWedging(*m);
@@ -2079,7 +2079,7 @@ TEST_CASE("wiggly and wedged bonds in CXSMILES") {
     auto m = "C[C@H](O)F |w:1.2|"_smiles;
     REQUIRE(m);
     unsigned int bondcfg = 0;
-    CHECK(m->getBondWithIdx(2)->getPropIfPresent("_MolFileBondCfg", bondcfg));
+    CHECK(m->getBondWithIdx(2)->getPropIfPresent(internKey("_MolFileBondCfg"), bondcfg));
     CHECK(bondcfg == 2);
     CHECK(m->getAtomWithIdx(1)->getChiralTag() ==
           Atom::ChiralType::CHI_UNSPECIFIED);
@@ -2099,7 +2099,7 @@ TEST_CASE("wiggly and wedged bonds in CXSMILES") {
     REQUIRE(m);
     CHECK(m->getBondWithIdx(0)->getBeginAtomIdx() == 1);
     unsigned int bondcfg = 0;
-    CHECK(m->getBondWithIdx(0)->getPropIfPresent("_MolFileBondCfg", bondcfg));
+    CHECK(m->getBondWithIdx(0)->getPropIfPresent(internKey("_MolFileBondCfg"), bondcfg));
     CHECK(bondcfg == 2);
   }
 
@@ -2108,25 +2108,25 @@ TEST_CASE("wiggly and wedged bonds in CXSMILES") {
         "CC(O)Cl |(-3.9163,5.4767,;-3.9163,3.9367,;-2.5826,3.1667,;-5.25,3.1667,),wU:1.0|"_smiles;
     REQUIRE(m);
     unsigned int bondcfg = 0;
-    CHECK(m->getBondWithIdx(0)->getPropIfPresent("_MolFileBondCfg", bondcfg));
+    CHECK(m->getBondWithIdx(0)->getPropIfPresent(internKey("_MolFileBondCfg"), bondcfg));
     CHECK(bondcfg == 1);
     CHECK(m->getAtomWithIdx(1)->getChiralTag() ==
           Atom::ChiralType::CHI_TETRAHEDRAL_CW);
     m = "CC(O)Cl |(-3.9163,5.4767,;-3.9163,3.9367,;-2.5826,3.1667,;-5.25,3.1667,),wD:1.0|"_smiles;
     REQUIRE(m);
-    CHECK(m->getBondWithIdx(0)->getPropIfPresent("_MolFileBondCfg", bondcfg));
+    CHECK(m->getBondWithIdx(0)->getPropIfPresent(internKey("_MolFileBondCfg"), bondcfg));
     CHECK(bondcfg == 3);
     CHECK(m->getAtomWithIdx(1)->getChiralTag() ==
           Atom::ChiralType::CHI_TETRAHEDRAL_CCW);
     invertMolBlockWedgingInfo(*m);
-    CHECK(m->getBondWithIdx(0)->getPropIfPresent("_MolFileBondCfg", bondcfg));
+    CHECK(m->getBondWithIdx(0)->getPropIfPresent(internKey("_MolFileBondCfg"), bondcfg));
     CHECK(bondcfg == 1);
     Chirality::reapplyMolBlockWedging(*m);
     MolOps::assignChiralTypesFromBondDirs(*m);
     CHECK(m->getAtomWithIdx(1)->getChiralTag() ==
           Atom::ChiralType::CHI_TETRAHEDRAL_CW);
     invertMolBlockWedgingInfo(*m);
-    CHECK(m->getBondWithIdx(0)->getPropIfPresent("_MolFileBondCfg", bondcfg));
+    CHECK(m->getBondWithIdx(0)->getPropIfPresent(internKey("_MolFileBondCfg"), bondcfg));
     CHECK(bondcfg == 3);
     Chirality::reapplyMolBlockWedging(*m);
     MolOps::assignChiralTypesFromBondDirs(*m);
@@ -2134,7 +2134,7 @@ TEST_CASE("wiggly and wedged bonds in CXSMILES") {
           Atom::ChiralType::CHI_TETRAHEDRAL_CCW);
     Chirality::clearMolBlockWedgingInfo(*m);
     m->getAtomWithIdx(1)->setChiralTag(Atom::ChiralType::CHI_UNSPECIFIED);
-    CHECK(!m->getBondWithIdx(0)->getPropIfPresent("_MolFileBondCfg", bondcfg));
+    CHECK(!m->getBondWithIdx(0)->getPropIfPresent(internKey("_MolFileBondCfg"), bondcfg));
     Chirality::reapplyMolBlockWedging(*m);
     MolOps::assignChiralTypesFromBondDirs(*m);
     CHECK(m->getAtomWithIdx(1)->getChiralTag() ==
@@ -2237,7 +2237,7 @@ M  END
     auto m = "CC=CC |w:2.2|"_smiles;
     REQUIRE(m);
     unsigned int bondcfg = 0;
-    CHECK(m->getBondWithIdx(2)->getPropIfPresent("_MolFileBondCfg", bondcfg));
+    CHECK(m->getBondWithIdx(2)->getPropIfPresent(internKey("_MolFileBondCfg"), bondcfg));
     CHECK(bondcfg == 2);
   }
 
@@ -2968,7 +2968,7 @@ TEST_CASE("Github #7372: SMILES output option to disable dative bonds") {
 void strip_atom_properties(RWMol *molecule) {
   for (auto atom : molecule->atoms()) {
     for (auto property : atom->getPropList(false, false)) {
-      atom->clearProp(property);
+      atom->clearProp(internKey(property));
     }
   }
 

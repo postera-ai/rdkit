@@ -74,13 +74,13 @@ TEST_CASE("Github #2062", "[bug][molops]") {
   std::unique_ptr<RWMol> mol(SmilesToMol("[C:1][C:2]([H:3])([H])[O:4][H]", ps));
   REQUIRE(mol);
   CHECK(mol->getNumAtoms() == 6);
-  mol->getAtomWithIdx(1)->setProp("intProp", 42);
+  mol->getAtomWithIdx(1)->setProp(internKey("intProp"), 42);
   MolOps::mergeQueryHs(*mol);
   CHECK(mol->getNumAtoms() == 3);
   SECTION("basics") { CHECK(mol->getAtomWithIdx(1)->getAtomMapNum() == 2); }
   SECTION("other props") {
-    REQUIRE(mol->getAtomWithIdx(1)->hasProp("intProp"));
-    CHECK(mol->getAtomWithIdx(1)->getProp<int>("intProp") == 42);
+    REQUIRE(mol->getAtomWithIdx(1)->hasProp(internKey("intProp")));
+    CHECK(mol->getAtomWithIdx(1)->getProp<int>(internKey("intProp")) == 42);
   }
 }
 
@@ -2591,7 +2591,7 @@ TEST_CASE("moves") {
       "C[C@H](O)[C@H](F)[C@@H](C)F |o2:1,5,&1:3,SgD:4:atom_data:foo::::|"_smiles;
   REQUIRE(m1);
   CHECK(m1->getStereoGroups().size() == 2);
-  m1->setProp("foo", 1u);
+  m1->setProp(internKey("foo"), 1u);
   SECTION("molecule move") {
     ROMol m2 = std::move(*m1);
     check_dest(m1.get(), m2);
@@ -2608,7 +2608,7 @@ TEST_CASE("query moves") {
       "C[C@H](O)[C@H](F)[C@@H](C)O |o2:1,5,&1:3,SgD:4:atom_data:foo::::|"_smarts;
   REQUIRE(m1);
   CHECK(m1->getStereoGroups().size() == 2);
-  m1->setProp("foo", 1u);
+  m1->setProp(internKey("foo"), 1u);
   SECTION("molecule move") {
     ROMol m2 = std::move(*m1);
     check_dest(m1.get(), m2);
@@ -2659,7 +2659,7 @@ M  END
 )CTAB"_ctab;
   REQUIRE(m1);
   CHECK(m1->getStereoGroups().size() == 2);
-  m1->setProp("foo", 1u);
+  m1->setProp(internKey("foo"), 1u);
   SECTION("molecule move") {
     ROMol m2 = std::move(*m1);
     check_dest(m1.get(), m2);
@@ -3535,7 +3535,7 @@ $$$$
   // This bond was a dashed bond (dash is removed when parity is resolved)
   auto bond = m->getBondWithIdx(0);
   int bond_dir = 0;
-  REQUIRE(bond->getPropIfPresent("_MolFileBondCfg", bond_dir) == true);
+  REQUIRE(bond->getPropIfPresent(internKey("_MolFileBondCfg"), bond_dir) == true);
   REQUIRE(bond_dir == 3);  // dashed bond
 
   auto begin_atom = bond->getBeginAtom();
@@ -4071,7 +4071,7 @@ M  END
 
         const auto &sg = sgs[sg_idx];
 
-        CHECK(sg.getProp<std::string>("TYPE") == "SUP");
+        CHECK(sg.getProp<std::string>(internKey("TYPE")) == "SUP");
         CHECK(sg.getAtoms() == atoms);
         CHECK(sg.getBonds() == bonds);
 
@@ -4967,10 +4967,10 @@ TEST_CASE("github #9068: properties with empty names") {
   SECTION("basics") {
     auto m = "CCO"_smiles;
     REQUIRE(m);
-    CHECK_THROWS_AS(m->setProp("", "some value"), ValueErrorException);
-    CHECK_THROWS_AS(m->getProp<std::string>(""), KeyErrorException);
-    CHECK(!m->hasProp(""));
-    CHECK_NOTHROW(m->clearProp(""));
+    CHECK_THROWS_AS(m->setProp(internKey(""), "some value"), ValueErrorException);
+    CHECK_THROWS_AS(m->getProp<std::string>(internKey("")), KeyErrorException);
+    CHECK(!m->hasProp(internKey("")));
+    CHECK_NOTHROW(m->clearProp(internKey("")));
   }
 }
 

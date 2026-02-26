@@ -84,10 +84,10 @@ RGroupDecomposition::~RGroupDecomposition() { delete data; }
 
 void RGroupDecomposition::labelAtomBondIndices(RWMol &mol) {
   for (const auto targetAtom : mol.atoms()) {
-    targetAtom->setProp(TARGET_ATOM_IDX, targetAtom->getIdx());
+    targetAtom->setProp(internKey(TARGET_ATOM_IDX), targetAtom->getIdx());
   }
   for (const auto targetBond : mol.bonds()) {
-    targetBond->setProp(TARGET_BOND_IDX, targetBond->getIdx());
+    targetBond->setProp(internKey(TARGET_BOND_IDX), targetBond->getIdx());
   }
 }
 
@@ -99,11 +99,11 @@ void RGroupDecomposition::setTargetAtomBondIndices(
   bool isHydrogen = RGroupData::isMolHydrogen(mol);
   for (const auto atom : mol.atoms()) {
     int targetAtomIdx;
-    if (atom->getPropIfPresent(TARGET_ATOM_IDX, targetAtomIdx)) {
-      atom->clearProp(TARGET_ATOM_IDX);
+    if (atom->getPropIfPresent(internKey(TARGET_ATOM_IDX), targetAtomIdx)) {
+      atom->clearProp(internKey(TARGET_ATOM_IDX));
       if ((atom->getAtomicNum() == 1 && data->params.removeHydrogensPostMatch &&
            !isHydrogen) ||
-          (atom->getAtomicNum() == 0 && !atom->hasProp(_rgroupInputDummy))) {
+          (atom->getAtomicNum() == 0 && !atom->hasProp(internKey(_rgroupInputDummy)))) {
         continue;
       }
       int atomIdx = atom->getIdx();
@@ -115,8 +115,8 @@ void RGroupDecomposition::setTargetAtomBondIndices(
   int largestBondIdx = -1;
   for (const auto bond : mol.bonds()) {
     int targetBondIdx;
-    if (bond->getPropIfPresent(TARGET_BOND_IDX, targetBondIdx)) {
-      bond->clearProp(TARGET_BOND_IDX);
+    if (bond->getPropIfPresent(internKey(TARGET_BOND_IDX), targetBondIdx)) {
+      bond->clearProp(internKey(TARGET_BOND_IDX));
       if ((bond->getBeginAtom()->getAtomicNum() == 1 ||
            bond->getEndAtom()->getAtomicNum() == 1) &&
           data->params.removeHydrogensPostMatch && !isHydrogen) {
@@ -124,9 +124,9 @@ void RGroupDecomposition::setTargetAtomBondIndices(
       }
       if (!includeBondsToRLabels &&
           ((bond->getBeginAtom()->getAtomicNum() == 0 &&
-            !bond->getBeginAtom()->hasProp(_rgroupInputDummy)) ||
+            !bond->getBeginAtom()->hasProp(internKey(_rgroupInputDummy))) ||
            (bond->getEndAtom()->getAtomicNum() == 0 &&
-            !bond->getEndAtom()->hasProp(_rgroupInputDummy)))) {
+            !bond->getEndAtom()->hasProp(internKey(_rgroupInputDummy))))) {
         continue;
       }
       int bondIdx = bond->getIdx();
@@ -405,7 +405,7 @@ int RGroupDecomposition::add(const ROMol &inmol) {
   // mark any wildcards in input molecule:
   for (auto &atom : mol->atoms()) {
     if (atom->getAtomicNum() == 0) {
-      atom->setProp(_rgroupInputDummy, true);
+      atom->setProp(internKey(_rgroupInputDummy), true);
       // clean any existing R group numbers
       atom->setIsotope(0);
       atom->setAtomMapNum(0);
@@ -463,9 +463,9 @@ int RGroupDecomposition::add(const ROMol &inmol) {
         for (size_t i = 0; i < fragments.size(); ++i) {
           const auto &newMol = fragments[i];
           std::vector<int> rlabelsOnSideChain;
-          newMol->setProp<int>("core", core_idx);
-          newMol->setProp<int>("idx", data->matches.size());
-          newMol->setProp<int>("frag_idx", i);
+          newMol->setProp<int>(internKey("core"), core_idx);
+          newMol->setProp<int>(internKey("idx"), data->matches.size());
+          newMol->setProp<int>(internKey("frag_idx"), i);
 #ifdef VERBOSE
           std::cerr << "Fragment " << MolToSmiles(*newMol) << std::endl;
 #endif
@@ -474,19 +474,19 @@ int RGroupDecomposition::add(const ROMol &inmol) {
               // we are only interested in sidechain R group atoms
               continue;
             }
-            if (!sideChainAtom->hasProp(_rgroupInputDummy)) {
+            if (!sideChainAtom->hasProp(internKey(_rgroupInputDummy))) {
               // this is the index of the core atom that the R group
               // atom is attached to
               unsigned int coreAtomIndex = sideChainAtom->getIsotope();
               auto coreAtom = rcore->core->getAtomWithIdx(coreAtomIndex);
               coreAtomAnyMatched.insert(coreAtomIndex);
               int rlabel;
-              if (coreAtom->getPropIfPresent(RLABEL, rlabel)) {
+              if (coreAtom->getPropIfPresent(internKey(RLABEL), rlabel)) {
                 std::vector<int> rlabelsOnSideChainAtom;
-                sideChainAtom->getPropIfPresent(SIDECHAIN_RLABELS,
+                sideChainAtom->getPropIfPresent(internKey(SIDECHAIN_RLABELS),
                                                 rlabelsOnSideChainAtom);
                 rlabelsOnSideChainAtom.push_back(rlabel);
-                sideChainAtom->setProp(SIDECHAIN_RLABELS,
+                sideChainAtom->setProp(internKey(SIDECHAIN_RLABELS),
                                        rlabelsOnSideChainAtom);
                 data->labels.insert(rlabel);  // keep track of all labels used
                 rlabelsOnSideChain.push_back(rlabel);
@@ -504,7 +504,7 @@ int RGroupDecomposition::add(const ROMol &inmol) {
               }
             } else {
               // restore input wildcard
-              sideChainAtom->clearProp(_rgroupInputDummy);
+              sideChainAtom->clearProp(internKey(_rgroupInputDummy));
             }
           }
           if (data->params.includeTargetMolInResults) {
@@ -537,15 +537,15 @@ int RGroupDecomposition::add(const ROMol &inmol) {
                 const Atom *coreAtm = rcore->core->getAtomWithIdx(mvpair.first);
                 Atom *newCoreAtm = newCore.getAtomWithIdx(mvpair.second);
                 int rlabel;
-                if (coreAtm->getPropIfPresent(RLABEL, rlabel)) {
-                  newCoreAtm->setProp<int>(RLABEL, rlabel);
+                if (coreAtm->getPropIfPresent(internKey(RLABEL), rlabel)) {
+                  newCoreAtm->setProp<int>(internKey(RLABEL), rlabel);
                 }
-                newCoreAtm->setProp<bool>("keep", true);
+                newCoreAtm->setProp<bool>(internKey("keep"), true);
               }
 
               newCore.beginBatchEdit();
               for (const auto atom : newCore.atoms()) {
-                if (!atom->hasProp("keep")) {
+                if (!atom->hasProp(internKey("keep"))) {
                   newCore.removeAtom(atom);
                 }
               }
@@ -795,7 +795,7 @@ RGroupColumns RGroupDecomposition::getRGroupsAsColumns() const {
       const auto realLabel = data->finalRlabelMapping.find(rgroup.first);
       CHECK_INVARIANT(realLabel != data->finalRlabelMapping.end(),
                       "unprocessed rlabel, please call process() first.");
-      CHECK_INVARIANT(rgroup.second->combinedMol->hasProp(done),
+      CHECK_INVARIANT(rgroup.second->combinedMol->hasProp(internKey(done)),
                       "Not done! Call process()");
 
       CHECK_INVARIANT(!Rs_seen.getIsUsed(realLabel->second),

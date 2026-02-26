@@ -132,24 +132,24 @@ void testMolProps() {
   m2.addAtom(new Atom(6), true, true);
   m2.addBond(0, 1, Bond::TRIPLE);
 
-  CHECK_INVARIANT(!m2.hasProp("prop1"), "");
-  CHECK_INVARIANT(!m2.hasProp("prop2"), "");
-  m2.setProp("prop1", 2);
+  CHECK_INVARIANT(!m2.hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!m2.hasProp(internKey("prop2")), "");
+  m2.setProp(internKey("prop1"), 2);
   int tmpI;
   std::string tmpS;
-  CHECK_INVARIANT(m2.hasProp("prop1"), "");
-  m2.getProp("prop1", tmpI);
+  CHECK_INVARIANT(m2.hasProp(internKey("prop1")), "");
+  m2.getProp(internKey("prop1"), tmpI);
   CHECK_INVARIANT(tmpI == 2, "");
-  m2.getProp("prop1", tmpS);
+  m2.getProp(internKey("prop1"), tmpS);
   CHECK_INVARIANT(tmpS == "2", "");
-  m2.setProp("prop1", std::string("2"));
-  CHECK_INVARIANT(m2.hasProp("prop1"), "");
-  m2.getProp("prop1", tmpS);
+  m2.setProp(internKey("prop1"), std::string("2"));
+  CHECK_INVARIANT(m2.hasProp(internKey("prop1")), "");
+  m2.getProp(internKey("prop1"), tmpS);
   CHECK_INVARIANT(tmpS == "2", "");
   std::string tmpString("2");
-  m2.setProp("prop1", tmpString.c_str());
-  CHECK_INVARIANT(m2.hasProp("prop1"), "");
-  m2.getProp("prop1", tmpS);
+  m2.setProp(internKey("prop1"), tmpString.c_str());
+  CHECK_INVARIANT(m2.hasProp(internKey("prop1")), "");
+  m2.getProp(internKey("prop1"), tmpS);
   CHECK_INVARIANT(tmpS == "2", "");
 
   tmpS = "name";
@@ -161,8 +161,8 @@ void testMolProps() {
   TEST_ASSERT(propNames.size() == 2);
 
   // check for computed properties
-  m2.setProp("cprop1", 1, true);
-  m2.setProp("cprop2", 2, true);
+  m2.setProp(internKey("cprop1"), 1, true);
+  m2.setProp(internKey("cprop2"), 2, true);
   STR_VECT cplst;
   m2.getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 2, "");
@@ -180,13 +180,13 @@ void testMolProps() {
   propNames = m2.getPropList();
   TEST_ASSERT(propNames.size() == 5);
 
-  m2.clearProp("cprop1");
-  CHECK_INVARIANT(!m2.hasProp("cprop1"), "");
+  m2.clearProp(internKey("cprop1"));
+  CHECK_INVARIANT(!m2.hasProp(internKey("cprop1")), "");
   m2.getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 1, "");
 
   m2.clearComputedProps();
-  CHECK_INVARIANT(!m2.hasProp("cprop2"), "");
+  CHECK_INVARIANT(!m2.hasProp(internKey("cprop2")), "");
   m2.getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 0, "");
 
@@ -205,18 +205,18 @@ void testClearMol() {
   // we start with no computed properties since none have been added
   TEST_ASSERT(!m2.hasProp(RDKit::detail::computedPropName));
 
-  TEST_ASSERT(!m2.hasProp("prop1"));
+  TEST_ASSERT(!m2.hasProp(internKey("prop1")));
   bool isComputed = true;
-  m2.setProp("prop1", 2, isComputed);
+  m2.setProp(internKey("prop1"), 2, isComputed);
   int tmpI;
-  TEST_ASSERT(m2.hasProp("prop1"));
-  m2.getProp("prop1", tmpI);
+  TEST_ASSERT(m2.hasProp(internKey("prop1")));
+  m2.getProp(internKey("prop1"), tmpI);
   TEST_ASSERT(tmpI == 2);
 
   TEST_ASSERT(m2.hasProp(RDKit::detail::computedPropName));
 
   m2.clear();
-  TEST_ASSERT(!m2.hasProp("prop1"));
+  TEST_ASSERT(!m2.hasProp(internKey("prop1")));
   TEST_ASSERT(m2.getNumAtoms() == 0);
   TEST_ASSERT(m2.getNumBonds() == 0);
   TEST_ASSERT(m2.getAtomBookmarks()->empty());
@@ -240,73 +240,73 @@ void testAtomProps() {
   Atom *a1 = m2.getAtomWithIdx(0);
   Atom *a2 = m2.getAtomWithIdx(0);
   Atom *a3 = &(*a1);
-  CHECK_INVARIANT(!a1->hasProp("prop1"), "");
-  CHECK_INVARIANT(!a1->hasProp("prop2"), "");
-  CHECK_INVARIANT(!a2->hasProp("prop1"), "");
-  CHECK_INVARIANT(!a2->hasProp("prop2"), "");
-  CHECK_INVARIANT(!a3->hasProp("prop1"), "");
-  CHECK_INVARIANT(!a3->hasProp("prop2"), "");
-  a1->setProp("prop1", 3);
-  a1->setProp("prop2", 4);
-  CHECK_INVARIANT(a1->hasProp("prop1"), "");
-  CHECK_INVARIANT(a1->hasProp("prop2"), "");
-  CHECK_INVARIANT(a2->hasProp("prop1"), "");
-  CHECK_INVARIANT(a2->hasProp("prop2"), "");
-  CHECK_INVARIANT(a3->hasProp("prop1"), "");
-  CHECK_INVARIANT(a3->hasProp("prop2"), "");
-  CHECK_INVARIANT(!a1->hasProp("bogus"), "");
-  CHECK_INVARIANT(!a2->hasProp("bogus"), "");
-  CHECK_INVARIANT(!a3->hasProp("bogus"), "");
+  CHECK_INVARIANT(!a1->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!a1->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(!a2->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!a2->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(!a3->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!a3->hasProp(internKey("prop2")), "");
+  a1->setProp(internKey("prop1"), 3);
+  a1->setProp(internKey("prop2"), 4);
+  CHECK_INVARIANT(a1->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(a1->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(a2->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(a2->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(a3->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(a3->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(!a1->hasProp(internKey("bogus")), "");
+  CHECK_INVARIANT(!a2->hasProp(internKey("bogus")), "");
+  CHECK_INVARIANT(!a3->hasProp(internKey("bogus")), "");
 
   bool ok = false;
-  a1->setProp<double>("dprop", 4);
-  TEST_ASSERT(a1->hasProp("dprop"));
+  a1->setProp<double>(internKey("dprop"), 4);
+  TEST_ASSERT(a1->hasProp(internKey("dprop")));
   try {
-    a1->getProp<int>("dprop");
+    a1->getProp<int>(internKey("dprop"));
   } catch (const std::bad_any_cast &) {
     ok = true;
   }
   TEST_ASSERT(ok);
-  a1->setProp<int>("iprop", 4);
-  TEST_ASSERT(a1->hasProp("iprop"));
+  a1->setProp<int>(internKey("iprop"), 4);
+  TEST_ASSERT(a1->hasProp(internKey("iprop")));
   ok = false;
   try {
-    a1->getProp<double>("iprop");
+    a1->getProp<double>(internKey("iprop"));
   } catch (const std::bad_any_cast &) {
     ok = true;
   }
   TEST_ASSERT(ok);
 
   int tmp;
-  a1->getProp("prop1", tmp);
+  a1->getProp(internKey("prop1"), tmp);
   CHECK_INVARIANT(tmp == 3, "");
-  a1->getProp("prop2", tmp);
+  a1->getProp(internKey("prop2"), tmp);
   CHECK_INVARIANT(tmp == 4, "");
-  a2->getProp("prop1", tmp);
+  a2->getProp(internKey("prop1"), tmp);
   CHECK_INVARIANT(tmp == 3, "");
-  a2->getProp("prop2", tmp);
+  a2->getProp(internKey("prop2"), tmp);
   CHECK_INVARIANT(tmp == 4, "");
-  a3->getProp("prop1", tmp);
+  a3->getProp(internKey("prop1"), tmp);
   CHECK_INVARIANT(tmp == 3, "");
-  a3->getProp("prop2", tmp);
+  a3->getProp(internKey("prop2"), tmp);
   CHECK_INVARIANT(tmp == 4, "");
 
   // check for computed properties
-  a1->setProp("cprop1", 1, true);
-  a1->setProp("cprop2", 2, true);
+  a1->setProp(internKey("cprop1"), 1, true);
+  a1->setProp(internKey("cprop2"), 2, true);
   STR_VECT cplst;
   a1->getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 2, "");
   CHECK_INVARIANT(cplst[0] == "cprop1", "");
   CHECK_INVARIANT(cplst[1] == "cprop2", "");
 
-  a1->clearProp("cprop1");
-  CHECK_INVARIANT(!a1->hasProp("cprop1"), "");
+  a1->clearProp(internKey("cprop1"));
+  CHECK_INVARIANT(!a1->hasProp(internKey("cprop1")), "");
   a1->getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 1, "");
 
   a1->clearComputedProps();
-  CHECK_INVARIANT(!a1->hasProp("cprop2"), "");
+  CHECK_INVARIANT(!a1->hasProp(internKey("cprop2")), "");
   a1->getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 0, "");
 
@@ -323,45 +323,45 @@ void testBondProps() {
 
   Bond *b1 = m2.getBondWithIdx(0);
   Bond *b2 = m2.getBondWithIdx(0);
-  CHECK_INVARIANT(!b1->hasProp("prop1"), "");
-  CHECK_INVARIANT(!b1->hasProp("prop2"), "");
-  CHECK_INVARIANT(!b2->hasProp("prop1"), "");
-  CHECK_INVARIANT(!b2->hasProp("prop2"), "");
-  b1->setProp("prop1", 3);
-  b1->setProp("prop2", 4);
-  CHECK_INVARIANT(b1->hasProp("prop1"), "");
-  CHECK_INVARIANT(b1->hasProp("prop2"), "");
-  CHECK_INVARIANT(b2->hasProp("prop1"), "");
-  CHECK_INVARIANT(b2->hasProp("prop2"), "");
-  CHECK_INVARIANT(!b1->hasProp("bogus"), "");
-  CHECK_INVARIANT(!b2->hasProp("bogus"), "");
+  CHECK_INVARIANT(!b1->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!b1->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(!b2->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!b2->hasProp(internKey("prop2")), "");
+  b1->setProp(internKey("prop1"), 3);
+  b1->setProp(internKey("prop2"), 4);
+  CHECK_INVARIANT(b1->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(b1->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(b2->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(b2->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(!b1->hasProp(internKey("bogus")), "");
+  CHECK_INVARIANT(!b2->hasProp(internKey("bogus")), "");
 
   int tmp;
-  b1->getProp("prop1", tmp);
+  b1->getProp(internKey("prop1"), tmp);
   CHECK_INVARIANT(tmp == 3, "");
-  b1->getProp("prop2", tmp);
+  b1->getProp(internKey("prop2"), tmp);
   CHECK_INVARIANT(tmp == 4, "");
-  b2->getProp("prop1", tmp);
+  b2->getProp(internKey("prop1"), tmp);
   CHECK_INVARIANT(tmp == 3, "");
-  b2->getProp("prop2", tmp);
+  b2->getProp(internKey("prop2"), tmp);
   CHECK_INVARIANT(tmp == 4, "");
 
   // check for computed properties
-  b1->setProp("cprop1", 1, true);
-  b1->setProp("cprop2", 2, true);
+  b1->setProp(internKey("cprop1"), 1, true);
+  b1->setProp(internKey("cprop2"), 2, true);
   STR_VECT cplst;
   b1->getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 2, "");
   CHECK_INVARIANT(cplst[0] == "cprop1", "");
   CHECK_INVARIANT(cplst[1] == "cprop2", "");
 
-  b1->clearProp("cprop1");
-  CHECK_INVARIANT(!b1->hasProp("cprop1"), "");
+  b1->clearProp(internKey("cprop1"));
+  CHECK_INVARIANT(!b1->hasProp(internKey("cprop1")), "");
   b1->getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 1, "");
 
   b1->clearComputedProps();
-  CHECK_INVARIANT(!b1->hasProp("cprop2"), "");
+  CHECK_INVARIANT(!b1->hasProp(internKey("cprop2")), "");
   b1->getProp(RDKit::detail::computedPropName, cplst);
   CHECK_INVARIANT(cplst.size() == 0, "");
 
@@ -381,51 +381,51 @@ void testPropLeak() {
 
   Atom *a1 = m2.getAtomWithIdx(0);
   Atom *a2 = m2.getAtomWithIdx(0);
-  CHECK_INVARIANT(!a1->hasProp("prop1"), "");
-  CHECK_INVARIANT(!a1->hasProp("prop2"), "");
-  CHECK_INVARIANT(!a2->hasProp("prop1"), "");
-  CHECK_INVARIANT(!a2->hasProp("prop2"), "");
-  a1->setProp("prop1", 3);
-  a1->setProp("prop2", 4);
-  CHECK_INVARIANT(a1->hasProp("prop1"), "");
-  CHECK_INVARIANT(a1->hasProp("prop2"), "");
-  CHECK_INVARIANT(a2->hasProp("prop1"), "");
-  CHECK_INVARIANT(a2->hasProp("prop2"), "");
-  CHECK_INVARIANT(!a1->hasProp("bogus"), "");
-  CHECK_INVARIANT(!a2->hasProp("bogus"), "");
+  CHECK_INVARIANT(!a1->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!a1->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(!a2->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!a2->hasProp(internKey("prop2")), "");
+  a1->setProp(internKey("prop1"), 3);
+  a1->setProp(internKey("prop2"), 4);
+  CHECK_INVARIANT(a1->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(a1->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(a2->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(a2->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(!a1->hasProp(internKey("bogus")), "");
+  CHECK_INVARIANT(!a2->hasProp(internKey("bogus")), "");
 
   int tmp;
-  a1->getProp("prop1", tmp);
+  a1->getProp(internKey("prop1"), tmp);
   CHECK_INVARIANT(tmp == 3, "");
-  a1->getProp("prop2", tmp);
+  a1->getProp(internKey("prop2"), tmp);
   CHECK_INVARIANT(tmp == 4, "");
-  a2->getProp("prop1", tmp);
+  a2->getProp(internKey("prop1"), tmp);
   CHECK_INVARIANT(tmp == 3, "");
-  a2->getProp("prop2", tmp);
+  a2->getProp(internKey("prop2"), tmp);
   CHECK_INVARIANT(tmp == 4, "");
 
   Bond *b1 = m2.getBondWithIdx(0);
   Bond *b2 = m2.getBondWithIdx(0);
-  CHECK_INVARIANT(!b1->hasProp("prop1"), "");
-  CHECK_INVARIANT(!b1->hasProp("prop2"), "");
-  CHECK_INVARIANT(!b2->hasProp("prop1"), "");
-  CHECK_INVARIANT(!b2->hasProp("prop2"), "");
-  b1->setProp("prop1", 3);
-  b1->setProp("prop2", 4);
-  CHECK_INVARIANT(b1->hasProp("prop1"), "");
-  CHECK_INVARIANT(b1->hasProp("prop2"), "");
-  CHECK_INVARIANT(b2->hasProp("prop1"), "");
-  CHECK_INVARIANT(b2->hasProp("prop2"), "");
-  CHECK_INVARIANT(!b1->hasProp("bogus"), "");
-  CHECK_INVARIANT(!b2->hasProp("bogus"), "");
+  CHECK_INVARIANT(!b1->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!b1->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(!b2->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(!b2->hasProp(internKey("prop2")), "");
+  b1->setProp(internKey("prop1"), 3);
+  b1->setProp(internKey("prop2"), 4);
+  CHECK_INVARIANT(b1->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(b1->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(b2->hasProp(internKey("prop1")), "");
+  CHECK_INVARIANT(b2->hasProp(internKey("prop2")), "");
+  CHECK_INVARIANT(!b1->hasProp(internKey("bogus")), "");
+  CHECK_INVARIANT(!b2->hasProp(internKey("bogus")), "");
 
-  b1->getProp("prop1", tmp);
+  b1->getProp(internKey("prop1"), tmp);
   CHECK_INVARIANT(tmp == 3, "");
-  b1->getProp("prop2", tmp);
+  b1->getProp(internKey("prop2"), tmp);
   CHECK_INVARIANT(tmp == 4, "");
-  b2->getProp("prop1", tmp);
+  b2->getProp(internKey("prop1"), tmp);
   CHECK_INVARIANT(tmp == 3, "");
-  b2->getProp("prop2", tmp);
+  b2->getProp(internKey("prop2"), tmp);
   CHECK_INVARIANT(tmp == 4, "");
 
   BOOST_LOG(rdInfoLog) << "Finished" << std::endl;

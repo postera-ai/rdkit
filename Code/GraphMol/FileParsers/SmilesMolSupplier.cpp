@@ -181,7 +181,7 @@ std::unique_ptr<RWMol> SmilesMolSupplier::processLine(std::string inLine) {
       }
 
       pval = recs[col];
-      res->setProp(pname, pval);
+      res->setProp(internKey(pname), pval);
     }
 
   } catch (const SmilesParseException &pe) {

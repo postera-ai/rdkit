@@ -29,7 +29,7 @@ std::string BuildV2000STYLines(const ROMol &mol) {
   const auto &sgroups = getSubstanceGroups(mol);
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
-         << FormatV2000StringField(sg->getProp<std::string>("TYPE"), 3, true,
+         << FormatV2000StringField(sg->getProp<std::string>(internKey("TYPE")), 3, true,
                                    true);
     if (++count == 8) {
       ret << "M  STY" << FormatV2000NumEntriesField(8) << temp.str() << "\n";
@@ -57,7 +57,7 @@ std::string BuildV2000StringPropLines(const unsigned int entriesPerLine,
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     std::string propValue;
     // Write field only if defined
-    if (sg->getPropIfPresent(propName, propValue)) {
+    if (sg->getPropIfPresent(internKey(propName), propValue)) {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
            << FormatV2000StringField(propValue, fieldWitdh, true, true);
       if (++count == entriesPerLine) {
@@ -85,7 +85,7 @@ std::string BuildV2000SLBLines(const ROMol &mol) {
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     unsigned int id;
     // Write value if assigned, else 0
-    if (sg->getPropIfPresent("ID", id)) {
+    if (sg->getPropIfPresent(internKey("ID"), id)) {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
            << FormatV2000IntField(id);
       if (++count == 8) {
@@ -111,7 +111,7 @@ std::string BuildV2000SDSLines(const ROMol &mol) {
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     // Write field only if defined
     std::string eState;
-    if (sg->getPropIfPresent("ESTATE", eState) && eState == "E") {
+    if (sg->getPropIfPresent(internKey("ESTATE"), eState) && eState == "E") {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()));
       if (++count == 15) {
         ret << "M  SDS EXP" << FormatV2000NumEntriesField(15) << temp.str()
@@ -138,7 +138,7 @@ std::string BuildV2000SPLLines(const ROMol &mol) {
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     // Write field only if a parent is defined
     unsigned int parentIdx = -1;
-    if (sg->getPropIfPresent("PARENT", parentIdx)) {
+    if (sg->getPropIfPresent(internKey("PARENT"), parentIdx)) {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
            << FormatV2000IntField(parentIdx);
       if (++count == 8) {
@@ -164,7 +164,7 @@ std::string BuildV2000SNCLines(const ROMol &mol) {
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     unsigned int compno;
     // Write field only if compno is set
-    if (sg->getPropIfPresent("COMPNO", compno)) {
+    if (sg->getPropIfPresent(internKey("COMPNO"), compno)) {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
            << FormatV2000IntField(compno);
       if (++count == 8) {
@@ -189,7 +189,7 @@ std::string BuildV2000SBTLines(const ROMol &mol) {
   const auto &sgroups = getSubstanceGroups(mol);
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     std::string bracketType;
-    if (sg->getPropIfPresent("BRKTYP", bracketType)) {
+    if (sg->getPropIfPresent(internKey("BRKTYP"), bracketType)) {
       unsigned int idx = 1 + (sg - sgroups.begin());
       if (bracketType == "BRACKET") {
         temp << FormatV2000IntField(idx) << FormatV2000IntField(0);
@@ -244,9 +244,9 @@ std::string BuildV2000SMTLine(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   std::string smtValue;
-  if ((sgroup.getProp<std::string>("TYPE") == "MUL" &&
-       sgroup.getPropIfPresent("MULT", smtValue)) ||
-      sgroup.getPropIfPresent("LABEL", smtValue)) {
+  if ((sgroup.getProp<std::string>(internKey("TYPE")) == "MUL" &&
+       sgroup.getPropIfPresent(internKey("MULT"), smtValue)) ||
+      sgroup.getPropIfPresent(internKey("LABEL"), smtValue)) {
     ret << "M  SMT" << FormatV2000IntField(idx)
         << FormatV2000StringField(smtValue, 69, false, true) << "\n";
   }
@@ -278,7 +278,7 @@ std::string BuildV2000SBVLine(const int idx, const SubstanceGroup &sgroup) {
   for (const auto &cstate : sgroup.getCStates()) {
     ret << "M  SBV" << FormatV2000IntField(idx)
         << FormatV2000IntField(cstate.bondIdx + 1);
-    if (sgroup.getProp<std::string>("TYPE") == "SUP") {
+    if (sgroup.getProp<std::string>(internKey("TYPE")) == "SUP") {
       ret << FormatV2000DoubleField(cstate.vector.x);
       ret << FormatV2000DoubleField(cstate.vector.y);
     }
@@ -292,24 +292,24 @@ std::string BuildV2000SDTLine(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   std::string sdtValue;
-  if (sgroup.getPropIfPresent("FIELDNAME", sdtValue)) {
+  if (sgroup.getPropIfPresent(internKey("FIELDNAME"), sdtValue)) {
     ret << "M  SDT" << FormatV2000IntField(idx);
     ret << FormatV2000StringField(sdtValue, 30, true, true);
 
-    if (sgroup.getPropIfPresent("FIELDTYPE", sdtValue)) {
+    if (sgroup.getPropIfPresent(internKey("FIELDTYPE"), sdtValue)) {
       ret << FormatV2000StringField(sdtValue, 2, true, false);
     } else {
       ret << " T";
     }
 
-    if (sgroup.getPropIfPresent("FIELDINFO", sdtValue)) {
+    if (sgroup.getPropIfPresent(internKey("FIELDINFO"), sdtValue)) {
       ret << FormatV2000StringField(sdtValue, 20, true, false);
     }
 
-    if (sgroup.getPropIfPresent("QUERYTYPE", sdtValue)) {
+    if (sgroup.getPropIfPresent(internKey("QUERYTYPE"), sdtValue)) {
       ret << FormatV2000StringField(sdtValue, 2, true, false);
     }
-    if (sgroup.getPropIfPresent("QUERYOP", sdtValue)) {
+    if (sgroup.getPropIfPresent(internKey("QUERYOP"), sdtValue)) {
       ret << FormatV2000StringField(sdtValue, 15, true, false);
     }
 
@@ -322,7 +322,7 @@ std::string BuildV2000SDDLine(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   std::string sddValue;
-  if (sgroup.getPropIfPresent("FIELDDISP", sddValue)) {
+  if (sgroup.getPropIfPresent(internKey("FIELDDISP"), sddValue)) {
     ret << "M  SDD" << FormatV2000IntField(idx);
     ret << FormatV2000StringField(sddValue, 69, false, true);
     ret << "\n";
@@ -335,7 +335,7 @@ std::string BuildV2000SCDSEDLines(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   STR_VECT dataFields;
-  if (sgroup.getPropIfPresent("DATAFIELDS", dataFields)) {
+  if (sgroup.getPropIfPresent(internKey("DATAFIELDS"), dataFields)) {
     for (const auto &data : dataFields) {
       unsigned int length = data.size();
       if (length > 200) {
@@ -394,7 +394,7 @@ std::string BuildV2000SCLLine(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   std::string sclValue;
-  if (sgroup.getPropIfPresent("CLASS", sclValue)) {
+  if (sgroup.getPropIfPresent(internKey("CLASS"), sclValue)) {
     ret << "M  SCL" << FormatV2000IntField(idx);
     ret << FormatV2000StringField(sclValue, 69, false, true);
     ret << "\n";
@@ -482,12 +482,12 @@ std::string BuildV3000BondsBlock(const SubstanceGroup &sgroup) {
   ret << BuildV3000IdxVectorDataBlock("XBONDS", bonds.begin(), first_cbond);
   ret << BuildV3000IdxVectorDataBlock("CBONDS", first_cbond, bonds.end());
 
-  if (sgroup.hasProp("XBHEAD")) {
-    auto v = sgroup.getProp<std::vector<unsigned int>>("XBHEAD");
+  if (sgroup.hasProp(internKey("XBHEAD"))) {
+    auto v = sgroup.getProp<std::vector<unsigned int>>(internKey("XBHEAD"));
     ret << BuildV3000IdxVectorDataBlock("XBHEAD", v.begin(), v.end());
   }
-  if (sgroup.hasProp("XBCORR")) {
-    auto v = sgroup.getProp<std::vector<unsigned int>>("XBCORR");
+  if (sgroup.hasProp(internKey("XBCORR"))) {
+    auto v = sgroup.getProp<std::vector<unsigned int>>(internKey("XBCORR"));
     ret << BuildV3000IdxVectorDataBlock("XBCORR", v.begin(), v.end());
   }
 
@@ -499,7 +499,7 @@ std::string FormatV3000StringPropertyBlock(const std::string &prop,
   std::ostringstream ret;
 
   std::string propValue;
-  if (sgroup.getPropIfPresent(prop, propValue)) {
+  if (sgroup.getPropIfPresent(internKey(prop), propValue)) {
     if (!propValue.empty()) {
       ret << ' ' << prop << '=';
       // CTAB spec says: "Strings that contain blank spaces or start with left
@@ -537,7 +537,7 @@ std::string FormatV3000ParentBlock(const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   unsigned int parentIdx = -1;
-  if (sgroup.getPropIfPresent("PARENT", parentIdx)) {
+  if (sgroup.getPropIfPresent(internKey("PARENT"), parentIdx)) {
     ret << " PARENT=" << parentIdx;
   }
 
@@ -549,7 +549,7 @@ std::string FormatV3000CompNoBlock(const SubstanceGroup &sgroup) {
 
   unsigned int compno;
 
-  if (sgroup.getPropIfPresent("COMPNO", compno)) {
+  if (sgroup.getPropIfPresent(internKey("COMPNO"), compno)) {
     ret << " COMPNO=" << compno;
   }
 
@@ -578,7 +578,7 @@ std::string FormatV3000FieldDataBlock(const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   STR_VECT dataFields;
-  if (sgroup.getPropIfPresent("DATAFIELDS", dataFields)) {
+  if (sgroup.getPropIfPresent(internKey("DATAFIELDS"), dataFields)) {
     for (const auto &data : dataFields) {
       ret << " FIELDDATA=\"" << data << "\"";
     }
@@ -593,7 +593,7 @@ std::string FormatV3000CStateBlock(const SubstanceGroup &sgroup) {
   for (const auto &cstate : sgroup.getCStates()) {
     unsigned int xbondIdx = 1 + cstate.bondIdx;
     ret << " CSTATE=(";
-    if (sgroup.getProp<std::string>("TYPE") == "SUP") {
+    if (sgroup.getProp<std::string>(internKey("TYPE")) == "SUP") {
       ret << "4 " << xbondIdx;
       ret << ' ' << FormatV3000DoubleField(cstate.vector.x);
       ret << ' ' << FormatV3000DoubleField(cstate.vector.y);
@@ -665,10 +665,10 @@ const std::string GetV3000MolFileSGroupLines(const unsigned int idx,
   std::ostringstream os;
 
   unsigned int id = 0;
-  sgroup.getPropIfPresent("ID", id);
+  sgroup.getPropIfPresent(internKey("ID"), id);
 
   std::string currLine = (boost::format("M  V30 %d %s %d") % idx %
-                          sgroup.getProp<std::string>("TYPE") % id)
+                          sgroup.getProp<std::string>(internKey("TYPE")) % id)
                              .str();
   addBlockToSGroupString(
       BuildV3000IdxVectorDataBlock("ATOMS", sgroup.getAtoms()), currLine, os);

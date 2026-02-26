@@ -220,10 +220,10 @@ TEST_CASE("molzip") {
   SECTION("use atom property as label") {
     auto a = "[C@H]([*])(F)([*])"_smiles;
     auto b = "[*]N.[*]I"_smiles;
-    a->getAtomWithIdx(1)->setProp<unsigned int>("foo", 1);
-    a->getAtomWithIdx(3)->setProp<unsigned int>("foo", 2);
-    b->getAtomWithIdx(0)->setProp<unsigned int>("foo", 1);
-    b->getAtomWithIdx(2)->setProp<unsigned int>("foo", 2);
+    a->getAtomWithIdx(1)->setProp<unsigned int>(internKey("foo"), 1);
+    a->getAtomWithIdx(3)->setProp<unsigned int>(internKey("foo"), 2);
+    b->getAtomWithIdx(0)->setProp<unsigned int>(internKey("foo"), 1);
+    b->getAtomWithIdx(2)->setProp<unsigned int>(internKey("foo"), 2);
     MolzipParams p;
     p.label = MolzipLabel::AtomProperty;
     p.atomProperty = "foo";
@@ -337,8 +337,8 @@ TEST_CASE("molzip") {
   {
     // check atom property zipping
     auto a = "C=C*.O/C=N/*"_smiles;
-    a->getAtomWithIdx(2)->setProp<unsigned int>("fuse", 1);
-    a->getAtomWithIdx(6)->setProp<unsigned int>("fuse", 1);
+    a->getAtomWithIdx(2)->setProp<unsigned int>(internKey("fuse"), 1);
+    a->getAtomWithIdx(6)->setProp<unsigned int>(internKey("fuse"), 1);
     MolzipParams p;
     p.atomProperty = "fuse";
     p.label = MolzipLabel::AtomProperty;

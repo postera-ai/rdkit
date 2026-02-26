@@ -254,12 +254,12 @@ void parseAtomAttribs(Atom *atom, AttribListType attribs, bool doingQuery) {
             fTag + "AtomBondEnvironment");
       } else {
         // anything we don't know how to deal with we'll just store in raw form:
-        atom->setProp(attribName, attribVal);
-      }
-    }
+        atom->setProp(internKey(attribName), attribVal);
+       }
+     }
 
-    // if we've constructed a query from all that, then we need to add it to the
-    // atomQuery:
+     // if we've constructed a query from all that, then we need to add it to the
+     // atomQuery:
     if (query) {
       if (!doingQuery) {
         BOOST_LOG(rdWarningLog) << "Query property '" << attribName
@@ -406,7 +406,7 @@ void parseBondAttribs(Bond *bond, AttribListType attribs, bool doingQuery) {
         bondType = Bond::AROMATIC;
       } else {
         bondType = Bond::OTHER;
-        bond->setProp("SLN_Type", attribVal);
+        bond->setProp(internKey("SLN_Type"), attribVal);
       }
       if (!doingQuery) {
         bond->setBondType(bondType);
@@ -442,7 +442,7 @@ void parseBondAttribs(Bond *bond, AttribListType attribs, bool doingQuery) {
       }
     } else {
       // anything we don't know how to deal with we'll just store in raw form:
-      bond->setProp(attribName, attribVal);
+      bond->setProp(internKey(attribName), attribVal);
     }
   }
 }
@@ -464,7 +464,7 @@ void parseMolAttribs(ROMol *mol, AttribListType attribs) {
     if (attribName == "name") {
       mol->setProp(common_properties::_Name, attribVal);
     } else {
-      mol->setProp(attribName, attribVal);
+      mol->setProp(internKey(attribName), attribVal);
     }
   }
 }

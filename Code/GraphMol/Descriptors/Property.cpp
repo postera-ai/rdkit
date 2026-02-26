@@ -173,7 +173,7 @@ std::vector<double> Properties::computeProperties(const RDKit::ROMol &mol,
   for (auto prop : m_properties) {
     res.push_back((*prop)(mol));
     if (annotate) {
-      mol.setProp<double>(prop->getName(), (*prop)(mol));
+      mol.setProp<double>(internKey(prop->getName()), (*prop)(mol));
     }
   }
   return res;
@@ -181,7 +181,7 @@ std::vector<double> Properties::computeProperties(const RDKit::ROMol &mol,
 
 void Properties::annotateProperties(RDKit::ROMol &mol) const {
   for (auto prop : m_properties) {
-    mol.setProp<double>(prop->getName(), (*prop)(mol));
+    mol.setProp<double>(internKey(prop->getName()), (*prop)(mol));
   }
 }
 

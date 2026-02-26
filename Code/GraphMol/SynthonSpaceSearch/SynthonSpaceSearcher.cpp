@@ -363,12 +363,12 @@ bool SynthonSpaceSearcher::verifyHit(ROMol &mol) const {
 
 namespace {
 void sortHits(std::vector<std::unique_ptr<ROMol>> &hits) {
-  if (!hits.empty() && hits.front()->hasProp("Similarity")) {
+  if (!hits.empty() && hits.front()->hasProp(internKey("Similarity"))) {
     std::sort(hits.begin(), hits.end(),
               [](const std::unique_ptr<ROMol> &lhs,
                  const std::unique_ptr<ROMol> &rhs) {
-                const auto lsim = lhs->getProp<double>("Similarity");
-                const auto rsim = rhs->getProp<double>("Similarity");
+                const auto lsim = lhs->getProp<double>(internKey("Similarity"));
+                const auto rsim = rhs->getProp<double>(internKey("Similarity"));
                 if (lsim == rsim) {
                   return lhs->getNumAtoms() < rhs->getNumAtoms();
                 }

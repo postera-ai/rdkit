@@ -130,7 +130,7 @@ void TDTWriter::write(const ROMol &mol, int confId) {
     // check if we have any properties the user specified to write out
     // in which loop over them and write them out
     for (pi = d_props.begin(); pi != d_props.end(); pi++) {
-      if (mol.hasProp(*pi)) {
+      if (mol.hasProp(internKey(*pi))) {
         writeProperty(mol, (*pi));
       }
     }
@@ -170,7 +170,7 @@ void TDTWriter::writeProperty(const ROMol &mol, const std::string &name) {
   std::string pval;
 
   // we need to remove any line breaks in the output, replace them with spaces
-  mol.getProp(name, pval);
+  mol.getProp(internKey(name), pval);
   boost::replace_all(pval, "\n", " ");
   (*dp_ostream) << pval << ">\n";
 }

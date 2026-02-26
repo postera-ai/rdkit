@@ -458,7 +458,7 @@ TEST_CASE("FP Freedom Space") {
     if (i < 10 || i > params.maxHits - 10) {
       std::cout << i << " : " << MolToSmiles(*mol) << " : "
                 << mol->getProp<std::string>(common_properties::_Name) << "  "
-                << mol->getProp<double>("Similarity") << std::endl;
+                << mol->getProp<double>(internKey("Similarity")) << std::endl;
     }
     ++i;
   }

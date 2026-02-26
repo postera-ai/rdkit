@@ -826,12 +826,12 @@ ROMol *_renumber(const ROMol *m, std::vector<unsigned int> &nVect,
   TEST_ASSERT(nm->getNumBonds() == m->getNumBonds());
   // MolOps::assignStereochemistry(*nm, true, true);
   // for (unsigned int ii = 0; ii < nm->getNumAtoms(); ++ii) {
-  //   if (nm->getAtomWithIdx(ii)->hasProp("_CIPCode")) {
-  //     TEST_ASSERT(m->getAtomWithIdx(nVect[ii])->hasProp("_CIPCode"));
+  //   if (nm->getAtomWithIdx(ii)->hasProp(internKey("_CIPCode"))) {
+  //     TEST_ASSERT(m->getAtomWithIdx(nVect[ii])->hasProp(internKey("_CIPCode")));
   //     std::string ocip =
-  //         m->getAtomWithIdx(nVect[ii])->getProp<std::string>("_CIPCode");
+  //         m->getAtomWithIdx(nVect[ii])->getProp<std::string>(internKey("_CIPCode"));
   //     std::string ncip =
-  //         nm->getAtomWithIdx(ii)->getProp<std::string>("_CIPCode");
+  //         nm->getAtomWithIdx(ii)->getProp<std::string>(internKey("_CIPCode"));
   //     if (ocip != ncip) {
   //       std::cerr << "  cip mismatch: " << inSmiles << std::endl;
   //       std::cerr << "      " << nVect[ii] << ": " << ocip << " -> " << ii
@@ -870,9 +870,9 @@ void _renumberTest(const ROMol *m, std::string inSmiles,
                 << std::endl;
       std::cerr << osmi << std::endl;
       std::cerr << smi << std::endl;
-      m->setProp("_Name", "orig");
+      m->setProp(internKey("_Name"), "orig");
       std::cerr << MolToMolBlock(*m) << std::endl;
-      nm->setProp("_Name", "renumber");
+      nm->setProp(internKey("_Name"), "renumber");
       std::cerr << MolToMolBlock(*nm) << std::endl;
       for (unsigned int j = 0; j < m->getNumAtoms(); ++j) {
         std::cerr << "Renumber: " << nVect[j] << "->" << j << std::endl;

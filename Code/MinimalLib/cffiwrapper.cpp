@@ -907,7 +907,7 @@ extern "C" short clear_log_buffer(void *log_handle) {
 extern "C" short has_prop(const char *mol_pkl, size_t mol_pkl_sz,
                           const char *key) {
   auto mol = mol_from_pkl(mol_pkl, mol_pkl_sz);
-  return mol.hasProp(key);
+  return mol.hasProp(internKey(key));
 }
 
 extern "C" char **get_prop_list(const char *mol_pkl, size_t mol_pkl_sz,
@@ -940,27 +940,29 @@ extern "C" void set_prop(char **mol_pkl, size_t *mol_pkl_sz, const char *key,
                          const char *val, short computed) {
   auto mol = mol_from_pkl(*mol_pkl, *mol_pkl_sz);
   std::string valAsString(val);
-  mol.setProp(key, valAsString, computed);
+  mol.setProp(internKey(key), valAsString, computed);
   mol_to_pkl(mol, mol_pkl, mol_pkl_sz);
 }
 
 extern "C" char *get_prop(const char *mol_pkl, size_t mol_pkl_sz,
                           const char *key) {
   auto mol = mol_from_pkl(mol_pkl, mol_pkl_sz);
-  if (!mol.hasProp(key)) {
+  auto dk = internKey(key);
+  if (!mol.hasProp(dk)) {
     return nullptr;
   }
   std::string val;
-  mol.getProp(key, val);
+  mol.getProp(dk, val);
   return strdup(val.c_str());
 }
 
 extern "C" short clear_prop(char **mol_pkl, size_t *mol_pkl_sz,
                             const char *key) {
   auto mol = mol_from_pkl(*mol_pkl, *mol_pkl_sz);
-  short res = mol.hasProp(key);
+  auto dk = internKey(key);
+  short res = mol.hasProp(dk);
   if (res) {
-    mol.clearProp(key);
+    mol.clearProp(dk);
     mol_to_pkl(mol, mol_pkl, mol_pkl_sz);
   }
   return res;

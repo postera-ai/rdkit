@@ -196,18 +196,18 @@ bool parseNode(
   switch (node.m_hStereo) {
     case kCDXProp_Atom_HDot:  // this atom has an implicit hydrogen with a
                               // wedged bond
-      rd_atom->setProp<char>(CDX_IMPLICIT_HYDROGEN_STEREO, 'w');
+      rd_atom->setProp<char>(internKey(CDX_IMPLICIT_HYDROGEN_STEREO), 'w');
       break;
     case kCDXProp_Atom_HDash:  // this atom has an implicit hydrogen with a
                                // hashed bond
-      rd_atom->setProp<char>(CDX_IMPLICIT_HYDROGEN_STEREO, 'h');
+      rd_atom->setProp<char>(internKey(CDX_IMPLICIT_HYDROGEN_STEREO), 'h');
       break;
   }
 
   if (node.m_bondOrdering) {
     // This node may be completely replaced by the fragment
     // i.e. [*:1]C[*:1].C[*:1]C => CCC
-    rd_atom->setProp<std::vector<int>>(CDX_BOND_ORDERING, *node.m_bondOrdering);
+    rd_atom->setProp<std::vector<int>>(internKey(CDX_BOND_ORDERING), *node.m_bondOrdering);
   }
   if (node.m_geometry == kCDXAtomGeometry_Tetrahedral) {
     // std::cerr << "tetrahedral" << std::endl;
@@ -218,10 +218,10 @@ bool parseNode(
       case kCDXCIPAtom_r:
       case kCDXCIPAtom_S:
       case kCDXCIPAtom_s:
-        rd_atom->setProp<CDXAtomCIPType>(CDX_CIP, node.m_CIP);
+        rd_atom->setProp<CDXAtomCIPType>(internKey(CDX_CIP), node.m_CIP);
         break;
       default:
-        rd_atom->setProp<CDXAtomCIPType>(CDX_CIP, kCDXCIPAtom_Undetermined);
+        rd_atom->setProp<CDXAtomCIPType>(internKey(CDX_CIP), kCDXCIPAtom_Undetermined);
         break;
     }
   }
@@ -237,8 +237,8 @@ bool parseNode(
     atom_coords.push_back(node.m_2dPosition.x);
     atom_coords.push_back(node.m_2dPosition.y);
   }
-  rd_atom->setProp<std::vector<double>>(CDX_ATOM_POS, atom_coords);
-  rd_atom->setProp<unsigned int>(CDX_ATOM_ID, atom_id);
+  rd_atom->setProp<std::vector<double>>(internKey(CDX_ATOM_POS), atom_coords);
+  rd_atom->setProp<unsigned int>(internKey(CDX_ATOM_ID), atom_id);
 
   const bool updateLabels = true;
   const bool takeOwnership = true;
@@ -313,11 +313,11 @@ bool parseNode(
                            missingFragId, atom_id)) {
           return false;
         }
-        mol.setProp<bool>(NEEDS_FUSE, true);
+        mol.setProp<bool>(internKey(NEEDS_FUSE), true);
         // might need to reset to OUR frag_id since parse_fragment will
         // set
         //  it to the fragments
-        mol.setProp(CDX_FRAG_ID, fragmentId);
+        mol.setProp(internKey(CDX_FRAG_ID), fragmentId);
       }
     }
   }

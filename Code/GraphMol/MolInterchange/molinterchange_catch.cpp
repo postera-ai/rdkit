@@ -317,7 +317,7 @@ M  END)CTAB"_ctab;
     CHECK(sgs[0].getAttachPoints()[0].lvIdx == 5);
     CHECK(sgs[0].getAttachPoints()[0].id == "1");
     std::string pval;
-    CHECK(sgs[0].getPropIfPresent("LABEL", pval));
+    CHECK(sgs[0].getPropIfPresent(internKey("LABEL"), pval));
     CHECK(pval == "Boc");
   }
 }

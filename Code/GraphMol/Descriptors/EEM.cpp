@@ -214,7 +214,7 @@ void calculate_charges(ROMol mol, double *dist3D, unsigned int numAtoms,
 
   for (unsigned int aix = 0; aix < numAtoms; aix++) {
     res[aix] = Res.data()[aix];
-    mol.getAtomWithIdx(aix)->setProp("_EEMCharge", res[aix], true);
+    mol.getAtomWithIdx(aix)->setProp(internKey("_EEMCharge"), res[aix], true);
   }
 }
 

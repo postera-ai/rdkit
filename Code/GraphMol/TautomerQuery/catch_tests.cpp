@@ -372,17 +372,17 @@ TEST_CASE("Serialization") {
 TEST_CASE("Tautomer queries should propagate atom properties") {
   auto mol = "COC1=NNC(*)=C1"_smiles;
   REQUIRE(mol);
-  mol->getAtomWithIdx(6)->setProp("_foo", 6);
+  mol->getAtomWithIdx(6)->setProp(internKey("_foo"), 6);
   auto tq = std::unique_ptr<TautomerQuery>(TautomerQuery::fromMol(*mol));
-  CHECK(tq->getTautomers()[0]->getAtomWithIdx(6)->hasProp("_foo"));
-  CHECK(tq->getTautomers()[1]->getAtomWithIdx(6)->hasProp("_foo"));
-  CHECK(tq->getTemplateMolecule().getAtomWithIdx(6)->hasProp("_foo"));
+  CHECK(tq->getTautomers()[0]->getAtomWithIdx(6)->hasProp(internKey("_foo")));
+  CHECK(tq->getTautomers()[1]->getAtomWithIdx(6)->hasProp(internKey("_foo")));
+  CHECK(tq->getTemplateMolecule().getAtomWithIdx(6)->hasProp(internKey("_foo")));
 #ifdef RDK_USE_BOOST_SERIALIZATION
   SECTION("serialization") {
     TautomerQuery tq2(tq->serialize());
-    CHECK(tq2.getTautomers()[0]->getAtomWithIdx(6)->hasProp("_foo"));
-    CHECK(tq2.getTautomers()[1]->getAtomWithIdx(6)->hasProp("_foo"));
-    CHECK(tq2.getTemplateMolecule().getAtomWithIdx(6)->hasProp("_foo"));
+    CHECK(tq2.getTautomers()[0]->getAtomWithIdx(6)->hasProp(internKey("_foo")));
+    CHECK(tq2.getTautomers()[1]->getAtomWithIdx(6)->hasProp(internKey("_foo")));
+    CHECK(tq2.getTemplateMolecule().getAtomWithIdx(6)->hasProp(internKey("_foo")));
   }
 #endif
 }

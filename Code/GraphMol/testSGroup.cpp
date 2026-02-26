@@ -72,11 +72,11 @@ RWMol buildSampleMolecule() {
   //// First SubstanceGroup ////
   {
     SubstanceGroup sg(&mol, "MUL");
-    sg.setProp("index", 1u);
+    sg.setProp(internKey("index"), 1u);
 
-    sg.setProp("SUBTYPE", "BLO");
-    sg.setProp("MULT", "n");
-    sg.setProp("CONNECT", "HH");
+    sg.setProp(internKey("SUBTYPE"), "BLO");
+    sg.setProp(internKey("MULT"), "n");
+    sg.setProp(internKey("CONNECT"), "HH");
 
     // Add some atoms and bonds
     for (unsigned i = 0; i < 3; ++i) {
@@ -85,8 +85,8 @@ RWMol buildSampleMolecule() {
       sg.addBondWithIdx(i);  // add 2 CBONDs + 1 XBOND
     }
 
-    sg.setProp("COMPNO", 7u);
-    sg.setProp("ESTATE", "E");
+    sg.setProp(internKey("COMPNO"), 7u);
+    sg.setProp(internKey("ESTATE"), "E");
 
     SubstanceGroup::Bracket bracket1 = {{RDGeom::Point3D(1., 3., 0.),
                                          RDGeom::Point3D(5., 7., 0.),
@@ -101,18 +101,18 @@ RWMol buildSampleMolecule() {
     // Vector should not be parsed (not a SUP group)
     sg.addCState(2, RDGeom::Point3D());
 
-    sg.setProp("CLASS", "DNA");
+    sg.setProp(internKey("CLASS"), "DNA");
 
     sg.addAttachPoint(0, 0, "XX");
 
-    sg.setProp("BRKTYP", "PAREN");
+    sg.setProp(internKey("BRKTYP"), "PAREN");
 
     addSubstanceGroup(mol, sg);
   }
   //// Second SubstanceGroup ////
   {
     SubstanceGroup sg(&mol, "SUP");
-    sg.setProp("index", 2u);
+    sg.setProp(internKey("index"), 2u);
 
     // Add some atoms and bonds
     for (unsigned i = 3; i < 6; ++i) {
@@ -121,7 +121,7 @@ RWMol buildSampleMolecule() {
       sg.addBondWithIdx(i - 1);  // add 1 XBOND + 2 CBONDs
     }
 
-    sg.setProp("LABEL", "TEST LABEL");
+    sg.setProp(internKey("LABEL"), "TEST LABEL");
 
     // V2000 has only x and y coords; z value restricted to 0.
     RDGeom::Point3D vector(3., 4., 0.);
@@ -134,27 +134,27 @@ RWMol buildSampleMolecule() {
   //// Third SubstanceGroup ////
   {
     SubstanceGroup sg(&mol, "DAT");
-    sg.setProp("index", 3u);
+    sg.setProp(internKey("index"), 3u);
 
-    sg.setProp("FIELDNAME", "SAMPLE FIELD NAME");  // 30 char max
+    sg.setProp(internKey("FIELDNAME"), "SAMPLE FIELD NAME");  // 30 char max
     // Field Type is ignored in V3000
-    sg.setProp("FIELDINFO", "SAMPLE FIELD INFO");  // 20 char max
-    sg.setProp("QUERYTYPE", "PQ");                 // 2 char max
-    sg.setProp("QUERYOP", "SAMPLE QUERY OP");      // 15 char max (rest of line)
+    sg.setProp(internKey("FIELDINFO"), "SAMPLE FIELD INFO");  // 20 char max
+    sg.setProp(internKey("QUERYTYPE"), "PQ");                 // 2 char max
+    sg.setProp(internKey("QUERYOP"), "SAMPLE QUERY OP");      // 15 char max (rest of line)
 
     // This should be properly formatted, but format is not checked
-    sg.setProp("FIELDDISP", "SAMPLE FIELD DISP");
+    sg.setProp(internKey("FIELDDISP"), "SAMPLE FIELD DISP");
 
     STR_VECT dataFields = {"SAMPLE DATA FIELD 1", "SAMPLE DATA FIELD 2",
                            "SAMPLE DATA FIELD 3"};
-    sg.setProp("DATAFIELDS", dataFields);
+    sg.setProp(internKey("DATAFIELDS"), dataFields);
 
     addSubstanceGroup(mol, sg);
   }
 
   // We have to set a parent with a lower index in V2000 mol blocks:
   const auto &sgroups = getSubstanceGroups(mol);
-  sgroups.at(1).setProp<unsigned int>("PARENT", 1u);
+  sgroups.at(1).setProp<unsigned int>(internKey("PARENT"), 1u);
 
   return mol;
 }
@@ -168,11 +168,11 @@ void checkSampleMolecule(const RWMol &mol) {
   {
     // First SubstanceGroup
     const auto &sg = sgroups.at(0);
-    TEST_ASSERT(sg.getProp<std::string>("TYPE") == "MUL");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("TYPE")) == "MUL");
 
-    TEST_ASSERT(sg.getProp<std::string>("SUBTYPE") == "BLO");
-    TEST_ASSERT(sg.getProp<std::string>("MULT") == "n");
-    TEST_ASSERT(sg.getProp<std::string>("CONNECT") == "HH");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("SUBTYPE")) == "BLO");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("MULT")) == "n");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("CONNECT")) == "HH");
 
     std::vector<unsigned int> atoms_reference = {1, 2, 3};
     auto atoms = sg.getAtoms();
@@ -193,8 +193,8 @@ void checkSampleMolecule(const RWMol &mol) {
     TEST_ASSERT(sg.getBondType(bonds[1]) == SubstanceGroup::BondType::CBOND);
     TEST_ASSERT(sg.getBondType(bonds[2]) == SubstanceGroup::BondType::XBOND);
 
-    TEST_ASSERT(sg.getProp<unsigned int>("COMPNO") == 7);
-    TEST_ASSERT(sg.getProp<std::string>("ESTATE") == "E");
+    TEST_ASSERT(sg.getProp<unsigned int>(internKey("COMPNO")) == 7);
+    TEST_ASSERT(sg.getProp<std::string>(internKey("ESTATE")) == "E");
 
     std::vector<std::array<std::array<double, 3>, 3>> brackets_reference = {
         {{{{1., 3., 0.}}, {{5., 7., 0.}}, {{0., 0., 0.}}}},
@@ -209,7 +209,7 @@ void checkSampleMolecule(const RWMol &mol) {
     TEST_ASSERT(cstates[0].vector.y == 0.);
     TEST_ASSERT(cstates[0].vector.z == 0.);
 
-    TEST_ASSERT(sg.getProp<std::string>("CLASS") == "DNA");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("CLASS")) == "DNA");
 
     auto ap = sg.getAttachPoints();
     TEST_ASSERT(ap.size() == 1);
@@ -217,13 +217,13 @@ void checkSampleMolecule(const RWMol &mol) {
     TEST_ASSERT(ap[0].lvIdx == static_cast<int>(atoms[0]));
     TEST_ASSERT(ap[0].id == "XX");
 
-    TEST_ASSERT(sg.getProp<std::string>("BRKTYP") == "PAREN");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("BRKTYP")) == "PAREN");
   }
 
   {
     // Second SubstanceGroup
     const auto &sg = sgroups.at(1);
-    TEST_ASSERT(sg.getProp<std::string>("TYPE") == "SUP");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("TYPE")) == "SUP");
 
     std::vector<unsigned int> atoms_reference = {4, 5, 6};
     auto atoms = sg.getAtoms();
@@ -243,7 +243,7 @@ void checkSampleMolecule(const RWMol &mol) {
     TEST_ASSERT(sg.getBondType(bonds[1]) == SubstanceGroup::BondType::CBOND);
     TEST_ASSERT(sg.getBondType(bonds[2]) == SubstanceGroup::BondType::CBOND);
 
-    TEST_ASSERT(sg.getProp<std::string>("LABEL") == "TEST LABEL");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("LABEL")) == "TEST LABEL");
 
     auto cstates = sg.getCStates();
     TEST_ASSERT(cstates.size() == 1);
@@ -257,22 +257,22 @@ void checkSampleMolecule(const RWMol &mol) {
     TEST_ASSERT(ap[0].aIdx == atoms[0]);
     TEST_ASSERT(ap[0].lvIdx == -1);
     TEST_ASSERT(ap[0].id == "YY");
-    TEST_ASSERT(sg.getProp<unsigned int>("PARENT") == 1u);
+    TEST_ASSERT(sg.getProp<unsigned int>(internKey("PARENT")) == 1u);
   }
 
   {
     // Third SubstanceGroup
     const auto &sg = sgroups.at(2);
-    TEST_ASSERT(sg.getProp<std::string>("TYPE") == "DAT");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("TYPE")) == "DAT");
 
-    TEST_ASSERT(sg.getProp<std::string>("FIELDNAME") == "SAMPLE FIELD NAME");
-    TEST_ASSERT(sg.getProp<std::string>("FIELDINFO") == "SAMPLE FIELD INFO");
-    TEST_ASSERT(sg.getProp<std::string>("QUERYTYPE") == "PQ");
-    TEST_ASSERT(sg.getProp<std::string>("QUERYOP") == "SAMPLE QUERY OP");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("FIELDNAME")) == "SAMPLE FIELD NAME");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("FIELDINFO")) == "SAMPLE FIELD INFO");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("QUERYTYPE")) == "PQ");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("QUERYOP")) == "SAMPLE QUERY OP");
 
-    TEST_ASSERT(sg.getProp<std::string>("FIELDDISP") == "SAMPLE FIELD DISP");
+    TEST_ASSERT(sg.getProp<std::string>(internKey("FIELDDISP")) == "SAMPLE FIELD DISP");
 
-    auto dataFields = sg.getProp<STR_VECT>("DATAFIELDS");
+    auto dataFields = sg.getProp<STR_VECT>(internKey("DATAFIELDS"));
     TEST_ASSERT(dataFields.size() == 3);
     TEST_ASSERT(dataFields[0] == "SAMPLE DATA FIELD 1");
     TEST_ASSERT(dataFields[1] == "SAMPLE DATA FIELD 2");
@@ -298,8 +298,8 @@ void testCreateSubstanceGroups() {
 
   const auto &sgroups = getSubstanceGroups(mol);
   TEST_ASSERT(sgroups.size() == 2);
-  TEST_ASSERT(sgroups.at(0).getProp<std::string>("TYPE") == "DAT");
-  TEST_ASSERT(sgroups.at(1).getProp<std::string>("TYPE") == "SUP");
+  TEST_ASSERT(sgroups.at(0).getProp<std::string>(internKey("TYPE")) == "DAT");
+  TEST_ASSERT(sgroups.at(1).getProp<std::string>(internKey("TYPE")) == "SUP");
 }
 
 void testParseSubstanceGroups(const std::string &rdbase) {
@@ -317,7 +317,7 @@ void testParseSubstanceGroups(const std::string &rdbase) {
 
     const auto &sgroup = sgroups.at(0);
 
-    TEST_ASSERT(sgroup.getProp<std::string>("TYPE") == "MON");
+    TEST_ASSERT(sgroup.getProp<std::string>(internKey("TYPE")) == "MON");
 
     std::vector<unsigned int> atoms_reference = {2, 3, 4, 1, 5};
 
@@ -347,7 +347,7 @@ void testParseSubstanceGroups(const std::string &rdbase) {
 
     const auto sgroup = sgroups.at(0);
 
-    TEST_ASSERT(sgroup.getProp<std::string>("TYPE") == "MON");
+    TEST_ASSERT(sgroup.getProp<std::string>(internKey("TYPE")) == "MON");
 
     std::vector<unsigned int> atoms_reference = {2, 3, 4, 1, 5};
     testIdxVector(sgroup.getAtoms(), atoms_reference);
@@ -370,9 +370,9 @@ void testParseSubstanceGroups(const std::string &rdbase) {
 
     const auto sgroup = sgroups.at(0);
 
-    TEST_ASSERT(sgroup.getProp<std::string>("TYPE") == "SUP");
-    TEST_ASSERT(sgroup.getProp<std::string>("CLASS") == "AA");
-    TEST_ASSERT(sgroup.getProp<std::string>("LABEL") == "abbrev");
+    TEST_ASSERT(sgroup.getProp<std::string>(internKey("TYPE")) == "SUP");
+    TEST_ASSERT(sgroup.getProp<std::string>(internKey("CLASS")) == "AA");
+    TEST_ASSERT(sgroup.getProp<std::string>(internKey("LABEL")) == "abbrev");
 
     std::vector<unsigned int> atoms_reference = {6, 7, 8, 9, 11, 12};
     testIdxVector(sgroup.getAtoms(), atoms_reference);
@@ -397,7 +397,7 @@ void testParseSubstanceGroups(const std::string &rdbase) {
 
     const auto sgroup = sgroups.at(0);
 
-    TEST_ASSERT(sgroup.getProp<std::string>("TYPE") == "SUP");
+    TEST_ASSERT(sgroup.getProp<std::string>(internKey("TYPE")) == "SUP");
 
     std::vector<unsigned int> atoms_reference = {6, 7, 8, 9, 11, 12};
     testIdxVector(sgroup.getAtoms(), atoms_reference);
@@ -578,14 +578,14 @@ void testSubstanceGroupChanges(const std::string &rdbase) {
   auto &sgroups1 = getSubstanceGroups(*mol);
   TEST_ASSERT(sgroups1.size() == 2);
 
-  TEST_ASSERT(sgroups1[0].hasProp("FIELDNAME"));
-  TEST_ASSERT(sgroups1[0].getProp<std::string>("FIELDNAME") == "pH");
-  sgroups1[0].setProp("FIELDNAME", "pKa");
+  TEST_ASSERT(sgroups1[0].hasProp(internKey("FIELDNAME")));
+  TEST_ASSERT(sgroups1[0].getProp<std::string>(internKey("FIELDNAME")) == "pH");
+  sgroups1[0].setProp(internKey("FIELDNAME"), "pKa");
 
   const auto &sgroups2 = getSubstanceGroups(*mol);
   TEST_ASSERT(sgroups2.size() == 2);
-  TEST_ASSERT(sgroups2[0].hasProp("FIELDNAME"));
-  TEST_ASSERT(sgroups2[0].getProp<std::string>("FIELDNAME") == "pKa");
+  TEST_ASSERT(sgroups2[0].hasProp(internKey("FIELDNAME")));
+  TEST_ASSERT(sgroups2[0].getProp<std::string>(internKey("FIELDNAME")) == "pKa");
 }
 
 void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
@@ -768,8 +768,8 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
     {
       auto &sgroups = getSubstanceGroups(*mol);
       TEST_ASSERT(sgroups.size() == 3);
-      TEST_ASSERT(sgroups[0].hasProp("index"))
-      TEST_ASSERT(sgroups[0].getProp<unsigned int>("index") == 1);
+      TEST_ASSERT(sgroups[0].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[0].getProp<unsigned int>(internKey("index")) == 1);
       TEST_ASSERT(sgroups[0].getAtoms().size() == 3);
       std::vector<unsigned int> tgt{3, 2, 7};
       TEST_ASSERT(sgroups[0].getAtoms() == tgt);
@@ -777,16 +777,16 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
       tgt = {1, 8};
       TEST_ASSERT(sgroups[0].getBonds() == tgt);
 
-      TEST_ASSERT(sgroups[1].hasProp("index"))
-      TEST_ASSERT(sgroups[1].getProp<unsigned int>("index") == 2);
+      TEST_ASSERT(sgroups[1].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[1].getProp<unsigned int>(internKey("index")) == 2);
       TEST_ASSERT(sgroups[1].getAtoms().size() == 6);
       tgt = {5, 4, 10, 15, 16, 17};
       TEST_ASSERT(sgroups[1].getAtoms() == tgt);
       TEST_ASSERT(sgroups[1].getBonds().size() == 2);
       tgt = {8, 16};
       TEST_ASSERT(sgroups[1].getBonds() == tgt);
-      TEST_ASSERT(sgroups[1].hasProp("PARENT"))
-      TEST_ASSERT(sgroups[1].getProp<unsigned int>("PARENT") == 1);
+      TEST_ASSERT(sgroups[1].hasProp(internKey("PARENT")))
+      TEST_ASSERT(sgroups[1].getProp<unsigned int>(internKey("PARENT")) == 1);
     }
     // remove an atom that's not in an S-group
     mol->removeAtom(0u);
@@ -804,8 +804,8 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
       auto &sgroups = getSubstanceGroups(*mol);
       TEST_ASSERT(sgroups.size() == 1);
       TEST_ASSERT(sgroups[0].getAtoms().size() == 4);
-      TEST_ASSERT(sgroups[0].hasProp("index"))
-      TEST_ASSERT(sgroups[0].getProp<unsigned int>("index") == 3);
+      TEST_ASSERT(sgroups[0].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[0].getProp<unsigned int>(internKey("index")) == 3);
     }
   }
 
@@ -818,8 +818,8 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
     {
       auto &sgroups = getSubstanceGroups(*mol);
       TEST_ASSERT(sgroups.size() == 3);
-      TEST_ASSERT(sgroups[0].hasProp("index"))
-      TEST_ASSERT(sgroups[0].getProp<unsigned int>("index") == 1);
+      TEST_ASSERT(sgroups[0].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[0].getProp<unsigned int>(internKey("index")) == 1);
       TEST_ASSERT(sgroups[0].getAtoms().size() == 3);
       std::vector<unsigned int> tgt{3, 2, 7};
       TEST_ASSERT(sgroups[0].getAtoms() == tgt);
@@ -827,27 +827,27 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
       tgt = {1, 8};
       TEST_ASSERT(sgroups[0].getBonds() == tgt);
 
-      TEST_ASSERT(sgroups[1].hasProp("index"))
-      TEST_ASSERT(sgroups[1].getProp<unsigned int>("index") == 2);
+      TEST_ASSERT(sgroups[1].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[1].getProp<unsigned int>(internKey("index")) == 2);
       TEST_ASSERT(sgroups[1].getAtoms().size() == 3);
       tgt = {5, 4, 10};
       TEST_ASSERT(sgroups[1].getAtoms() == tgt);
       TEST_ASSERT(sgroups[1].getBonds().size() == 2);
       tgt = {8, 11};
       TEST_ASSERT(sgroups[1].getBonds() == tgt);
-      TEST_ASSERT(sgroups[1].hasProp("PARENT"))
-      TEST_ASSERT(sgroups[1].getProp<unsigned int>("PARENT") == 1);
+      TEST_ASSERT(sgroups[1].hasProp(internKey("PARENT")))
+      TEST_ASSERT(sgroups[1].getProp<unsigned int>(internKey("PARENT")) == 1);
 
-      TEST_ASSERT(sgroups[2].hasProp("index"))
-      TEST_ASSERT(sgroups[2].getProp<unsigned int>("index") == 3);
+      TEST_ASSERT(sgroups[2].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[2].getProp<unsigned int>(internKey("index")) == 3);
       TEST_ASSERT(sgroups[2].getAtoms().size() == 2);
       tgt = {9, 8};
       TEST_ASSERT(sgroups[2].getAtoms() == tgt);
       TEST_ASSERT(sgroups[2].getBonds().size() == 2);
       tgt = {5, 10};
       TEST_ASSERT(sgroups[2].getBonds() == tgt);
-      TEST_ASSERT(sgroups[2].hasProp("PARENT"))
-      TEST_ASSERT(sgroups[2].getProp<unsigned int>("PARENT") == 2);
+      TEST_ASSERT(sgroups[2].hasProp(internKey("PARENT")))
+      TEST_ASSERT(sgroups[2].getProp<unsigned int>(internKey("PARENT")) == 2);
     }
     // remove an atom that's not in an S-group
     mol->removeAtom(0u);
@@ -877,8 +877,8 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
     {
       auto &sgroups = getSubstanceGroups(*mol);
       TEST_ASSERT(sgroups.size() == 3);
-      TEST_ASSERT(sgroups[2].hasProp("index"))
-      TEST_ASSERT(sgroups[2].getProp<unsigned int>("index") == 20);
+      TEST_ASSERT(sgroups[2].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[2].getProp<unsigned int>(internKey("index")) == 20);
       TEST_ASSERT(sgroups[2].getAtoms().size() == 6);
       std::vector<unsigned int> tgt{5, 4, 10, 15, 16, 17};
       TEST_ASSERT(sgroups[2].getAtoms() == tgt);
@@ -888,11 +888,11 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
       TEST_ASSERT(sgroups[2].getParentAtoms().size() == 3);
       tgt = {5, 4, 10};
       TEST_ASSERT(sgroups[2].getParentAtoms() == tgt);
-      TEST_ASSERT(sgroups[2].hasProp("PARENT"))
-      TEST_ASSERT(sgroups[2].getProp<unsigned int>("PARENT") == 10);
+      TEST_ASSERT(sgroups[2].hasProp(internKey("PARENT")))
+      TEST_ASSERT(sgroups[2].getProp<unsigned int>(internKey("PARENT")) == 10);
 
-      TEST_ASSERT(sgroups[1].hasProp("index"))
-      TEST_ASSERT(sgroups[1].getProp<unsigned int>("index") == 10);
+      TEST_ASSERT(sgroups[1].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[1].getProp<unsigned int>(internKey("index")) == 10);
       TEST_ASSERT(sgroups[1].getAtoms().size() == 3);
       tgt = {3, 2, 7};
       TEST_ASSERT(sgroups[1].getAtoms() == tgt);
@@ -911,26 +911,26 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
     {
       auto &sgroups = getSubstanceGroups(*mol);
       TEST_ASSERT(sgroups.size() == 3);
-      TEST_ASSERT(sgroups[2].hasProp("index"))
-      TEST_ASSERT(sgroups[2].getProp<unsigned int>("index") == 10);
+      TEST_ASSERT(sgroups[2].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[2].getProp<unsigned int>(internKey("index")) == 10);
       TEST_ASSERT(sgroups[2].getAtoms().size() == 5);
       std::vector<unsigned int> tgt{3, 2, 4, 5, 7};
       TEST_ASSERT(sgroups[2].getAtoms() == tgt);
       TEST_ASSERT(sgroups[2].getBonds().size() == 2);
       tgt = {1, 5};
       TEST_ASSERT(sgroups[2].getBonds() == tgt);
-      TEST_ASSERT(!sgroups[2].hasProp("PARENT"))
+      TEST_ASSERT(!sgroups[2].hasProp(internKey("PARENT")))
 
-      TEST_ASSERT(sgroups[0].hasProp("index"))
-      TEST_ASSERT(sgroups[0].getProp<unsigned int>("index") == 2);
+      TEST_ASSERT(sgroups[0].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[0].getProp<unsigned int>(internKey("index")) == 2);
       TEST_ASSERT(sgroups[0].getAtoms().size() == 2);
       tgt = {3, 2};
       TEST_ASSERT(sgroups[0].getAtoms() == tgt);
       TEST_ASSERT(sgroups[0].getBonds().size() == 2);
       tgt = {1, 3};
       TEST_ASSERT(sgroups[0].getBonds() == tgt);
-      TEST_ASSERT(sgroups[0].hasProp("PARENT"))
-      TEST_ASSERT(sgroups[0].getProp<unsigned int>("PARENT") == 10);
+      TEST_ASSERT(sgroups[0].hasProp(internKey("PARENT")))
+      TEST_ASSERT(sgroups[0].getProp<unsigned int>(internKey("PARENT")) == 10);
     }
     // remove an atom that's not in an S-group
     mol->removeAtom(0u);
@@ -938,26 +938,26 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
     {
       auto &sgroups = getSubstanceGroups(*mol);
       TEST_ASSERT(sgroups.size() == 3);
-      TEST_ASSERT(sgroups[2].hasProp("index"))
-      TEST_ASSERT(sgroups[2].getProp<unsigned int>("index") == 10);
+      TEST_ASSERT(sgroups[2].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[2].getProp<unsigned int>(internKey("index")) == 10);
       TEST_ASSERT(sgroups[2].getAtoms().size() == 5);
       std::vector<unsigned int> tgt{2, 1, 3, 4, 6};
       TEST_ASSERT(sgroups[2].getAtoms() == tgt);
       TEST_ASSERT(sgroups[2].getBonds().size() == 2);
       tgt = {0, 4};
       TEST_ASSERT(sgroups[2].getBonds() == tgt);
-      TEST_ASSERT(!sgroups[2].hasProp("PARENT"))
+      TEST_ASSERT(!sgroups[2].hasProp(internKey("PARENT")))
 
-      TEST_ASSERT(sgroups[0].hasProp("index"))
-      TEST_ASSERT(sgroups[0].getProp<unsigned int>("index") == 2);
+      TEST_ASSERT(sgroups[0].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[0].getProp<unsigned int>(internKey("index")) == 2);
       TEST_ASSERT(sgroups[0].getAtoms().size() == 2);
       tgt = {2, 1};
       TEST_ASSERT(sgroups[0].getAtoms() == tgt);
       TEST_ASSERT(sgroups[0].getBonds().size() == 2);
       tgt = {0, 2};
       TEST_ASSERT(sgroups[0].getBonds() == tgt);
-      TEST_ASSERT(sgroups[0].hasProp("PARENT"))
-      TEST_ASSERT(sgroups[0].getProp<unsigned int>("PARENT") == 10);
+      TEST_ASSERT(sgroups[0].hasProp(internKey("PARENT")))
+      TEST_ASSERT(sgroups[0].getProp<unsigned int>(internKey("PARENT")) == 10);
     }
     // remove an atom from parent, make sure children also get deleted
     mol->removeAtom(1u);
@@ -977,26 +977,26 @@ void testSubstanceGroupsAndRemoveAtoms(const std::string &rdbase) {
     {
       auto &sgroups = getSubstanceGroups(*mol);
       TEST_ASSERT(sgroups.size() == 3);
-      TEST_ASSERT(sgroups[2].hasProp("index"))
-      TEST_ASSERT(sgroups[2].getProp<unsigned int>("index") == 10);
+      TEST_ASSERT(sgroups[2].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[2].getProp<unsigned int>(internKey("index")) == 10);
       TEST_ASSERT(sgroups[2].getAtoms().size() == 5);
       std::vector<unsigned int> tgt{3, 2, 4, 5, 7};
       TEST_ASSERT(sgroups[2].getAtoms() == tgt);
       TEST_ASSERT(sgroups[2].getBonds().size() == 2);
       tgt = {1, 5};
       TEST_ASSERT(sgroups[2].getBonds() == tgt);
-      TEST_ASSERT(!sgroups[2].hasProp("PARENT"))
+      TEST_ASSERT(!sgroups[2].hasProp(internKey("PARENT")))
 
-      TEST_ASSERT(sgroups[0].hasProp("index"))
-      TEST_ASSERT(sgroups[0].getProp<unsigned int>("index") == 2);
+      TEST_ASSERT(sgroups[0].hasProp(internKey("index")))
+      TEST_ASSERT(sgroups[0].getProp<unsigned int>(internKey("index")) == 2);
       TEST_ASSERT(sgroups[0].getAtoms().size() == 2);
       tgt = {3, 2};
       TEST_ASSERT(sgroups[0].getAtoms() == tgt);
       TEST_ASSERT(sgroups[0].getBonds().size() == 2);
       tgt = {1, 3};
       TEST_ASSERT(sgroups[0].getBonds() == tgt);
-      TEST_ASSERT(sgroups[0].hasProp("PARENT"))
-      TEST_ASSERT(sgroups[0].getProp<unsigned int>("PARENT") == 10);
+      TEST_ASSERT(sgroups[0].hasProp(internKey("PARENT")))
+      TEST_ASSERT(sgroups[0].getProp<unsigned int>(internKey("PARENT")) == 10);
     }
   }
 }

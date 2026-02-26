@@ -112,12 +112,12 @@ void Synthon::setSearchMol(std::unique_ptr<ROMol> mol) {
   dp_searchMol = std::move(mol);
   // There are probably extraneous props on the atoms and bonds
   for (auto &atom : dp_searchMol->atoms()) {
-    atom->clearProp("molNum");
-    atom->clearProp("idx");
+    atom->clearProp(internKey("molNum"));
+    atom->clearProp(internKey("idx"));
   }
   for (auto &bond : dp_searchMol->bonds()) {
-    bond->clearProp("molNum");
-    bond->clearProp("idx");
+    bond->clearProp(internKey("molNum"));
+    bond->clearProp(internKey("idx"));
   }
   finishInitialization();
 }

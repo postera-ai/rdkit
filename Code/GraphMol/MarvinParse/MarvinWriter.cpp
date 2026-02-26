@@ -593,7 +593,7 @@ class MarvinCMLWriter {
 
       for (const SubstanceGroup &sgroup : getSubstanceGroups(*mol)) {
         std::string type;
-        if (!sgroup.getPropIfPresent("TYPE", type)) {
+        if (!sgroup.getPropIfPresent(internKey("TYPE"), type)) {
           throw MarvinWriterException("TYPE not found for an Sgroup");
         }
         if (type == "SRU" || type == "MOD" || type == "COP") {
@@ -611,12 +611,12 @@ class MarvinCMLWriter {
           marvinMol->sgroups.push_back(
               std::unique_ptr<MarvinMolBase>(marvinCoModSruSgroup));
 
-          if (!sgroup.getPropIfPresent("LABEL", marvinCoModSruSgroup->title)) {
+          if (!sgroup.getPropIfPresent(internKey("LABEL"), marvinCoModSruSgroup->title)) {
             throw MarvinWriterException(
                 "Expected a LABEL attribute for an SRU, MOD, or COP group");
           }
 
-          if (!sgroup.getPropIfPresent("CONNECT",
+          if (!sgroup.getPropIfPresent(internKey("CONNECT"),
                                        marvinCoModSruSgroup->connect)) {
             throw MarvinWriterException(
                 "Expected a CONNECT attribute for an SRU, MOD, or COP group");
@@ -644,22 +644,22 @@ class MarvinCMLWriter {
 
           marvinDataSgroup->id = "sg" + std::to_string(++tempSgCount);
           marvinDataSgroup->molID = 'm' + std::to_string(++tempMolCount);
-          if (!sgroup.getPropIfPresent("FIELDNAME",
+          if (!sgroup.getPropIfPresent(internKey("FIELDNAME"),
                                        marvinDataSgroup->fieldName)) {
             throw MarvinWriterException(
                 "FIELDNAME not found for a SuperatomSgroup");
           }
 
-          if (!sgroup.getPropIfPresent("QUERYTYPE",
+          if (!sgroup.getPropIfPresent(internKey("QUERYTYPE"),
                                        marvinDataSgroup->queryType)) {
             marvinDataSgroup->queryType = "";
           }
-          if (!sgroup.getPropIfPresent("QUERYOP", marvinDataSgroup->queryOp)) {
+          if (!sgroup.getPropIfPresent(internKey("QUERYOP"), marvinDataSgroup->queryOp)) {
             marvinDataSgroup->queryOp = "";
           }
 
           std::vector<std::string> fieldDatas;
-          if (!sgroup.getPropIfPresent<std::vector<std::string>>("DATAFIELDS",
+          if (!sgroup.getPropIfPresent<std::vector<std::string>>(internKey("DATAFIELDS"),
                                                                  fieldDatas)) {
             marvinDataSgroup->fieldData = "";
           } else {
@@ -667,24 +667,24 @@ class MarvinCMLWriter {
                 boost::algorithm::join(fieldDatas, "\n");
           }
 
-          if (!sgroup.getPropIfPresent("UNITS", marvinDataSgroup->units)) {
+          if (!sgroup.getPropIfPresent(internKey("UNITS"), marvinDataSgroup->units)) {
             marvinDataSgroup->units = "";
           }
 
-          if (!sgroup.getPropIfPresent<double>("X", marvinDataSgroup->x)) {
+          if (!sgroup.getPropIfPresent<double>(internKey("X"), marvinDataSgroup->x)) {
             marvinDataSgroup->x = 0.0;
           }
-          if (!sgroup.getPropIfPresent<double>("Y", marvinDataSgroup->y)) {
+          if (!sgroup.getPropIfPresent<double>(internKey("Y"), marvinDataSgroup->y)) {
             marvinDataSgroup->y = 0.0;
           }
-          if (!sgroup.getPropIfPresent("CONTEXT", marvinDataSgroup->context)) {
+          if (!sgroup.getPropIfPresent(internKey("CONTEXT"), marvinDataSgroup->context)) {
             marvinDataSgroup->context = "";
           }
-          if (!sgroup.getPropIfPresent("PLACEMENT",
+          if (!sgroup.getPropIfPresent(internKey("PLACEMENT"),
                                        marvinDataSgroup->placement)) {
             marvinDataSgroup->placement = "";
           }
-          if (!sgroup.getPropIfPresent("UNITSDISPLAYED",
+          if (!sgroup.getPropIfPresent(internKey("UNITSDISPLAYED"),
                                        marvinDataSgroup->unitsDisplayed)) {
             marvinDataSgroup->unitsDisplayed = "";
           }
@@ -706,7 +706,7 @@ class MarvinCMLWriter {
           superatomSgroupExpanded->id = "sg" + std::to_string(++tempSgCount);
           superatomSgroupExpanded->molID = 'm' + std::to_string(++tempMolCount);
 
-          if (!sgroup.getPropIfPresent("LABEL",
+          if (!sgroup.getPropIfPresent(internKey("LABEL"),
                                        superatomSgroupExpanded->title)) {
             throw MarvinWriterException(
                 "LABEL not found for a SuperatomSgroup");
@@ -726,8 +726,8 @@ class MarvinCMLWriter {
           marvinMultipleSgroup->molID = 'm' + std::to_string(++tempMolCount);
 
           std::string titleValue;
-          if (!sgroup.getPropIfPresent("MULT", titleValue) &&
-              !sgroup.getPropIfPresent("LABEL", titleValue)) {
+          if (!sgroup.getPropIfPresent(internKey("MULT"), titleValue) &&
+              !sgroup.getPropIfPresent(internKey("LABEL"), titleValue)) {
             throw MarvinWriterException("Title not found for a MultipleSgroup");
           }
           marvinMultipleSgroup->title = titleValue;
@@ -778,8 +778,8 @@ class MarvinCMLWriter {
           marvinMonomerSgroup->molID = 'm' + std::to_string(++tempMolCount);
 
           std::string titleValue;
-          if (!sgroup.getPropIfPresent("MULT", titleValue) &&
-              !sgroup.getPropIfPresent("LABEL", titleValue)) {
+          if (!sgroup.getPropIfPresent(internKey("MULT"), titleValue) &&
+              !sgroup.getPropIfPresent(internKey("LABEL"), titleValue)) {
             throw MarvinWriterException("Title not found for a MultipleSgroup");
           }
           marvinMonomerSgroup->title = titleValue;

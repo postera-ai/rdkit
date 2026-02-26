@@ -143,8 +143,8 @@ std::unique_ptr<ROMol> deprotect(
     }
   }
 
-  m->setProp("DEPROTECTIONS", deprotections_used);
-  m->setProp<int>("DEPROTECTION_COUNT", deprotections_used.size());
+  m->setProp(internKey("DEPROTECTIONS"), deprotections_used);
+  m->setProp<int>(internKey("DEPROTECTION_COUNT"), deprotections_used.size());
   return std::unique_ptr<ROMol>(new ROMol(*m.get()));
 }
 
@@ -181,8 +181,8 @@ bool deprotectInPlace(RWMol &mol,
     }
   }
 
-  mol.setProp("DEPROTECTIONS", deprotections_used);
-  mol.setProp<int>("DEPROTECTION_COUNT", deprotections_used.size());
+  mol.setProp(internKey("DEPROTECTIONS"), deprotections_used);
+  mol.setProp<int>(internKey("DEPROTECTION_COUNT"), deprotections_used.size());
   return modified;
 };
 
