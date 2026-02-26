@@ -4964,13 +4964,12 @@ TEST_CASE(
 }
 
 TEST_CASE("github #9068: properties with empty names") {
-  SECTION("basics") {
-    auto m = "CCO"_smiles;
-    REQUIRE(m);
-    CHECK_THROWS_AS(m->setProp(internKey(""), "some value"), ValueErrorException);
-    CHECK_THROWS_AS(m->getProp<std::string>(internKey("")), KeyErrorException);
-    CHECK(!m->hasProp(internKey("")));
-    CHECK_NOTHROW(m->clearProp(internKey("")));
+  SECTION("Dict string_view overloads reject empty keys") {
+    Dict d;
+    CHECK_THROWS_AS(d.setVal(std::string_view(""), 42), ValueErrorException);
+    CHECK_THROWS_AS(d.getVal<int>(std::string_view("")), KeyErrorException);
+    CHECK(!d.hasVal(std::string_view("")));
+    CHECK_NOTHROW(d.clearVal(std::string_view("")));
   }
 }
 
