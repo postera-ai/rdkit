@@ -105,9 +105,9 @@ double getTPSAAtomContribs(const ROMol &mol, std::vector<double> &Vi,
   TEST_ASSERT(Vi.size() >= mol.getNumAtoms());
   double res = 0;
   std::string pname =
-      (boost::format("%s-%s") % common_properties::_tpsa % includeSandP).str();
+      (boost::format("%s-%s") % keyToString(common_properties::_tpsa) % includeSandP).str();
   std::string contribsName =
-      (boost::format("%s-%s") % common_properties::_tpsaAtomContribs %
+      (boost::format("%s-%s") % keyToString(common_properties::_tpsaAtomContribs) %
        includeSandP)
           .str();
   if (!force && mol.hasProp(contribsName)) {
@@ -346,7 +346,7 @@ double getTPSAAtomContribs(const ROMol &mol, std::vector<double> &Vi,
 }
 double calcTPSA(const ROMol &mol, bool force, bool includeSandP) {
   std::string pname =
-      (boost::format("%s-%s") % common_properties::_tpsa % includeSandP).str();
+      (boost::format("%s-%s") % keyToString(common_properties::_tpsa) % includeSandP).str();
   if (!force && mol.hasProp(pname)) {
     double res;
     mol.getProp(pname, res);

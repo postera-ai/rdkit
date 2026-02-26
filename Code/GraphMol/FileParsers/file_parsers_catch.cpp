@@ -6205,7 +6205,7 @@ void check_roundtripped_properties(RDProps &original, RDProps &roundtrip) {
                         originalPropNames.begin(), originalPropNames.end()));
 
   for (const auto &o : original.getDict().getData()) {
-    if (o.key == detail::computedPropName) {
+    if (o.key == keyToString(detail::computedPropName)) {
       continue;
     }
 

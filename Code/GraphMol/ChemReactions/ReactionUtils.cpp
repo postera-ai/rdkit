@@ -141,7 +141,7 @@ bool hasReactionAtomMapping(const ChemicalReaction &rxn) {
   for (; begin != end; ++begin) {
     const ROMol &reactant = *begin->get();
     if (MolOps::getNumAtomsWithDistinctProperty(
-            reactant, common_properties::molAtomMapNumber)) {
+            reactant, keyToString(common_properties::molAtomMapNumber))) {
       return true;
     }
   }
@@ -150,7 +150,7 @@ bool hasReactionAtomMapping(const ChemicalReaction &rxn) {
   for (; begin != end; ++begin) {
     const ROMol &reactant = *begin->get();
     if (MolOps::getNumAtomsWithDistinctProperty(
-            reactant, common_properties::molAtomMapNumber)) {
+            reactant, keyToString(common_properties::molAtomMapNumber))) {
       return true;
     }
   }
@@ -159,7 +159,7 @@ bool hasReactionAtomMapping(const ChemicalReaction &rxn) {
 
 bool isReactionTemplateMoleculeAgent(const ROMol &mol, double agentThreshold) {
   unsigned numMappedAtoms = MolOps::getNumAtomsWithDistinctProperty(
-      mol, common_properties::molAtomMapNumber);
+      mol, keyToString(common_properties::molAtomMapNumber));
   unsigned numAtoms = mol.getNumHeavyAtoms();
   return !(numAtoms > 0u && static_cast<double>(numMappedAtoms) /
                                     static_cast<double>(numAtoms) >=

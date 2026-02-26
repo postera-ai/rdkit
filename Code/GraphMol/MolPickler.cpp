@@ -168,26 +168,26 @@ class PropTracker {
   // the properties themselves are stored as std::int8_t
   static constexpr std::array<std::pair<std::string_view, std::uint16_t>, 5>
       explicitBondProps{{
-          {RDKit::common_properties::_MolFileBondType, 0x1},
-          {RDKit::common_properties::_MolFileBondStereo, 0x2},
-          {RDKit::common_properties::_MolFileBondCfg, 0x4},
-          {RDKit::common_properties::_MolFileBondQuery, 0x8},
-          {RDKit::common_properties::molStereoCare, 0x10},
+          {kWellKnownKeys[common_properties::_MolFileBondType], 0x1},
+          {kWellKnownKeys[common_properties::_MolFileBondStereo], 0x2},
+          {kWellKnownKeys[common_properties::_MolFileBondCfg], 0x4},
+          {kWellKnownKeys[common_properties::_MolFileBondQuery], 0x8},
+          {kWellKnownKeys[common_properties::molStereoCare], 0x10},
       }};
   // this is stored as bitflags in a byte, so don't exceed 8 entries or we need
   // to update the pickle format.
   // the properties themselves are stored as std::int16_t
   static constexpr std::array<std::pair<std::string_view, std::uint16_t>, 4>
       explicitAtomProps{{
-          {common_properties::molStereoCare, 0x1},
-          {common_properties::molParity, 0x2},
-          {common_properties::molInversionFlag, 0x4},
-          {common_properties::_ChiralityPossible, 0x8},
+          {kWellKnownKeys[common_properties::molStereoCare], 0x1},
+          {kWellKnownKeys[common_properties::molParity], 0x2},
+          {kWellKnownKeys[common_properties::molInversionFlag], 0x4},
+          {kWellKnownKeys[common_properties::_ChiralityPossible], 0x8},
 
       }};
   static constexpr std::array<std::string_view, 2> ignoreAtomProps{
-      common_properties::molAtomMapNumber,
-      common_properties::dummyLabel,
+      kWellKnownKeys[common_properties::molAtomMapNumber],
+      kWellKnownKeys[common_properties::dummyLabel],
   };
   std::unordered_set<std::string_view> ignoreBondProps;
   PropTracker() {

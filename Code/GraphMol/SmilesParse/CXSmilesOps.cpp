@@ -2028,10 +2028,10 @@ std::string get_coords_block(const ROMol &mol,
 std::string get_atom_props_block(const ROMol &mol,
                                  const std::vector<unsigned int> &atomOrder) {
   constexpr std::array<std::string_view, 7> skip = {
-      common_properties::atomLabel,       common_properties::molFileValue,
-      common_properties::molParity,       common_properties::molAtomMapNumber,
-      common_properties::molStereoCare,   common_properties::molRxnExactChange,
-      common_properties::molInversionFlag};
+      kWellKnownKeys[common_properties::atomLabel],       kWellKnownKeys[common_properties::molFileValue],
+      kWellKnownKeys[common_properties::molParity],       kWellKnownKeys[common_properties::molAtomMapNumber],
+      kWellKnownKeys[common_properties::molStereoCare],   kWellKnownKeys[common_properties::molRxnExactChange],
+      kWellKnownKeys[common_properties::molInversionFlag]};
   std::string res = "";
   unsigned int which = 0;
   for (auto idx : atomOrder) {
@@ -2550,7 +2550,7 @@ std::string getCXExtensions(const ROMol &mol, std::uint32_t flags) {
       res += ",";
     }
     res += "$_AV:" +
-           get_value_block(mol, atomOrder, common_properties::molFileValue) +
+           get_value_block(mol, atomOrder, keyToString(common_properties::molFileValue)) +
            "$";
   }
   auto radblock = get_radical_block(mol, atomOrder);

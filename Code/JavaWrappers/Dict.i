@@ -46,6 +46,8 @@
 %ignore RDKit::DictKeyIntern;
 %ignore RDKit::internKey;
 %ignore RDKit::keyToString;
+%ignore RDKit::common_properties;
+%ignore RDKit::detail::computedPropName;
 %include <RDGeneral/DictKeyIntern.h>
 %include <RDGeneral/Dict.h>
 

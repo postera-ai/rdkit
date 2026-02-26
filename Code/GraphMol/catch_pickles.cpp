@@ -98,8 +98,8 @@ M  END)CTAB"_ctab;
 
     CHECK(pkl.size() > basepkl.size());
     // make sure the property names aren't in the pickle
-    CHECK(pkl.find(common_properties::_MolFileBondType) == std::string::npos);
-    CHECK(pkl.find(common_properties::_MolFileBondCfg) == std::string::npos);
+    CHECK(pkl.find(keyToString(common_properties::_MolFileBondType)) == std::string::npos);
+    CHECK(pkl.find(keyToString(common_properties::_MolFileBondCfg)) == std::string::npos);
     // std::cerr << "!!!! " << pkl.size() << " " << basepkl.size() << std::endl;
 
     RWMol mol2(pkl);
@@ -203,8 +203,8 @@ M  END
     MolPickler::pickleMol(*mol, pkl);
 
     // make sure the property names aren't in the pickle
-    CHECK(pkl.find(common_properties::_MolFileBondAttach) == std::string::npos);
-    CHECK(pkl.find(common_properties::_MolFileBondEndPts) == std::string::npos);
+    CHECK(pkl.find(keyToString(common_properties::_MolFileBondAttach)) == std::string::npos);
+    CHECK(pkl.find(keyToString(common_properties::_MolFileBondEndPts)) == std::string::npos);
     // std::cerr << "!!!! " << pkl.size() << " " << basepkl.size() << std::endl;
 
     RWMol mol2(pkl);

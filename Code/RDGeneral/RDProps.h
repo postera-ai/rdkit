@@ -44,14 +44,13 @@ class RDProps {
   //  all setProp functions are const because they
   //     are not meant to change the atom chemically
   // ------------------------------------
-  //! returns a list with the names of our \c properties
   STR_VECT getPropList(bool includePrivate = true,
                        bool includeComputed = true) const {
     const STR_VECT &tmp = d_props.keys();
     STR_VECT res, computed;
     if (!includeComputed &&
         getPropIfPresent(RDKit::detail::computedPropName, computed)) {
-      computed.emplace_back(RDKit::detail::computedPropName);
+      computed.emplace_back(keyToString(RDKit::detail::computedPropName));
     }
 
     auto pos = tmp.begin();
@@ -65,93 +64,66 @@ class RDProps {
     return res;
   }
 
-  //! sets a \c property value
-  /*!
-    \param key the name under which the \c property should be stored.
-    If a \c property is already stored under this name, it will be
-    replaced.
-    \param val the value to be stored
-    \param computed (optional) allows the \c property to be flagged
-    \c computed.
-  */
-
-  //! \overload
   template <typename T>
   void setProp(const std::string_view key, T val, bool computed = false) const {
-    if(key.empty()) {
+    if (key.empty()) {
       throw ValueErrorException("Cannot set property with empty key");
     }
+    DictKey dk = internKey(key);
     if (computed) {
-      STR_VECT compLst;
-      getPropIfPresent(RDKit::detail::computedPropName, compLst);
-      if (std::find(compLst.begin(), compLst.end(), key) == compLst.end()) {
-        compLst.emplace_back(key);
-        d_props.setVal(RDKit::detail::computedPropName, compLst);
-      }
+      addComputedKey(dk);
+    }
+    d_props.setVal(dk, val);
+  }
+
+  template <typename T>
+  void setProp(DictKey key, T val, bool computed = false) const {
+    if (computed) {
+      addComputedKey(key);
     }
     d_props.setVal(key, val);
   }
 
-  //! allows retrieval of a particular property value
-  /*!
-
-    \param key the name under which the \c property should be stored.
-    If a \c property is already stored under this name, it will be
-    replaced.
-    \param res a reference to the storage location for the value.
-
-    <b>Notes:</b>
-    - if no \c property with name \c key exists, a KeyErrorException will be
-    thrown.
-    - the \c boost::lexical_cast machinery is used to attempt type
-    conversions.
-    If this fails, a \c boost::bad_lexical_cast exception will be thrown.
-
-  */
-  //! \overload
   template <typename T>
   void getProp(const std::string_view key, T &res) const {
     d_props.getVal(key, res);
   }
+  template <typename T>
+  void getProp(DictKey key, T &res) const {
+    d_props.getVal(key, res);
+  }
 
-  //! \overload
   template <typename T>
   T getProp(const std::string_view key) const {
     return d_props.getVal<T>(key);
   }
+  template <typename T>
+  T getProp(DictKey key) const {
+    return d_props.getVal<T>(key);
+  }
 
-  //! returns whether or not we have a \c property with name \c key
-  //!  and assigns the value if we do
-  //! \overload
   template <typename T>
   bool getPropIfPresent(const std::string_view key, T &res) const {
     return d_props.getValIfPresent(key, res);
   }
+  template <typename T>
+  bool getPropIfPresent(DictKey key, T &res) const {
+    return d_props.getValIfPresent(key, res);
+  }
 
-  //! \overload
   bool hasProp(const std::string_view key) const { return d_props.hasVal(key); }
+  bool hasProp(DictKey key) const { return d_props.hasVal(key); }
 
-  //! clears the value of a \c property
-  /*!
-    <b>Notes:</b>
-    - if no \c property with name \c key exists, this will be a no-op.
-    - if the \c property is marked as \c computed, it will also be removed
-    from our list of \c computedProperties
-  */
-  //! \overload
   void clearProp(const std::string_view key) const {
-    STR_VECT compLst;
-    if (getPropIfPresent(RDKit::detail::computedPropName, compLst)) {
-      auto svi = std::find(compLst.begin(), compLst.end(), key);
-      if (svi != compLst.end()) {
-        compLst.erase(svi);
-        d_props.setVal(RDKit::detail::computedPropName, compLst);
-      }
-    }
+    DictKey dk = internKey(key);
+    removeComputedKey(dk);
+    d_props.clearVal(dk);
+  }
+  void clearProp(DictKey key) const {
+    removeComputedKey(key);
     d_props.clearVal(key);
   }
 
-  //! clears all of our \c computed \c properties
   void clearComputedProps() const {
     STR_VECT compLst;
     if (getPropIfPresent(RDKit::detail::computedPropName, compLst) &&
@@ -163,6 +135,30 @@ class RDProps {
       d_props.setVal(RDKit::detail::computedPropName, compLst);
     }
   }
+
+ private:
+  void addComputedKey(DictKey dk) const {
+    STR_VECT compLst;
+    getPropIfPresent(RDKit::detail::computedPropName, compLst);
+    const std::string &ks = keyToString(dk);
+    if (std::find(compLst.begin(), compLst.end(), ks) == compLst.end()) {
+      compLst.push_back(ks);
+      d_props.setVal(RDKit::detail::computedPropName, compLst);
+    }
+  }
+  void removeComputedKey(DictKey dk) const {
+    STR_VECT compLst;
+    if (getPropIfPresent(RDKit::detail::computedPropName, compLst)) {
+      const std::string &ks = keyToString(dk);
+      auto svi = std::find(compLst.begin(), compLst.end(), ks);
+      if (svi != compLst.end()) {
+        compLst.erase(svi);
+        d_props.setVal(RDKit::detail::computedPropName, compLst);
+      }
+    }
+  }
+
+ public:
 
   //! update the properties from another
   /*
