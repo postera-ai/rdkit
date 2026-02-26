@@ -221,18 +221,20 @@ inline DictKey internKey(std::string_view s) {
   struct CacheEntry {
     std::string key;
     DictKey val{0};
+    bool occupied{false};
   };
   static constexpr size_t kCacheSize = 64;
   static thread_local std::array<CacheEntry, kCacheSize> tl_cache{};
 
   size_t h = std::hash<std::string_view>{}(s) % kCacheSize;
   auto &entry = tl_cache[h];
-  if (entry.key.size() == s.size() && entry.key == s) {
+  if (entry.occupied && entry.key.size() == s.size() && entry.key == s) {
     return entry.val;
   }
   DictKey k = DictKeyIntern::instance().intern(s);
   entry.key.assign(s.data(), s.size());
   entry.val = k;
+  entry.occupied = true;
   return k;
 }
 inline const std::string &keyToString(DictKey k) {
