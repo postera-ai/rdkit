@@ -1246,7 +1246,7 @@ One unrecognized group type in a comma-separated list makes the whole thing fail
   python::def(
       "PreprocessReaction", RDKit::PreprocessReaction,
       (python::arg("reaction"), python::arg("queries") = python::dict(),
-       python::arg("propName") = RDKit::common_properties::molFileValue),
+       python::arg("propName") = RDKit::kWellKnownKeys[RDKit::common_properties::molFileValue]),
       docString.c_str());
 
   python::enum_<RDKit::RxnOps::SanitizeRxnFlags>("SanitizeFlags")

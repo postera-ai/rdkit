@@ -202,7 +202,7 @@ std::unique_ptr<RWMol> TDTMolSupplier::parseMol(std::string inLine) {
       boost::trim_if(propName, boost::is_any_of(" \t"));
       startP = endP + 1;
 
-      if (propName == common_properties::TWOD && d_params.confId2D >= 0) {
+      if (propName == keyToString(common_properties::TWOD) && d_params.confId2D >= 0) {
         std::string rest = inLine.substr(startP, inLine.size() - startP);
         std::vector<double> coords;
         TDTParseUtils::ParseNumberList(rest, coords, dp_inStream);

@@ -19,7 +19,7 @@ namespace {
 inline void copyComputedProps(const ROMol &src, ROMol &dst) {
   dst.updateProps(src);
   for (auto &v : dst.getPropList(true, false)) {
-    if (v != RDKit::detail::computedPropName) {
+    if (v != keyToString(RDKit::detail::computedPropName)) {
       dst.clearProp(v);
     }
   }
