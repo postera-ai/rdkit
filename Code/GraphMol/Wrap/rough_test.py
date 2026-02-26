@@ -4469,17 +4469,17 @@ $$$$
     m = Chem.MolFromSmiles('c1ccccc1C(C)C')
     for atom in m.GetAtoms():
       d = atom.GetPropsAsDict()
-      self.assertEqual(set(d.keys()), set(['_CIPRank', '__computedProps']))
-      self.assertEqual(type(d['_CIPRank']), int)
-      self.assertEqual(list(d['__computedProps']), ['_CIPRank'])
+      self.assertEqual(set(d.keys()), set(['_R', '__computedProps']))
+      self.assertEqual(type(d['_R']), int)
+      self.assertEqual(list(d['__computedProps']), ['_R'])
 
     m = Chem.MolFromSmiles('c1ccccc1')
     self.assertEqual(Chem.ComputeAtomCIPRanks(m), (0, 0, 0, 0, 0, 0))
     for atom in m.GetAtoms():
       d = atom.GetPropsAsDict()
-      self.assertEqual(set(d.keys()), set(['_CIPRank', '__computedProps']))
-      self.assertEqual(d['_CIPRank'], 0)
-      self.assertEqual(list(d['__computedProps']), ['_CIPRank'])
+      self.assertEqual(set(d.keys()), set(['_R', '__computedProps']))
+      self.assertEqual(d['_R'], 0)
+      self.assertEqual(list(d['__computedProps']), ['_R'])
 
     Chem.SetUseLegacyStereoPerception(origVal)
 

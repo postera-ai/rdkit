@@ -1272,7 +1272,7 @@ def ComputeChiralVolume(mol, centerIdx, confId=-1):
     return 0.0
 
   nbrs = center.GetNeighbors()
-  nbrRanks = [(int(nbr.GetProp('_CIPRank')), conf.GetAtomPosition(nbr.GetIdx())) for nbr in nbrs]
+  nbrRanks = [(int(nbr.GetProp('_R')), conf.GetAtomPosition(nbr.GetIdx())) for nbr in nbrs]
 
   # if we only have three neighbors (i.e. the determining H isn't present)
   # then use the central atom as the fourth point:
