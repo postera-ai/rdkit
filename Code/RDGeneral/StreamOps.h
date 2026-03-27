@@ -658,6 +658,12 @@ inline bool streamReadProp(std::istream &ss, Dict::Pair &pair,
   return ok;
 }
 
+inline bool streamReadProp(std::istream &ss, Dict::Pair &pair,
+                           const CustomPropHandlerVec &handlers = {}) {
+  bool unused = false;
+  return streamReadProp(ss, pair, unused, handlers);
+}
+
 template <typename COUNT_TYPE = unsigned int>
 inline unsigned int streamReadProps(std::istream &ss, RDProps &props,
                                     const CustomPropHandlerVec &handlers = {},
