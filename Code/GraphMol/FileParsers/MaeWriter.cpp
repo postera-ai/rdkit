@@ -137,7 +137,7 @@ void copyProperties(
   // since we don't want to export these.
   origin.clearComputedProps();
 
-  for (const auto &prop : origin.getDict()) {
+  for (const auto &prop : origin.getDict().getData()) {
     // Skip the property holding the names of the computed properties
     if (prop.key == keyToString(detail::computedPropName)) {
       continue;
