@@ -1254,23 +1254,32 @@ void iterateCIPRanks(const ROMol &mol, const DOUBLE_VECT &invars,
 
   PrecomputedBondFeatures bondFeatures = computeBondFeatures(mol);
 
+  boost::dynamic_bitset<> inTiedSegment(numAtoms);
+  auto markTiedAtoms = [&]() {
+    inTiedSegment.reset();
+    for (const auto &[firstIdx, lastIdx] : needsSorting) {
+      for (int i = firstIdx; i <= lastIdx; ++i) {
+        inTiedSegment.set(sortableEntries[i].atomIdx);
+      }
+    }
+  };
+  markTiedAtoms();
+
   while (!needsSorting.empty() && numIts < maxIts &&
          (lastNumRanks < 0 ||
           static_cast<unsigned int>(lastNumRanks) < numRanks)) {
-    // ----------------------------------------------------
-    //
-    // for each atom, get a sorted list of its neighbors' ranks:
-    //
     for (unsigned int index = 0; index < numAtoms; ++index) {
+      if (!inTiedSegment[index]) {
+        continue;
+      }
+
       const unsigned int indexOffset = kMaxBonds * index;
       const int numNeighbors = bondFeatures.numNeighbors[index];
 
       auto *sortBegin = &bondFeatures.countsAndNeighborIndices[indexOffset];
       auto *sortEnd = sortBegin + numNeighbors + 1;
 
-      // For each of our neighbors' ranks weighted by bond type, copy it N times
-      // to our cipEntry in reverse rank order, where N is the weight.
-      if (numNeighbors > 1) {  // compare vs 1 for performance.
+      if (numNeighbors > 1) {
         std::sort(sortBegin, sortEnd,
                   [&ranks](const std::pair<std::uint8_t, int> &countAndIdx1,
                            const std::pair<std::uint8_t, int> &countAndIdx2) {
@@ -1283,27 +1292,21 @@ void iterateCIPRanks(const ROMol &mol, const DOUBLE_VECT &invars,
         const auto &[count, idx] = *iter;
         cipEntry.insert(cipEntry.end(), count, ranks[idx] + 1);
       }
-      // add a zero for each coordinated H as long as we're not a query atom
       if (!mol[index]->hasQuery()) {
         cipEntry.insert(cipEntry.end(), mol[index]->getTotalNumHs(), 0);
       }
     }
-    // ----------------------------------------------------
-    //
-    // sort the new ranks and update the list of active indices:
-    //
+
     lastNumRanks = numRanks;
 
-    // Loop through previously tied atom sections and re-sort.
     for (const auto &[firstIdx, lastIdx] : needsSorting) {
       std::sort(sortableEntries.begin() + firstIdx,
                 sortableEntries.begin() + lastIdx + 1);
     }
     findSegmentsToResort(sortableEntries, needsSorting, numRanks);
-    // Map out of order rankings back to the absolute rankings vector.
     recomputeRanks(sortableEntries, ranks);
+    markTiedAtoms();
 
-    // now truncate each vector and stick the rank at the end
     if (static_cast<unsigned int>(lastNumRanks) != numRanks) {
       for (unsigned int i = 0; i < numAtoms; ++i) {
         cipEntries[i].resize(cipRankIndex + 1);
