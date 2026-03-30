@@ -1315,7 +1315,7 @@ std::string outputMolToMolBlock(const RWMol &tmol, int confId,
       if (conf->is3D()) {
         ss << "3D";
       } else {
-        ss << common_properties::TWOD;
+        ss << keyToString(common_properties::TWOD);
       }
     }
     res += ss.str();

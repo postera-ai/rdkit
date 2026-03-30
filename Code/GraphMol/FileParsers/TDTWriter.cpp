@@ -144,10 +144,10 @@ void TDTWriter::write(const ROMol &mol, int confId) {
     STR_VECT_CI pi;
     for (pi = properties.begin(); pi != properties.end(); pi++) {
       // ignore any of the following properties
-      if (((*pi) == RDKit::detail::computedPropName) ||
-          ((*pi) == common_properties::_Name) || ((*pi) == "_MolFileInfo") ||
+      if (((*pi) == keyToString(RDKit::detail::computedPropName)) ||
+          ((*pi) == keyToString(common_properties::_Name)) || ((*pi) == "_MolFileInfo") ||
           ((*pi) == "_MolFileComments") ||
-          ((*pi) == common_properties::_MolFileChiralFlag)) {
+          ((*pi) == keyToString(common_properties::_MolFileChiralFlag))) {
         continue;
       }
 

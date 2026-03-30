@@ -137,9 +137,9 @@ void copyProperties(
   // since we don't want to export these.
   origin.clearComputedProps();
 
-  for (const auto &prop : origin.getDict()) {
+  for (const auto &prop : origin.getDict().getData()) {
     // Skip the property holding the names of the computed properties
-    if (prop.key == detail::computedPropName) {
+    if (prop.key == keyToString(detail::computedPropName)) {
       continue;
     }
 
@@ -164,7 +164,7 @@ void copyProperties(
       case RDTypeTag::IntTag:
       case RDTypeTag::UnsignedIntTag: {
         auto propName = prop.key;
-        if (prop.key == common_properties::_MolFileRLabel) {
+        if (prop.key == keyToString(common_properties::_MolFileRLabel)) {
           propName = MAE_RGROUP_LABEL;
         } else if (!std::regex_match(prop.key, MMCT_PROP_REGEX)) {
           propName.insert(0, "i_rdkit_");

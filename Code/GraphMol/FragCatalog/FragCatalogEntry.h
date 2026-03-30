@@ -66,26 +66,38 @@ class RDKIT_FRAGCATALOG_EXPORT FragCatalogEntry
   // REVIEW: this should be removed?
   std::string getSmarts() { return ""; }
 
-  // FUnctions on the property dictionary
   template <typename T>
   void setProp(const std::string_view &key, T &val) const {
+    dp_props->setVal(key, val);
+  }
+  template <typename T>
+  void setProp(DictKey key, T &val) const {
     dp_props->setVal(key, val);
   }
 
   void setProp(const std::string_view &key, int val) const {
     dp_props->setVal(key, val);
   }
+  void setProp(DictKey key, int val) const { dp_props->setVal(key, val); }
 
   void setProp(const std::string_view &key, float val) const {
     dp_props->setVal(key, val);
   }
+  void setProp(DictKey key, float val) const { dp_props->setVal(key, val); }
 
   void setProp(const std::string_view &key, std::string &val) const {
+    dp_props->setVal(key, val);
+  }
+  void setProp(DictKey key, std::string &val) const {
     dp_props->setVal(key, val);
   }
 
   template <typename T>
   void getProp(const std::string_view &key, T &res) const {
+    dp_props->getVal(key, res);
+  }
+  template <typename T>
+  void getProp(DictKey key, T &res) const {
     dp_props->getVal(key, res);
   }
 
@@ -95,8 +107,15 @@ class RDKIT_FRAGCATALOG_EXPORT FragCatalogEntry
     }
     return dp_props->hasVal(key);
   }
+  bool hasProp(DictKey key) const {
+    if (!dp_props) {
+      return false;
+    }
+    return dp_props->hasVal(key);
+  }
 
   void clearProp(const std::string_view &key) const { dp_props->clearVal(key); }
+  void clearProp(DictKey key) const { dp_props->clearVal(key); }
 
   void toStream(std::ostream &ss) const override;
   std::string Serialize() const override;

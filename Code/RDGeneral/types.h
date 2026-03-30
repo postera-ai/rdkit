@@ -47,160 +47,148 @@
 namespace RDKit {
 
 namespace detail {
-// used in various places for computed properties
-inline constexpr std::string_view computedPropName = "__computedProps";
+#ifndef SWIG
+inline constexpr DictKey computedPropName = 0;
+#endif
 }  // namespace detail
 
+#ifndef SWIG
 namespace common_properties {
-///////////////////////////////////////////////////////////////
-// Molecule Props
-inline constexpr std::string_view TWOD = "2D";
-inline constexpr std::string_view BalabanJ = "BalabanJ";
-inline constexpr std::string_view BalanbanJ = "BalanbanJ";
-inline constexpr std::string_view Discrims = "Discrims";
-inline constexpr std::string_view DistanceMatrix_Paths = "DistanceMatrix_Paths";
-inline constexpr std::string_view MolFileComments = "MolFileComments";
-inline constexpr std::string_view MolFileInfo = "MolFileInfo";
-inline constexpr std::string_view NullBond = "NullBond";
-inline constexpr std::string_view _2DConf = "_2DConf";
-inline constexpr std::string_view _3DConf = "_3DConf";
-inline constexpr std::string_view _AtomID = "_AtomID";
-inline constexpr std::string_view _BondsPotentialStereo =
-    "_BondsPotentialStereo";
-inline constexpr std::string_view _ChiralAtomRank = "_chiralAtomRank";
-inline constexpr std::string_view _CIPCode = "_CIPCode";
-inline constexpr std::string_view _CIPRank = "_CIPRank";
-inline constexpr std::string_view _CIPComputed = "_CIPComputed";
-inline constexpr std::string_view _CIPNeighborOrder = "_CIPNeighborOrder";
-inline constexpr std::string_view _CanonicalRankingNumber =
-    "_CanonicalRankingNumber";
-inline constexpr std::string_view _ChiralityPossible = "_ChiralityPossible";
-inline constexpr std::string_view _CrippenLogP = "_CrippenLogP";
-inline constexpr std::string_view _CrippenMR = "_CrippenMR";
-inline constexpr std::string_view _MMFFSanitized = "_MMFFSanitized";
-inline constexpr std::string_view _MolFileChiralFlag = "_MolFileChiralFlag";
-inline constexpr std::string_view MRV_SMA = "MRV SMA";
-inline constexpr std::string_view _MolFileRLabel = "_MolFileRLabel";
-inline constexpr std::string_view _MolFileAtomQuery = "_MolFileAtomQuery";
-inline constexpr std::string_view _MolFileBondQuery = "_MolFileBondQuery";
-inline constexpr std::string_view _MolFileBondEndPts = "_MolFileBondEndPts";
-inline constexpr std::string_view _MolFileBondAttach = "_MolFileBondAttach";
-inline constexpr std::string_view _MolFileBondType = "_MolFileBondType";
-inline constexpr std::string_view _MolFileBondStereo = "_MolFileBondStereo";
-inline constexpr std::string_view _MolFileBondCfg = "_MolFileBondCfg";
-
-inline constexpr std::string_view _Name = "_Name";
-inline constexpr std::string_view _NeedsQueryScan = "_NeedsQueryScan";
-inline constexpr std::string_view _NonExplicit3DChirality =
-    "_NonExplicit3DChirality";
-inline constexpr std::string_view _QueryFormalCharge = "_QueryFormalCharge";
-inline constexpr std::string_view _QueryHCount = "_QueryHCount";
-inline constexpr std::string_view _QueryIsotope = "_QueryIsotope";
-inline constexpr std::string_view _QueryMass = "_QueryMass";
-inline constexpr std::string_view _ReactionDegreeChanged =
-    "_ReactionDegreeChanged";
-inline constexpr std::string_view reactantAtomIdx = "react_atom_idx";
-inline constexpr std::string_view reactionMapNum = "old_mapno";
-inline constexpr std::string_view reactantIdx = "react_idx";
-
-inline constexpr std::string_view _RingClosures = "_RingClosures";
-inline constexpr std::string_view _SLN_s = "_SLN_s";
-inline constexpr std::string_view _SmilesStart = "_SmilesStart";
-inline constexpr std::string_view _StereochemDone = "_StereochemDone";
-inline constexpr std::string_view _TraversalBondIndexOrder =
-    "_TraversalBondIndexOrder";
-inline constexpr std::string_view _TraversalRingClosureBond =
-    "_TraversalRingClosureBond";
-inline constexpr std::string_view _TraversalStartPoint = "_TraversalStartPoint";
-inline constexpr std::string_view _TriposAtomType = "_TriposAtomType";
-inline constexpr std::string_view _Unfinished_SLN_ = "_Unfinished_SLN_";
-inline constexpr std::string_view _UnknownStereo = "_UnknownStereo";
-inline constexpr std::string_view _connectivityHKDeltas =
-    "_connectivityHKDeltas";
-inline constexpr std::string_view _connectivityNVals = "_connectivityNVals";
-inline constexpr std::string_view _crippenLogP = "_crippenLogP";
-inline constexpr std::string_view _crippenLogPContribs = "_crippenLogPContribs";
-inline constexpr std::string_view _crippenMR = "_crippenMR";
-inline constexpr std::string_view _crippenMRContribs = "_crippenMRContribs";
-inline constexpr std::string_view _GasteigerCharge = "_GasteigerCharge";
-inline constexpr std::string_view _GasteigerHCharge = "_GasteigerHCharge";
-inline constexpr std::string_view _doIsoSmiles = "_doIsoSmiles";
-inline constexpr std::string_view _fragSMARTS = "_fragSMARTS";
-inline constexpr std::string_view _hasMassQuery = "_hasMassQuery";
-inline constexpr std::string_view _labuteASA = "_labuteASA";
-inline constexpr std::string_view _labuteAtomContribs = "_labuteAtomContribs";
-inline constexpr std::string_view _labuteAtomHContrib = "_labuteAtomHContrib";
-inline constexpr std::string_view _protected = "_protected";
-inline constexpr std::string_view _queryRootAtom = "_queryRootAtom";
-inline constexpr std::string_view _ringStereoAtoms = "_ringStereoAtoms";
-inline constexpr std::string_view _ringStereoWarning = "_ringStereoWarning";
-inline constexpr std::string_view _ringStereochemCand = "_ringStereochemCand";
-inline constexpr std::string_view _ringStereoOtherAtom = "_ringStereoOtherAtom";
-inline constexpr std::string_view _mesoOtherAtom = "_mesoOtherAtom";
-inline constexpr std::string_view _chiralPermutation = "_chiralPermutation";
-inline constexpr std::string_view _smilesAtomOutputOrder =
-    "_smilesAtomOutputOrder";
-inline constexpr std::string_view _smilesBondOutputOrder =
-    "_smilesBondOutputOrder";
-inline constexpr std::string_view _starred = "_starred";
-inline constexpr std::string_view _supplementalSmilesLabel =
-    "_supplementalSmilesLabel";
-inline constexpr std::string_view _tpsa = "_tpsa";
-inline constexpr std::string_view _tpsaAtomContribs = "_tpsaAtomContribs";
-inline constexpr std::string_view _unspecifiedOrder = "_unspecifiedOrder";
-inline constexpr std::string_view _brokenChirality = "_brokenChirality";
-inline constexpr std::string_view _rgroupAtomMaps = "_rgroupAtomMaps";
-inline constexpr std::string_view _rgroupBonds = "_rgroupBonds";
-inline constexpr std::string_view _rgroupTargetAtoms = "_rgroupTargetAtoms";
-inline constexpr std::string_view _rgroupTargetBonds = "_rgroupTargetBonds";
-inline constexpr std::string_view dummyLabel = "dummyLabel";
-inline constexpr std::string_view extraRings = "extraRings";
-inline constexpr std::string_view isImplicit = "isImplicit";
-inline constexpr std::string_view maxAttachIdx = "maxAttachIdx";
-inline constexpr std::string_view molAtomMapNumber = "molAtomMapNumber";
-inline constexpr std::string_view molFileAlias = "molFileAlias";
-inline constexpr std::string_view molFileValue = "molFileValue";
-inline constexpr std::string_view molInversionFlag = "molInversionFlag";
-inline constexpr std::string_view molParity = "molParity";
-inline constexpr std::string_view molStereoCare = "molStereoCare";
-inline constexpr std::string_view molRxnComponent = "molRxnComponent";
-inline constexpr std::string_view molRxnRole = "molRxnRole";
-inline constexpr std::string_view molTotValence = "molTotValence";
-inline constexpr std::string_view molFileLinkNodes = "_molLinkNodes";
-inline constexpr std::string_view numArom = "numArom";
-inline constexpr std::string_view ringMembership = "ringMembership";
-inline constexpr std::string_view smilesSymbol = "smilesSymbol";
-inline constexpr std::string_view atomLabel = "atomLabel";
-inline constexpr std::string_view OxidationNumber = "OxidationNumber";
-inline constexpr std::string_view internalRgroupSmiles = "internalRgroupSmiles";
-inline constexpr std::string_view molRingBondCount = "molRingBondCount";
-inline constexpr std::string_view molSubstCount = "molSubstCount";
-inline constexpr std::string_view molAttachPoint = "molAttchpt";
-inline constexpr std::string_view molAttachOrder = "molAttchord";
-inline constexpr std::string_view molAttachOrderTemplate =
-    "molAttachOrderTemplate";
-inline constexpr std::string_view molAtomClass = "molClass";
-inline constexpr std::string_view molAtomSeqId = "molSeqid";
-inline constexpr std::string_view molAtomSeqName = "molSeqName";
-inline constexpr std::string_view molRxnExactChange = "molRxnExachg";
-inline constexpr std::string_view molReactStatus = "molReactStatus";
-inline constexpr std::string_view _fromAttachPoint = "_fromAttchpt";
-inline constexpr std::string_view natReplace = "natReplace";
-inline constexpr std::string_view templateNames = "templateNames";
-
-inline constexpr std::string_view molNote = "molNote";
-inline constexpr std::string_view atomNote = "atomNote";
-inline constexpr std::string_view bondNote = "bondNote";
-inline constexpr std::string_view _isotopicHs = "_isotopicHs";
-
-inline constexpr std::string_view _QueryAtomGenericLabel =
-    "_QueryAtomGenericLabel";
-
-// molecule drawing
-inline constexpr std::string_view _displayLabel = "_displayLabel";
-inline constexpr std::string_view _displayLabelW = "_displayLabelW";
-
+inline constexpr DictKey TWOD = 1;
+inline constexpr DictKey BalabanJ = 2;
+inline constexpr DictKey BalanbanJ = 3;
+inline constexpr DictKey Discrims = 4;
+inline constexpr DictKey DistanceMatrix_Paths = 5;
+inline constexpr DictKey MolFileComments = 6;
+inline constexpr DictKey MolFileInfo = 7;
+inline constexpr DictKey NullBond = 8;
+inline constexpr DictKey _2DConf = 9;
+inline constexpr DictKey _3DConf = 10;
+inline constexpr DictKey _AtomID = 11;
+inline constexpr DictKey _BondsPotentialStereo = 12;
+inline constexpr DictKey _ChiralAtomRank = 13;
+inline constexpr DictKey _CIPCode = 14;
+inline constexpr DictKey _CIPRank = 15;
+inline constexpr DictKey _CIPComputed = 16;
+inline constexpr DictKey _CIPNeighborOrder = 17;
+inline constexpr DictKey _CanonicalRankingNumber = 18;
+inline constexpr DictKey _ChiralityPossible = 19;
+inline constexpr DictKey _CrippenLogP = 20;
+inline constexpr DictKey _CrippenMR = 21;
+inline constexpr DictKey _MMFFSanitized = 22;
+inline constexpr DictKey _MolFileChiralFlag = 23;
+inline constexpr DictKey MRV_SMA = 24;
+inline constexpr DictKey _MolFileRLabel = 25;
+inline constexpr DictKey _MolFileAtomQuery = 26;
+inline constexpr DictKey _MolFileBondQuery = 27;
+inline constexpr DictKey _MolFileBondEndPts = 28;
+inline constexpr DictKey _MolFileBondAttach = 29;
+inline constexpr DictKey _MolFileBondType = 30;
+inline constexpr DictKey _MolFileBondStereo = 31;
+inline constexpr DictKey _MolFileBondCfg = 32;
+inline constexpr DictKey _Name = 33;
+inline constexpr DictKey _NeedsQueryScan = 34;
+inline constexpr DictKey _NonExplicit3DChirality = 35;
+inline constexpr DictKey _QueryFormalCharge = 36;
+inline constexpr DictKey _QueryHCount = 37;
+inline constexpr DictKey _QueryIsotope = 38;
+inline constexpr DictKey _QueryMass = 39;
+inline constexpr DictKey _ReactionDegreeChanged = 40;
+inline constexpr DictKey reactantAtomIdx = 41;
+inline constexpr DictKey reactionMapNum = 42;
+inline constexpr DictKey reactantIdx = 43;
+inline constexpr DictKey _RingClosures = 44;
+inline constexpr DictKey _SLN_s = 45;
+inline constexpr DictKey _SmilesStart = 46;
+inline constexpr DictKey _StereochemDone = 47;
+inline constexpr DictKey _TraversalBondIndexOrder = 48;
+inline constexpr DictKey _TraversalRingClosureBond = 49;
+inline constexpr DictKey _TraversalStartPoint = 50;
+inline constexpr DictKey _TriposAtomType = 51;
+inline constexpr DictKey _Unfinished_SLN_ = 52;
+inline constexpr DictKey _UnknownStereo = 53;
+inline constexpr DictKey _connectivityHKDeltas = 54;
+inline constexpr DictKey _connectivityNVals = 55;
+inline constexpr DictKey _crippenLogP = 56;
+inline constexpr DictKey _crippenLogPContribs = 57;
+inline constexpr DictKey _crippenMR = 58;
+inline constexpr DictKey _crippenMRContribs = 59;
+inline constexpr DictKey _GasteigerCharge = 60;
+inline constexpr DictKey _GasteigerHCharge = 61;
+inline constexpr DictKey _doIsoSmiles = 62;
+inline constexpr DictKey _fragSMARTS = 63;
+inline constexpr DictKey _hasMassQuery = 64;
+inline constexpr DictKey _labuteASA = 65;
+inline constexpr DictKey _labuteAtomContribs = 66;
+inline constexpr DictKey _labuteAtomHContrib = 67;
+inline constexpr DictKey _protected = 68;
+inline constexpr DictKey _queryRootAtom = 69;
+inline constexpr DictKey _ringStereoAtoms = 70;
+inline constexpr DictKey _ringStereoWarning = 71;
+inline constexpr DictKey _ringStereochemCand = 72;
+inline constexpr DictKey _ringStereoOtherAtom = 73;
+inline constexpr DictKey _mesoOtherAtom = 74;
+inline constexpr DictKey _chiralPermutation = 75;
+inline constexpr DictKey _smilesAtomOutputOrder = 76;
+inline constexpr DictKey _smilesBondOutputOrder = 77;
+inline constexpr DictKey _starred = 78;
+inline constexpr DictKey _supplementalSmilesLabel = 79;
+inline constexpr DictKey _tpsa = 80;
+inline constexpr DictKey _tpsaAtomContribs = 81;
+inline constexpr DictKey _unspecifiedOrder = 82;
+inline constexpr DictKey _brokenChirality = 83;
+inline constexpr DictKey _rgroupAtomMaps = 84;
+inline constexpr DictKey _rgroupBonds = 85;
+inline constexpr DictKey _rgroupTargetAtoms = 86;
+inline constexpr DictKey _rgroupTargetBonds = 87;
+inline constexpr DictKey dummyLabel = 88;
+inline constexpr DictKey extraRings = 89;
+inline constexpr DictKey isImplicit = 90;
+inline constexpr DictKey maxAttachIdx = 91;
+inline constexpr DictKey molAtomMapNumber = 92;
+inline constexpr DictKey molFileAlias = 93;
+inline constexpr DictKey molFileValue = 94;
+inline constexpr DictKey molInversionFlag = 95;
+inline constexpr DictKey molParity = 96;
+inline constexpr DictKey molStereoCare = 97;
+inline constexpr DictKey molRxnComponent = 98;
+inline constexpr DictKey molRxnRole = 99;
+inline constexpr DictKey molTotValence = 100;
+inline constexpr DictKey molFileLinkNodes = 101;
+inline constexpr DictKey numArom = 102;
+inline constexpr DictKey ringMembership = 103;
+inline constexpr DictKey smilesSymbol = 104;
+inline constexpr DictKey atomLabel = 105;
+inline constexpr DictKey OxidationNumber = 106;
+inline constexpr DictKey internalRgroupSmiles = 107;
+inline constexpr DictKey molRingBondCount = 108;
+inline constexpr DictKey molSubstCount = 109;
+inline constexpr DictKey molAttachPoint = 110;
+inline constexpr DictKey molAttachOrder = 111;
+inline constexpr DictKey molAttachOrderTemplate = 112;
+inline constexpr DictKey molAtomClass = 113;
+inline constexpr DictKey molAtomSeqId = 114;
+inline constexpr DictKey molAtomSeqName = 115;
+inline constexpr DictKey molRxnExactChange = 116;
+inline constexpr DictKey molReactStatus = 117;
+inline constexpr DictKey _fromAttachPoint = 118;
+inline constexpr DictKey natReplace = 119;
+inline constexpr DictKey templateNames = 120;
+inline constexpr DictKey molNote = 121;
+inline constexpr DictKey atomNote = 122;
+inline constexpr DictKey bondNote = 123;
+inline constexpr DictKey _isotopicHs = 124;
+inline constexpr DictKey _QueryAtomGenericLabel = 125;
+inline constexpr DictKey _displayLabel = 126;
+inline constexpr DictKey _displayLabelW = 127;
+inline constexpr DictKey _cxsmilesBondIdx = 128;
+inline constexpr DictKey _cxsmilesOutputIndex = 129;
+inline constexpr DictKey _needsDetectAtomStereo = 130;
+inline constexpr DictKey _needsDetectBondStereo = 131;
+inline constexpr DictKey _potentialStereo = 132;
+inline constexpr DictKey _stereoGroup = 133;
 }  // namespace common_properties
+#endif  // SWIG
 #ifndef WIN32
 typedef long long int LONGINT;
 #else

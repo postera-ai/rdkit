@@ -99,10 +99,11 @@ boost::python::dict GetPropsAsDict(const T &obj, bool includePrivate,
                                    bool includeComputed,
                                    bool autoConvertStrings = true) {
   boost::python::dict dict;
-  const auto &rd_dict = obj.getDict();
+  auto &rd_dict = obj.getDict();
+  auto data = rd_dict.getData();
 
   STR_VECT keys = obj.getPropList(includePrivate, includeComputed);
-  for (const auto &rdvalue : rd_dict) {
+  for (auto &rdvalue : data) {
     if (std::find(keys.begin(), keys.end(), rdvalue.key) == keys.end()) {
       continue;
     }
@@ -241,8 +242,8 @@ PyObject *GetPyProp(const RDOb *obj, const std::string &key, bool autoConvert) {
       return nullptr;
     }
   } else {
-    const auto &rd_dict = obj->getDict();
-    for (const auto &rdvalue : rd_dict) {
+    const auto &data = obj->getDict().getData();
+    for (auto &rdvalue : data) {
       if (rdvalue.key == key) {
         try {
           const auto tag = rdvalue.val.getTag();
