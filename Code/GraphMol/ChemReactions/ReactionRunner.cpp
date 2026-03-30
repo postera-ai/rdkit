@@ -36,6 +36,7 @@
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <GraphMol/QueryOps.h>
 #include <boost/dynamic_bitset.hpp>
+#include <deque>
 #include <map>
 #include <algorithm>
 #include <GraphMol/ChemTransforms/ChemTransforms.h>
@@ -943,7 +944,7 @@ void addReactantNeighborsToProduct(
     boost::dynamic_bitset<> &visitedAtoms,
     std::vector<const Atom *> &chiralAtomsToCheck,
     ReactantProductAtomMapping *mapping, unsigned int reactantId) {
-  std::list<const Atom *> atomStack;
+  std::deque<const Atom *> atomStack;
   atomStack.push_back(&reactantAtom);
 
   // std::cerr << "-------------------" << std::endl;
