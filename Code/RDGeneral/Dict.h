@@ -53,31 +53,25 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
   Dict() {}
 
-  Dict(const Dict &other) : _data(other._data) {
-    _hasNonPodData = other._hasNonPodData;
-    if (other._hasNonPodData) {  // other has non pod data, need to copy
-      std::vector<Pair> data(other._data.size());
-      _data.swap(data);
-      for (size_t i = 0; i < _data.size(); ++i) {
-        _data[i].key = other._data[i].key;
-        copy_rdvalue(_data[i].val, other._data[i].val);
-      }
+  Dict(const Dict &other) {
+    std::vector<Pair> data(other._data.size());
+    _data.swap(data);
+    for (size_t i = 0; i < _data.size(); ++i) {
+      _data[i].key = other._data[i].key;
+      copy_rdvalue(_data[i].val, other._data[i].val);
     }
   }
 
   Dict(Dict &&other) noexcept = default;
 
   ~Dict() {
-    reset();  // to clear pointers if necessary
+    reset();
   }
 
   void update(const Dict &other, bool preserveExisting = false) {
     if (!preserveExisting) {
       *this = other;
     } else {
-      if (other._hasNonPodData) {
-        _hasNonPodData = true;
-      }
       for (const auto &opair : other._data) {
         Pair *target = nullptr;
         for (auto &dpair : _data) {
@@ -88,11 +82,9 @@ class RDKIT_RDGENERAL_EXPORT Dict {
         }
 
         if (!target) {
-          // need to create blank entry and copy
           _data.push_back(Pair(opair.key));
           copy_rdvalue(_data.back().val, opair.val);
         } else {
-          // just copy
           copy_rdvalue(target->val, opair.val);
         }
       }
@@ -103,21 +95,14 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     if (this == &other) {
       return *this;
     }
-    if (_hasNonPodData) {
-      reset();
-    }
+    reset();
 
-    if (other._hasNonPodData) {
-      std::vector<Pair> data(other._data.size());
-      _data.swap(data);
-      for (size_t i = 0; i < _data.size(); ++i) {
-        _data[i].key = other._data[i].key;
-        copy_rdvalue(_data[i].val, other._data[i].val);
-      }
-    } else {
-      _data = other._data;
+    std::vector<Pair> data(other._data.size());
+    _data.swap(data);
+    for (size_t i = 0; i < _data.size(); ++i) {
+      _data[i].key = other._data[i].key;
+      copy_rdvalue(_data[i].val, other._data[i].val);
     }
-    _hasNonPodData = other._hasNonPodData;
     return *this;
   }
 
@@ -125,16 +110,16 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     if (this == &other) {
       return *this;
     }
-    if (_hasNonPodData) {
-      reset();
-    }
-    _hasNonPodData = other._hasNonPodData;
-    other._hasNonPodData = false;
+    reset();
     _data = std::move(other._data);
     return *this;
   }
 
   //----------------------------------------------------------
+  //! \brief Access to the underlying non-POD containment flag (deprecated, always true)
+  inline static bool getNonPODStatus_sink = false;
+  bool &getNonPODStatus() { return getNonPODStatus_sink; }
+
   //! \brief Returns the number of entries in the dictionary
   std::size_t size() const { return _data.size(); }
 
@@ -147,15 +132,11 @@ class RDKIT_RDGENERAL_EXPORT Dict {
 
   //! \brief Appends a populated Pair to the dictionary.
   void insert(Pair &&pair) {
-    _hasNonPodData |= pair.val.needsCleanup();
     _data.push_back(std::move(pair));
   }
 
   //! \brief Bulk-appends a vector of Pairs, moving them into the dictionary.
   void extend(std::vector<Pair> &&pairs) {
-    for (auto &p : pairs) {
-      _hasNonPodData |= p.val.needsCleanup();
-    }
     _data.insert(_data.end(), std::make_move_iterator(pairs.begin()),
                  std::make_move_iterator(pairs.end()));
   }
@@ -294,7 +275,6 @@ class RDKIT_RDGENERAL_EXPORT Dict {
     if (what.empty()) {
       throw ValueErrorException("Cannot set value with empty key");
     }
-    _hasNonPodData = true;
     for (auto &&data : _data) {
       if (data.key == what) {
         RDValue::cleanup_rdvalue(data.val);
@@ -377,9 +357,7 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   void clearVal(const std::string_view what) {
     for (auto it = _data.begin(); it < _data.end(); ++it) {
       if (it->key == what) {
-        if (_hasNonPodData) {
-          RDValue::cleanup_rdvalue(it->val);
-        }
+        RDValue::cleanup_rdvalue(it->val);
         _data.erase(it);
         return;
       }
@@ -390,19 +368,15 @@ class RDKIT_RDGENERAL_EXPORT Dict {
   //! \brief Clears all keys (and values) from the dictionary.
   //!
   void reset() {
-    if (_hasNonPodData) {
-      for (auto &&data : _data) {
-        RDValue::cleanup_rdvalue(data.val);
-      }
+    for (auto &&data : _data) {
+      RDValue::cleanup_rdvalue(data.val);
     }
     DataType data;
     _data.swap(data);
   }
 
  private:
-  DataType _data{};            //!< the actual dictionary
-  bool _hasNonPodData{false};  // if true, need a deep copy
-                               //  (copy_rdvalue)
+  DataType _data{};
 };
 
 template <>
