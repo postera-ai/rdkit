@@ -2713,7 +2713,7 @@ TEST_CASE("github9101 - $$$$ at buffer end") {
   SDMolSupplier reader(infile);
   CHECK(reader.length() == 2);  // this causes the issue as we pre-index
   auto *mol = reader[0];
-  CHECK(mol->getProp<std::string>("comment").size() == 65369);
+  CHECK(mol->getProp<std::string>(internKey("comment")).size() == 65369);
   delete mol;
   mol = reader[1];
   REQUIRE(mol);

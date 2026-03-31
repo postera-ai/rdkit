@@ -1425,7 +1425,7 @@ M  END
     auto m = v2::FileParsers::MolFromMolBlock(mb);
     REQUIRE(m);
 
-    CAPTURE(m->getProp<std::string>("_Name"), usingLegacyStereo);
+    CAPTURE(m->getProp<std::string>(common_properties::_Name), usingLegacyStereo);
 
     auto refLabels = getBondLabels(*m);
     CHECK(refLabels.size() == 8);
