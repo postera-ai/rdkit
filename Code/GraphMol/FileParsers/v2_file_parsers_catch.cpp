@@ -71,6 +71,6 @@ TEST_CASE("empty column names in SmilesMolSupplier") {
   v2::FileParsers::SmilesMolSupplier suppl(fName, params);
   auto mol = suppl.next();
   REQUIRE(mol);
-  CHECK(mol->hasProp(internKey("_Name")));
+  CHECK(mol->hasProp(common_properties::_Name));
   CHECK(mol->hasProp(internKey("Column_0")));
 }

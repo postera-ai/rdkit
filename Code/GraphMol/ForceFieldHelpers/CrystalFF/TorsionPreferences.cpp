@@ -126,7 +126,7 @@ ExpTorsionAngleCollection::ExpTorsionAngleCollection(
            ++i) {
         Atom const *atom = (angle.dp_pattern.get())->getAtomWithIdx(i);
         int num;
-        if (atom->getPropIfPresent(internKey("molAtomMapNumber"), num)) {
+        if (atom->getPropIfPresent(common_properties::molAtomMapNumber, num)) {
           if (num > 0 && num < 5) {
             angle.idx[num - 1] = i;
           }

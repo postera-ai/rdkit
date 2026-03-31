@@ -31,11 +31,11 @@ void AddMWMF(RWMol &mol,
   mass = RDKit::MolOps::getExactMolWt(mol);
   std::string formula = RDKit::MolOps::getMolFormula(mol);
   if (!formula.empty()) {
-    mol.setProp(RDKit::internKey(pre ? "MF_PRE" : "MF_POST"), formula);
+    mol.setProp(pre ? common_properties::MF_PRE : common_properties::MF_POST, formula);
   }
   char propertyValue[64];
   snprintf(propertyValue, sizeof(propertyValue), "%g", mass);
-  mol.setProp(RDKit::internKey(pre ? "MW_PRE" : "MW_POST"), mass);
+  mol.setProp(pre ? common_properties::MW_PRE : common_properties::MW_POST, mass);
 }
 
 bool StripSmallFragments(RWMol &mol, bool verbose) {

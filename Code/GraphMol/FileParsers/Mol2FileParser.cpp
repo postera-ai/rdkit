@@ -617,7 +617,7 @@ Atom *ParseMol2FileAtomLine(const std::string atomLine, RDGeom::Point3D &pos) {
   }
 
   // now assign the properties
-  res->setProp(internKey("_TriposAtomName"), tAN);  // maybe remove that since it's
+  res->setProp(common_properties::_TriposAtomName, tAN);  // maybe remove that since it's
                                          // useless?
   res->setProp(common_properties::_TriposAtomType, tAT);
   // no implicit hydrogens for mol2 files
@@ -636,7 +636,7 @@ Atom *ParseMol2FileAtomLine(const std::string atomLine, RDGeom::Point3D &pos) {
   ++itemIt;
   // the Partial charge in the file
   if (itemIt != tokens.end()) {
-    res->setProp(internKey("_TriposPartialCharge"), *itemIt);
+    res->setProp(common_properties::_TriposPartialCharge, *itemIt);
   }
   // we skip the status bit ...
 
@@ -910,7 +910,7 @@ std::unique_ptr<RWMol> MolFromMol2DataStream(std::istream &inStream,
   tempStr = getLine(inStream);  // mol_type - ignore
   tempStr = getLine(inStream);
   boost::trim(tempStr);
-  res->setProp(internKey("_TriposChargeType"), tempStr);
+  res->setProp(common_properties::_TriposChargeType, tempStr);
   // stop here since we don't support anything else from the MOLECULE block
   INT_VECT idxCorresp(nAtoms, -1);
   inStream.seekg(atomStart, std::ios::beg);

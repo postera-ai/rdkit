@@ -136,7 +136,7 @@ void ParseSGroupV2000STYLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
     std::string typ = text.substr(pos + 1, 3);
     if (SubstanceGroupChecks::isValidType(typ)) {
       auto sgroup = SubstanceGroup(mol, typ);
-      sgroup.setProp<unsigned int>(internKey("index"), sequenceId);
+      sgroup.setProp<unsigned int>(common_properties::sgIndex, sequenceId);
       sGroupMap.emplace(sequenceId, sgroup);
     } else {
       std::ostringstream errout;
@@ -309,7 +309,7 @@ void ParseSGroupV2000SSTLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
       return;
     }
 
-    sgroup->setProp(internKey("SUBTYPE"), subType);
+    sgroup->setProp(common_properties::sgSUBTYPE, subType);
     pos += 3;
   }
 }
@@ -341,13 +341,13 @@ void ParseSGroupV2000SMTLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
   }
   std::string label = text.substr(pos, text.length() - pos);
 
-  if (sgroup->getProp<std::string>(internKey("TYPE")) ==
+  if (sgroup->getProp<std::string>(common_properties::sgTYPE) ==
       "MUL") {  // Case of multiple groups
-    sgroup->setProp(internKey("MULT"), label);
+    sgroup->setProp(common_properties::sgMULT, label);
 
   } else {  // Case of abbreviation groups, but we might not have seen a SCL
             // line yet
-    sgroup->setProp(internKey("LABEL"), label);
+    sgroup->setProp(common_properties::sgLABEL, label);
   }
 }
 
@@ -396,7 +396,7 @@ void ParseSGroupV2000SLBLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
       return;
     }
 
-    sgroup->setProp<unsigned int>(internKey("ID"), id);
+    sgroup->setProp<unsigned int>(common_properties::sgID, id);
   }
 }
 
@@ -444,7 +444,7 @@ void ParseSGroupV2000SCNLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
       return;
     }
 
-    sgroup->setProp(internKey("CONNECT"), connect);
+    sgroup->setProp(common_properties::sgCONNECT, connect);
     pos += 3;
   }
 }
@@ -480,7 +480,7 @@ void ParseSGroupV2000SDSLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
       return;
     }
 
-    sgroup->setProp(internKey("ESTATE"), "E");
+    sgroup->setProp(common_properties::sgESTATE, "E");
   }
 }
 
@@ -510,7 +510,7 @@ void ParseSGroupV2000SBVLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
   Bond *bond = mol->getUniqueBondWithBookmark(bondMark);
 
   RDGeom::Point3D vector;
-  if (sgroup->getProp<std::string>(internKey("TYPE")) == "SUP") {
+  if (sgroup->getProp<std::string>(common_properties::sgTYPE) == "SUP") {
     vector.x = ParseSGroupDoubleField(ok, strictParsing, text, line, pos);
     if (!ok) {
       sgroup->setIsValid(false);
@@ -578,19 +578,19 @@ void ParseSGroupV2000SDTLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
 
   // only add entries for the remaining properties if they aren't blank
   if (!fieldName.empty()) {
-    sgroup->setProp(internKey("FIELDNAME"), fieldName);
+    sgroup->setProp(common_properties::sgFIELDNAME, fieldName);
   }
   if (!fieldType.empty()) {
-    sgroup->setProp(internKey("FIELDTYPE"), fieldType);
+    sgroup->setProp(common_properties::sgFIELDTYPE, fieldType);
   }
   if (!fieldInfo.empty()) {
-    sgroup->setProp(internKey("FIELDINFO"), fieldInfo);
+    sgroup->setProp(common_properties::sgFIELDINFO, fieldInfo);
   }
   if (!queryType.empty()) {
-    sgroup->setProp(internKey("QUERYTYPE"), queryType);
+    sgroup->setProp(common_properties::sgQUERYTYPE, queryType);
   }
   if (!queryOp.empty()) {
-    sgroup->setProp(internKey("QUERYOP"), queryOp);
+    sgroup->setProp(common_properties::sgQUERYOP, queryOp);
   }
 }
 
@@ -614,7 +614,7 @@ void ParseSGroupV2000SDDLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
   // Store the rest of the line as is.
   ++pos;
   if (pos < text.length()) {
-    sgroup->setProp(internKey("FIELDDISP"), text.substr(pos, text.length() - pos));
+    sgroup->setProp(common_properties::sgFIELDDISP, text.substr(pos, text.length() - pos));
   }
 }
 
@@ -655,7 +655,7 @@ void ParseSGroupV2000SCDSEDLine(IDX_TO_SGROUP_MAP &sGroupMap,
   }
 
   // have we already seen an SDT line?
-  if (!sgroup->hasProp(internKey("FIELDNAME"))) {
+  if (!sgroup->hasProp(common_properties::sgFIELDNAME)) {
     // one can read the docs and draw the conclusion that this is mandatory,
     // but it's also possible to interpret them the other way, and we know
     // that there are CTABs out there with empty fieldnames in SDT lines,
@@ -721,7 +721,7 @@ void ParseSGroupV2000SPLLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
     }
     unsigned int parentIdx = ParseSGroupIntField(text, line, pos);
 
-    sgroup->setProp<unsigned int>(internKey("PARENT"), parentIdx);
+    sgroup->setProp<unsigned int>(common_properties::sgPARENT, parentIdx);
   }
 }
 
@@ -771,7 +771,7 @@ void ParseSGroupV2000SNCLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
       sgroup->setIsValid(false);
       return;
     }
-    sgroup->setProp<unsigned int>(internKey("COMPNO"), compno);
+    sgroup->setProp<unsigned int>(common_properties::sgCOMPNO, compno);
   }
 }
 
@@ -876,7 +876,7 @@ void ParseSGroupV2000SCLLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
   }
 
   ++pos;
-  sgroup->setProp(internKey("CLASS"), text.substr(pos, text.length() - pos));
+  sgroup->setProp(common_properties::sgCLASS, text.substr(pos, text.length() - pos));
 }
 
 void ParseSGroupV2000SBTLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
@@ -918,9 +918,9 @@ void ParseSGroupV2000SBTLine(IDX_TO_SGROUP_MAP &sGroupMap, RWMol *mol,
     }
 
     if (bracketType == 0) {
-      sgroup->setProp(internKey("BRKTYP"), "BRACKET");
+      sgroup->setProp(common_properties::sgBRKTYP, "BRACKET");
     } else if (bracketType == 1) {
-      sgroup->setProp(internKey("BRKTYP"), "PAREN");
+      sgroup->setProp(common_properties::sgBRKTYP, "PAREN");
     } else {
       std::ostringstream errout;
       errout << "Invalid SBT value '" << bracketType << "' on line " << line;
@@ -978,7 +978,7 @@ void ParseV3000CStateLabel(RWMol *mol, SubstanceGroup &sgroup,
   unsigned int bondMark;
   stream >> count >> bondMark;
 
-  std::string type = sgroup.getProp<std::string>(internKey("TYPE"));
+  std::string type = sgroup.getProp<std::string>(common_properties::sgTYPE);
 
   if ((type != "SUP" && count != 1) || (type == "SUP" && count != 4)) {
     std::ostringstream errout;
@@ -1143,7 +1143,7 @@ void ParseV3000ParseLabel(const std::string &label,
         errout << "Invalid PARENT label found on line " << line;
         throw FileParseException(errout.str());
       }
-      sgroup.setProp<unsigned int>(internKey("PARENT"), parentIdx);
+      sgroup.setProp<unsigned int>(common_properties::sgPARENT, parentIdx);
     } else if (label == "COMPNO") {
       unsigned int compno;
       lineStream >> compno;
@@ -1153,7 +1153,7 @@ void ParseV3000ParseLabel(const std::string &label,
                << line;
         throw FileParseException(errout.str());
       }
-      sgroup.setProp<unsigned int>(internKey("COMPNO"), compno);
+      sgroup.setProp<unsigned int>(common_properties::sgCOMPNO, compno);
     } else if (label == "FIELDDATA") {
       auto strValue = ParseV3000StringPropLabel(lineStream);
       if (strictParsing) {
@@ -1248,7 +1248,7 @@ std::string ParseV3000SGroupsBlock(std::istream *inStream, unsigned int &line,
     SubstanceGroup sgroup(mol, type);
     STR_VECT dataFields;
 
-    sgroup.setProp<unsigned int>(internKey("index"), sequenceId);
+    sgroup.setProp<unsigned int>(common_properties::sgIndex, sequenceId);
     if (externalId > 0) {
       if (!SubstanceGroupChecks::isSubstanceGroupIdFree(*mol, externalId)) {
         std::ostringstream errout;
@@ -1262,7 +1262,7 @@ std::string ParseV3000SGroupsBlock(std::istream *inStream, unsigned int &line,
         }
       }
 
-      sgroup.setProp<unsigned int>(internKey("ID"), externalId);
+      sgroup.setProp<unsigned int>(common_properties::sgID, externalId);
     }
 
     while (sgroup.getIsValid() && !lineStream.eof() && !lineStream.fail()) {
@@ -1351,7 +1351,7 @@ std::string ParseV3000SGroupsBlock(std::istream *inStream, unsigned int &line,
       }
     }
 
-    sgroup.setProp(internKey("DATAFIELDS"), dataFields);
+    sgroup.setProp(common_properties::sgDATAFIELDS, dataFields);
     sGroupMap.emplace(sequenceId, sgroup);
 
     tempStr = FileParserUtils::getV3000Line(inStream, line);

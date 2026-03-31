@@ -406,7 +406,7 @@ void parseBondAttribs(Bond *bond, AttribListType attribs, bool doingQuery) {
         bondType = Bond::AROMATIC;
       } else {
         bondType = Bond::OTHER;
-        bond->setProp(internKey("SLN_Type"), attribVal);
+        bond->setProp(common_properties::SLN_Type, attribVal);
       }
       if (!doingQuery) {
         bond->setBondType(bondType);

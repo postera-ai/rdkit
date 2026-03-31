@@ -51,7 +51,7 @@ void testRDF() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp(RDKit::internKey("_Name"), nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> drdf;
 

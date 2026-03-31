@@ -67,9 +67,9 @@ RWMol buildSampleMolecule() {
   {
     SubstanceGroup sg(&mol, "MUL");
 
-    sg.setProp(internKey("SUBTYPE"), "BLO");
-    sg.setProp(internKey("MULT"), "n");
-    sg.setProp(internKey("CONNECT"), "HH");
+    sg.setProp(common_properties::sgSUBTYPE, "BLO");
+    sg.setProp(common_properties::sgMULT, "n");
+    sg.setProp(common_properties::sgCONNECT, "HH");
 
     // Add some atoms and bonds
     for (unsigned i = 0; i < 3; ++i) {
@@ -78,8 +78,8 @@ RWMol buildSampleMolecule() {
       sg.addBondWithIdx(i);  // add 2 CBONDs + 1 XBOND
     }
 
-    sg.setProp(internKey("COMPNO"), 7u);
-    sg.setProp(internKey("ESTATE"), "E");
+    sg.setProp(common_properties::sgCOMPNO, 7u);
+    sg.setProp(common_properties::sgESTATE, "E");
 
     SubstanceGroup::Bracket bracket1 = {{RDGeom::Point3D(1., 3., 0.),
                                          RDGeom::Point3D(5., 7., 0.),
@@ -94,11 +94,11 @@ RWMol buildSampleMolecule() {
     // Vector should not be parsed (not a SUP group)
     sg.addCState(2, RDGeom::Point3D());
 
-    sg.setProp(internKey("CLASS"), "TEST CLASS");
+    sg.setProp(common_properties::sgCLASS, "TEST CLASS");
 
     sg.addAttachPoint(0, 0, "XX");
 
-    sg.setProp(internKey("BRKTYP"), "PAREN");
+    sg.setProp(common_properties::sgBRKTYP, "PAREN");
 
     addSubstanceGroup(mol, sg);
   }
@@ -113,7 +113,7 @@ RWMol buildSampleMolecule() {
       sg.addBondWithIdx(i - 1);  // add 1 XBOND + 2 CBONDs
     }
 
-    sg.setProp(internKey("LABEL"), "TEST LABEL");
+    sg.setProp(common_properties::sgLABEL, "TEST LABEL");
 
     // V2000 has only x and y coords; z value restricted to 0.
     RDGeom::Point3D vector(3., 4., 0.);
@@ -127,25 +127,25 @@ RWMol buildSampleMolecule() {
   {
     SubstanceGroup sg(&mol, "DAT");
 
-    sg.setProp(internKey("FIELDNAME"), "SAMPLE FIELD NAME");  // 30 char max
+    sg.setProp(common_properties::sgFIELDNAME, "SAMPLE FIELD NAME");  // 30 char max
     // Field Type is ignored in V3000
-    sg.setProp(internKey("FIELDINFO"), "SAMPLE FIELD INFO");  // 20 char max
-    sg.setProp(internKey("QUERYTYPE"), "PQ");                 // 2 char max
-    sg.setProp(internKey("QUERYOP"), "SAMPLE QUERY OP");      // 15 char max (rest of line)
+    sg.setProp(common_properties::sgFIELDINFO, "SAMPLE FIELD INFO");  // 20 char max
+    sg.setProp(common_properties::sgQUERYTYPE, "PQ");                 // 2 char max
+    sg.setProp(common_properties::sgQUERYOP, "SAMPLE QUERY OP");      // 15 char max (rest of line)
 
     // This should be properly formatted, but format is not checked
-    sg.setProp(internKey("FIELDDISP"), "SAMPLE FIELD DISP");
+    sg.setProp(common_properties::sgFIELDDISP, "SAMPLE FIELD DISP");
 
     STR_VECT dataFields = {"SAMPLE DATA FIELD 1", "SAMPLE DATA FIELD 2",
                            "SAMPLE DATA FIELD 3"};
-    sg.setProp(internKey("DATAFIELDS"), dataFields);
+    sg.setProp(common_properties::sgDATAFIELDS, dataFields);
 
     addSubstanceGroup(mol, sg);
   }
 
   // Set a parent with higher index
   const auto &sgroups = getSubstanceGroups(mol);
-  sgroups.at(0).setProp<unsigned int>(internKey("PARENT"), 3);
+  sgroups.at(0).setProp<unsigned int>(common_properties::sgPARENT, 3);
 
   return mol;
 }
@@ -165,8 +165,8 @@ TEST_CASE("Basic Sgroup creation", "[Sgroups]") {
 
   const auto &sgroups = getSubstanceGroups(mol);
   REQUIRE(sgroups.size() == 2);
-  CHECK(sgroups.at(0).getProp<std::string>(internKey("TYPE")) == "DAT");
-  CHECK(sgroups.at(1).getProp<std::string>(internKey("TYPE")) == "SUP");
+  CHECK(sgroups.at(0).getProp<std::string>(common_properties::sgTYPE) == "DAT");
+  CHECK(sgroups.at(1).getProp<std::string>(common_properties::sgTYPE) == "SUP");
 }
 
 TEST_CASE("Build and test sample molecule", "[Sgroups]") {
@@ -177,11 +177,11 @@ TEST_CASE("Build and test sample molecule", "[Sgroups]") {
 
   SECTION("first sgroup") {
     const auto &sg = sgroups.at(0);
-    CHECK(sg.getProp<std::string>(internKey("TYPE")) == "MUL");
+    CHECK(sg.getProp<std::string>(common_properties::sgTYPE) == "MUL");
 
-    CHECK(sg.getProp<std::string>(internKey("SUBTYPE")) == "BLO");
-    CHECK(sg.getProp<std::string>(internKey("MULT")) == "n");
-    CHECK(sg.getProp<std::string>(internKey("CONNECT")) == "HH");
+    CHECK(sg.getProp<std::string>(common_properties::sgSUBTYPE) == "BLO");
+    CHECK(sg.getProp<std::string>(common_properties::sgMULT) == "n");
+    CHECK(sg.getProp<std::string>(common_properties::sgCONNECT) == "HH");
 
     std::vector<unsigned int> atoms_reference = {1, 2, 3};
     auto atoms = sg.getAtoms();
@@ -202,8 +202,8 @@ TEST_CASE("Build and test sample molecule", "[Sgroups]") {
     CHECK(sg.getBondType(bonds[1]) == SubstanceGroup::BondType::CBOND);
     CHECK(sg.getBondType(bonds[2]) == SubstanceGroup::BondType::XBOND);
 
-    CHECK(sg.getProp<unsigned int>(internKey("COMPNO")) == 7u);
-    CHECK(sg.getProp<std::string>(internKey("ESTATE")) == "E");
+    CHECK(sg.getProp<unsigned int>(common_properties::sgCOMPNO) == 7u);
+    CHECK(sg.getProp<std::string>(common_properties::sgESTATE) == "E");
 
     std::vector<std::array<std::array<double, 3>, 3>> brackets_reference = {
         {{{{1., 3., 0.}}, {{5., 7., 0.}}, {{0., 0., 0.}}}},
@@ -218,7 +218,7 @@ TEST_CASE("Build and test sample molecule", "[Sgroups]") {
     CHECK(cstates[0].vector.y == 0.);
     CHECK(cstates[0].vector.z == 0.);
 
-    CHECK(sg.getProp<std::string>(internKey("CLASS")) == "TEST CLASS");
+    CHECK(sg.getProp<std::string>(common_properties::sgCLASS) == "TEST CLASS");
 
     auto ap = sg.getAttachPoints();
     CHECK(ap.size() == 1);
@@ -226,14 +226,14 @@ TEST_CASE("Build and test sample molecule", "[Sgroups]") {
     CHECK(ap[0].lvIdx == static_cast<int>(atoms[0]));
     CHECK(ap[0].id == "XX");
 
-    CHECK(sg.getProp<std::string>(internKey("BRKTYP")) == "PAREN");
+    CHECK(sg.getProp<std::string>(common_properties::sgBRKTYP) == "PAREN");
 
-    CHECK(sg.getProp<unsigned int>(internKey("PARENT")) == 3u);
+    CHECK(sg.getProp<unsigned int>(common_properties::sgPARENT) == 3u);
   }
 
   SECTION("second sgroup") {
     const auto &sg = sgroups.at(1);
-    CHECK(sg.getProp<std::string>(internKey("TYPE")) == "SUP");
+    CHECK(sg.getProp<std::string>(common_properties::sgTYPE) == "SUP");
 
     std::vector<unsigned int> atoms_reference = {4, 5, 6};
     auto atoms = sg.getAtoms();
@@ -253,7 +253,7 @@ TEST_CASE("Build and test sample molecule", "[Sgroups]") {
     CHECK(sg.getBondType(bonds[1]) == SubstanceGroup::BondType::CBOND);
     CHECK(sg.getBondType(bonds[2]) == SubstanceGroup::BondType::CBOND);
 
-    CHECK(sg.getProp<std::string>(internKey("LABEL")) == "TEST LABEL");
+    CHECK(sg.getProp<std::string>(common_properties::sgLABEL) == "TEST LABEL");
 
     auto cstates = sg.getCStates();
     CHECK(cstates.size() == 1);
@@ -271,16 +271,16 @@ TEST_CASE("Build and test sample molecule", "[Sgroups]") {
 
   SECTION("third sgroup") {
     const auto &sg = sgroups.at(2);
-    CHECK(sg.getProp<std::string>(internKey("TYPE")) == "DAT");
+    CHECK(sg.getProp<std::string>(common_properties::sgTYPE) == "DAT");
 
-    CHECK(sg.getProp<std::string>(internKey("FIELDNAME")) == "SAMPLE FIELD NAME");
-    CHECK(sg.getProp<std::string>(internKey("FIELDINFO")) == "SAMPLE FIELD INFO");
-    CHECK(sg.getProp<std::string>(internKey("QUERYTYPE")) == "PQ");
-    CHECK(sg.getProp<std::string>(internKey("QUERYOP")) == "SAMPLE QUERY OP");
+    CHECK(sg.getProp<std::string>(common_properties::sgFIELDNAME) == "SAMPLE FIELD NAME");
+    CHECK(sg.getProp<std::string>(common_properties::sgFIELDINFO) == "SAMPLE FIELD INFO");
+    CHECK(sg.getProp<std::string>(common_properties::sgQUERYTYPE) == "PQ");
+    CHECK(sg.getProp<std::string>(common_properties::sgQUERYOP) == "SAMPLE QUERY OP");
 
-    CHECK(sg.getProp<std::string>(internKey("FIELDDISP")) == "SAMPLE FIELD DISP");
+    CHECK(sg.getProp<std::string>(common_properties::sgFIELDDISP) == "SAMPLE FIELD DISP");
 
-    auto dataFields = sg.getProp<STR_VECT>(internKey("DATAFIELDS"));
+    auto dataFields = sg.getProp<STR_VECT>(common_properties::sgDATAFIELDS);
     CHECK(dataFields.size() == 3);
     CHECK(dataFields[0] == "SAMPLE DATA FIELD 1");
     CHECK(dataFields[1] == "SAMPLE DATA FIELD 2");
@@ -497,14 +497,14 @@ M  END
 
     for (const auto &sg : getSubstanceGroups(*v2000_mol)) {
       ++count;
-      TEST_ASSERT(sg.getPropIfPresent(internKey("index"), index));
+      TEST_ASSERT(sg.getPropIfPresent(common_properties::sgIndex, index));
       TEST_ASSERT(index == count);
     }
 
     count = 0;
     for (const auto &sg : getSubstanceGroups(*v3000_mol)) {
       ++count;
-      TEST_ASSERT(sg.getPropIfPresent(internKey("index"), index));
+      TEST_ASSERT(sg.getPropIfPresent(common_properties::sgIndex, index));
       TEST_ASSERT(index == count);
     }
   }
@@ -546,14 +546,14 @@ M  END)CTAB"_ctab;
   const auto sgs = getSubstanceGroups(*mol);
   REQUIRE(sgs.size() == 1);
   const auto &sg = sgs[0];
-  REQUIRE(sg.getProp<std::string>(internKey("TYPE")) == "DAT");
+  REQUIRE(sg.getProp<std::string>(common_properties::sgTYPE) == "DAT");
   REQUIRE(sg.getAtoms() == std::vector<unsigned int>{0});
-  CHECK(sg.getProp<std::string>(internKey("FIELDNAME")) == "");
-  CHECK(sg.getProp<std::string>(internKey("FIELDDISP")) ==
+  CHECK(sg.getProp<std::string>(common_properties::sgFIELDNAME) == "");
+  CHECK(sg.getProp<std::string>(common_properties::sgFIELDDISP) ==
         "    3.8241   -7.7842    DA    ALL  1       5");
-  CHECK(sg.getProp<std::string>(internKey("index")) == "2");
+  CHECK(sg.getProp<std::string>(common_properties::sgIndex) == "2");
 
-  const auto dataFields = sg.getProp<STR_VECT>(internKey("DATAFIELDS"));
+  const auto dataFields = sg.getProp<STR_VECT>(common_properties::sgDATAFIELDS);
   REQUIRE(dataFields.size() == 1);
   CHECK(dataFields[0] == "[IV]");
 }

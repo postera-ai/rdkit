@@ -25,41 +25,35 @@ typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 namespace RDKit {
 namespace MolEnumerator {
 
-const std::string polymarker = "_polymeratom";
-const std::string headmarker = "_headatom";
-const std::string headmarker_frame = "_headatom_frame";
-const std::string tailmarker = "_tailatom";
-const std::string tailmarker_frame = "_tailatom_frame";
-const std::string headheadmarker = "_headhead";
 const unsigned ladderoffset = 100000;
 
 namespace {
 void tagAtoms(std::shared_ptr<ROMol> mol, const Bond *bond,
               const boost::dynamic_bitset<> &sgatoms, unsigned int index,
-              const std::string &marker, const std::string &framemarker,
+              DictKey marker, DictKey framemarker,
               const std::string &connect) {
   PRECONDITION(mol, "bad molecule");
   PRECONDITION(bond, "bad bond");
   if (sgatoms[bond->getBeginAtomIdx()]) {
-    bond->getBeginAtom()->setProp(internKey(marker), index);
+    bond->getBeginAtom()->setProp(marker, index);
     if (connect == "HH") {
-      bond->getBeginAtom()->setProp(internKey(headheadmarker), 1);
+      bond->getBeginAtom()->setProp(common_properties::_headhead, 1);
     }
     auto frameAtom = mol->getAtomWithIdx(bond->getEndAtomIdx());
     std::vector<unsigned int> vs;
-    frameAtom->getPropIfPresent(internKey(framemarker), vs);
+    frameAtom->getPropIfPresent(framemarker, vs);
     vs.push_back(index);
-    frameAtom->setProp(internKey(framemarker), vs);
+    frameAtom->setProp(framemarker, vs);
   } else if (sgatoms[bond->getEndAtomIdx()]) {
-    bond->getEndAtom()->setProp(internKey(marker), index);
+    bond->getEndAtom()->setProp(marker, index);
     if (connect == "HH") {
-      bond->getEndAtom()->setProp(internKey(headheadmarker), 1);
+      bond->getEndAtom()->setProp(common_properties::_headhead, 1);
     }
     auto frameAtom = mol->getAtomWithIdx(bond->getBeginAtomIdx());
     std::vector<unsigned int> vs;
-    frameAtom->getPropIfPresent(internKey(framemarker), vs);
+    frameAtom->getPropIfPresent(framemarker, vs);
     vs.push_back(index);
-    frameAtom->setProp(internKey(framemarker), vs);
+    frameAtom->setProp(framemarker, vs);
   } else {
     throw ValueErrorException("neither atom in an SRU bond is in the polymer");
   }
@@ -137,12 +131,12 @@ void RepeatUnitOp::initFromMol() {
   std::vector<const SubstanceGroup *> enumerated_SGroups;
   for (auto &sg : getSubstanceGroups(*dp_mol)) {
     std::string typ;
-    if (!sg.getPropIfPresent(internKey("TYPE"), typ) || typ != "SRU") {
+    if (!sg.getPropIfPresent(common_properties::sgTYPE, typ) || typ != "SRU") {
       continue;
     }
 
     std::string connect;
-    sg.getPropIfPresent(internKey("CONNECT"), connect);
+    sg.getPropIfPresent(common_properties::sgCONNECT, connect);
     if (!connect.empty()) {
       if (connect != "HT" && connect != "HH") {
         BOOST_LOG(rdWarningLog)
@@ -153,7 +147,7 @@ void RepeatUnitOp::initFromMol() {
     }
 
     std::string label;
-    sg.getPropIfPresent(internKey("LABEL"), label);
+    sg.getPropIfPresent(common_properties::sgLABEL, label);
     auto [min_repeats, max_repeats] = parse_repeat_counts(label);
     d_minRepeatCounts.push_back(min_repeats);
     d_countAtEachPoint.push_back(
@@ -170,16 +164,16 @@ void RepeatUnitOp::initFromMol() {
     }
     atomsPerSRU.push_back(sgatoms);
 
-    auto sgIdx = sg.getProp<unsigned>(internKey("index"));
+    auto sgIdx = sg.getProp<unsigned>(common_properties::sgIndex);
 
     // tag the head and tail atoms
     const auto &bnds = sg.getBonds();
     if (bnds.size() == 2) {
       // simple case with only two bonds: here we just have head and tail
       tagAtoms(dp_mol, dp_mol->getBondWithIdx(bnds[0]), sgatoms, sgIdx,
-               headmarker, tailmarker_frame, connect);
+               common_properties::_headatom, common_properties::_tailatom_frame, connect);
       tagAtoms(dp_mol, dp_mol->getBondWithIdx(bnds[1]), sgatoms, sgIdx,
-               tailmarker, headmarker_frame, connect);
+               common_properties::_tailatom, common_properties::_headatom_frame, connect);
     } else if (bnds.size() == 4) {
       // four bonds are what we see for a ladder polymer, here we need two
       // different heads and two different tails. We mark the second set with
@@ -191,20 +185,20 @@ void RepeatUnitOp::initFromMol() {
 
       // We may have XBCORR to indicate which bonds correspond to which
       std::vector<unsigned int> xbcorr;
-      sg.getPropIfPresent(internKey("XBCORR"), xbcorr);
+      sg.getPropIfPresent(common_properties::sgXBCORR, xbcorr);
       // if it's not there, or if it wasn't the right size, just use
       // the bonds:
       if (xbcorr.size() != 4) {
         xbcorr = {bnds[0], bnds[2], bnds[1], bnds[3]};
       }
       tagAtoms(dp_mol, dp_mol->getBondWithIdx(xbcorr[0]), sgatoms, sgIdx,
-               headmarker, tailmarker_frame, connect);
+               common_properties::_headatom, common_properties::_tailatom_frame, connect);
       tagAtoms(dp_mol, dp_mol->getBondWithIdx(xbcorr[2]), sgatoms,
-               sgIdx + ladderoffset, headmarker, tailmarker_frame, connect);
+               sgIdx + ladderoffset, common_properties::_headatom, common_properties::_tailatom_frame, connect);
       tagAtoms(dp_mol, dp_mol->getBondWithIdx(xbcorr[1]), sgatoms, sgIdx,
-               tailmarker, headmarker_frame, connect);
+               common_properties::_tailatom, common_properties::_headatom_frame, connect);
       tagAtoms(dp_mol, dp_mol->getBondWithIdx(xbcorr[3]), sgatoms,
-               sgIdx + ladderoffset, tailmarker, headmarker_frame, connect);
+               sgIdx + ladderoffset, common_properties::_tailatom, common_properties::_headatom_frame, connect);
     } else {
       throw ValueErrorException("can only handle SRUs with two or four bonds");
     }
@@ -241,7 +235,7 @@ void RepeatUnitOp::initFromMol() {
       if (!sgatoms[aidx]) {
         repeat->removeAtom(aidx);
       } else {
-        repeat->getAtomWithIdx(aidx)->setProp(internKey(polymarker), 1);
+        repeat->getAtomWithIdx(aidx)->setProp(common_properties::_polymeratom, 1);
       }
     }
     repeat->commitBatchEdit();
@@ -259,24 +253,24 @@ namespace {
 void flipHeadHeadGroups(unsigned int origAtomCount, RWMol &mol) {
   for (auto aidx = origAtomCount; aidx < mol.getNumAtoms(); ++aidx) {
     auto atom = mol.getAtomWithIdx(aidx);
-    if (atom->hasProp(internKey(headheadmarker))) {
-      if (atom->hasProp(internKey(headmarker))) {
-        atom->setProp(internKey(tailmarker), atom->getProp<unsigned>(internKey(headmarker)));
-        atom->clearProp(internKey(headmarker));
-      } else if (atom->hasProp(internKey(tailmarker))) {
-        atom->setProp(internKey(headmarker), atom->getProp<unsigned>(internKey(tailmarker)));
-        atom->clearProp(internKey(tailmarker));
+    if (atom->hasProp(common_properties::_headhead)) {
+      if (atom->hasProp(common_properties::_headatom)) {
+        atom->setProp(common_properties::_tailatom, atom->getProp<unsigned>(common_properties::_headatom));
+        atom->clearProp(common_properties::_headatom);
+      } else if (atom->hasProp(common_properties::_tailatom)) {
+        atom->setProp(common_properties::_headatom, atom->getProp<unsigned>(common_properties::_tailatom));
+        atom->clearProp(common_properties::_tailatom);
       }
-      if (atom->hasProp(internKey(headmarker_frame))) {
+      if (atom->hasProp(common_properties::_headatom_frame)) {
         atom->setProp(
-            internKey(tailmarker_frame),
-            atom->getProp<std::vector<unsigned int>>(internKey(headmarker_frame)));
-        atom->clearProp(internKey(headmarker_frame));
-      } else if (atom->hasProp(internKey(tailmarker_frame))) {
+            common_properties::_tailatom_frame,
+            atom->getProp<std::vector<unsigned int>>(common_properties::_headatom_frame));
+        atom->clearProp(common_properties::_headatom_frame);
+      } else if (atom->hasProp(common_properties::_tailatom_frame)) {
         atom->setProp(
-            internKey(headmarker_frame),
-            atom->getProp<std::vector<unsigned int>>(internKey(tailmarker_frame)));
-        atom->clearProp(internKey(tailmarker_frame));
+            common_properties::_headatom_frame,
+            atom->getProp<std::vector<unsigned int>>(common_properties::_tailatom_frame));
+        atom->clearProp(common_properties::_tailatom_frame);
       }
     }
   }
@@ -287,20 +281,20 @@ void connectRepeatAtomsAndRemoveExtras(unsigned int origAtomCount, RWMol &mol) {
   for (auto aidx1 = 0u; aidx1 < origAtomCount; ++aidx1) {
     auto at1 = mol.getAtomWithIdx(aidx1);
     unsigned tailIdx;
-    if (at1->getPropIfPresent(internKey(tailmarker), tailIdx)) {
+    if (at1->getPropIfPresent(common_properties::_tailatom, tailIdx)) {
       bool connected = false;
       for (auto aidx2 = origAtomCount; aidx2 < mol.getNumAtoms(); ++aidx2) {
         auto at2 = mol.getAtomWithIdx(aidx2);
         unsigned int headIdx;
-        if (at2->getPropIfPresent(internKey(headmarker), headIdx) && tailIdx == headIdx) {
+        if (at2->getPropIfPresent(common_properties::_headatom, headIdx) && tailIdx == headIdx) {
           connected = true;
-          at2->clearProp(internKey(headmarker));
+          at2->clearProp(common_properties::_headatom);
           // remove any atom connected to the head which isn't in the
           // repeat unit
           for (const auto &nbri :
                boost::make_iterator_range(mol.getAtomNeighbors(at2))) {
             auto nbr = mol[nbri];
-            if (!nbr->hasProp(internKey(polymarker))) {
+            if (!nbr->hasProp(common_properties::_polymeratom)) {
               mol.removeAtom(nbr);
             }
           }
@@ -310,13 +304,13 @@ void connectRepeatAtomsAndRemoveExtras(unsigned int origAtomCount, RWMol &mol) {
         }
       }
       if (connected) {
-        at1->clearProp(internKey(tailmarker));
+        at1->clearProp(common_properties::_tailatom);
         // remove any atom connected to the tail which isn't in the
         // repeat unit
         for (const auto &nbri :
              boost::make_iterator_range(mol.getAtomNeighbors(at1))) {
           auto nbr = mol[nbri];
-          if (!nbr->hasProp(internKey(polymarker))) {
+          if (!nbr->hasProp(common_properties::_polymeratom)) {
             mol.removeAtom(nbr);
           }
         }
@@ -334,34 +328,34 @@ void connectRepeatToFrame(unsigned int nOrigAtoms, RWMol &mol,
   for (auto aidx = nOrigAtoms; aidx < mol.getNumAtoms(); ++aidx) {
     auto sruAtom = mol.getAtomWithIdx(aidx);
     unsigned int val;
-    if (sruAtom->getPropIfPresent(internKey(headmarker), val)) {
+    if (sruAtom->getPropIfPresent(common_properties::_headatom, val)) {
       if (tailMap.find(val) != tailMap.end()) {
         // there's an atom in the frame to connect to:
         mol.addBond(sruAtom, tailMap[val], Bond::BondType::SINGLE);
-        sruAtom->clearProp(internKey(headmarker));
+        sruAtom->clearProp(common_properties::_headatom);
         tailMap.erase(val);
       }
     }
-    if (sruAtom->getPropIfPresent(internKey(tailmarker), val)) {
+    if (sruAtom->getPropIfPresent(common_properties::_tailatom, val)) {
       if (headMap.find(val) != headMap.end()) {
         // there's an atom in the frame to connect to:
         mol.addBond(sruAtom, headMap[val], Bond::BondType::SINGLE);
-        sruAtom->clearProp(internKey(tailmarker));
+        sruAtom->clearProp(common_properties::_tailatom);
         headMap.erase(val);
       }
     }
     std::vector<unsigned int> vals;
-    if (sruAtom->getPropIfPresent(internKey(headmarker_frame), vals)) {
+    if (sruAtom->getPropIfPresent(common_properties::_headatom_frame, vals)) {
       for (const auto val : vals) {
         headMap[val] = sruAtom;
       }
-      sruAtom->clearProp(internKey(headmarker_frame));
+      sruAtom->clearProp(common_properties::_headatom_frame);
     }
-    if (sruAtom->getPropIfPresent(internKey(tailmarker_frame), vals)) {
+    if (sruAtom->getPropIfPresent(common_properties::_tailatom_frame, vals)) {
       for (const auto val : vals) {
         tailMap[val] = sruAtom;
       }
-      sruAtom->clearProp(internKey(tailmarker_frame));
+      sruAtom->clearProp(common_properties::_tailatom_frame);
     }
   }
 }
@@ -370,7 +364,7 @@ void constructHeadAndTailMaps(RWMol &mol, std::map<unsigned, Atom *> &headMap,
                               std::map<unsigned, Atom *> &tailMap) {
   for (auto atom : mol.atoms()) {
     std::vector<unsigned int> vals;
-    if (atom->getPropIfPresent(internKey(headmarker_frame), vals)) {
+    if (atom->getPropIfPresent(common_properties::_headatom_frame, vals)) {
       for (auto val : vals) {
         if (headMap.find(val) != headMap.end()) {
           throw ValueErrorException(
@@ -379,7 +373,7 @@ void constructHeadAndTailMaps(RWMol &mol, std::map<unsigned, Atom *> &headMap,
         headMap[val] = atom;
       }
     }
-    if (atom->getPropIfPresent(internKey(tailmarker_frame), vals)) {
+    if (atom->getPropIfPresent(common_properties::_tailatom_frame, vals)) {
       for (auto val : vals) {
         if (tailMap.find(val) != tailMap.end()) {
           throw ValueErrorException(
@@ -450,8 +444,8 @@ std::unique_ptr<ROMol> RepeatUnitOp::operator()(
     auto iter = tailMap.find(tpl.first);
     if (iter != tailMap.end()) {
       res->addBond(tpl.second, iter->second, Bond::BondType::SINGLE);
-      tpl.second->clearProp(internKey(headmarker_frame));
-      iter->second->clearProp(internKey(tailmarker_frame));
+      tpl.second->clearProp(common_properties::_headatom_frame);
+      iter->second->clearProp(common_properties::_tailatom_frame);
     }
   }
   res->commitBatchEdit();

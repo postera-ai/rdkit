@@ -58,7 +58,7 @@ void RCore::findIndicesWithRLabel() {
   core_atoms_with_user_labels.resize(core->getNumAtoms());
   for (const auto atom : core->atoms()) {
     int label;
-    if (atom->getPropIfPresent(internKey(RLABEL), label) && label > 0) {
+    if (atom->getPropIfPresent(common_properties::rgd_RLABEL, label) && label > 0) {
       core_atoms_with_user_labels.set(atom->getIdx());
     }
   }
@@ -75,14 +75,14 @@ RWMOL_SPTR RCore::extractCoreFromMolMatch(
   for (const auto &pair : match) {
     const auto queryAtom = core->getAtomWithIdx(pair.first);
     const auto targetAtom = extractedCore->getAtomWithIdx(pair.second);
-    if (int rLabel; queryAtom->getPropIfPresent(internKey(RLABEL), rLabel)) {
-      targetAtom->setProp(internKey(RLABEL), rLabel);
+    if (int rLabel; queryAtom->getPropIfPresent(common_properties::rgd_RLABEL, rLabel)) {
+      targetAtom->setProp(common_properties::rgd_RLABEL, rLabel);
     }
-    if (int rLabelType; queryAtom->getPropIfPresent(internKey(RLABEL_TYPE), rLabelType)) {
-      targetAtom->setProp(internKey(RLABEL_TYPE), rLabelType);
+    if (int rLabelType; queryAtom->getPropIfPresent(common_properties::rgd_RLABEL_TYPE, rLabelType)) {
+      targetAtom->setProp(common_properties::rgd_RLABEL_TYPE, rLabelType);
     }
 
-    if (queryAtom->getAtomicNum() == 0 && queryAtom->hasProp(internKey(RLABEL)) &&
+    if (queryAtom->getAtomicNum() == 0 && queryAtom->hasProp(common_properties::rgd_RLABEL) &&
         queryAtom->getDegree() == 1) {
       continue;
     } else {
@@ -140,7 +140,7 @@ RWMOL_SPTR RCore::extractCoreFromMolMatch(
         const auto queryNeighbor =
             core->getAtomWithIdx((*queryNeighborMapping).first);
         if (queryNeighbor->getAtomicNum() == 0 &&
-            queryNeighbor->hasProp(internKey(RLABEL)) && queryNeighbor->getDegree() == 1) {
+            queryNeighbor->hasProp(common_properties::rgd_RLABEL) && queryNeighbor->getDegree() == 1) {
           auto newDummy = new Atom(*queryNeighbor);
           dummyAtomMap[newDummy] = static_cast<int>(targetNeighborIndex);
           newDummy->clearComputedProps();
@@ -263,9 +263,9 @@ RWMOL_SPTR RCore::extractCoreFromMolMatch(
 
     for (const auto atom : extractedCore->atoms()) {
       if (isUserRLabel(*atom)) {
-        int rLabel = atom->getProp<int>(internKey(RLABEL));
+        int rLabel = atom->getProp<int>(common_properties::rgd_RLABEL);
         for (const auto coreAtom : core->atoms()) {
-          if (int l; coreAtom->getPropIfPresent(internKey(RLABEL), l) && l == rLabel) {
+          if (int l; coreAtom->getPropIfPresent(common_properties::rgd_RLABEL, l) && l == rLabel) {
             int i = 0;
             for (auto citer = core->beginConformers();
                  citer != core->endConformers(); ++citer, ++i) {
@@ -413,7 +413,7 @@ void RCore::buildMatchingMol() {
   matchingMol->beginBatchEdit();
   for (auto atom : matchingMol->atoms()) {
     // keep track of the original core index in the matching molecule atom
-    atom->setProp<int>(internKey(RLABEL_CORE_INDEX), atom->getIdx());
+    atom->setProp<int>(common_properties::rgd_RLABEL_CORE_INDEX, atom->getIdx());
     // TODO for unlabelled core attachments if the heavy neighbor is not dummy
     // then keep one attachment
     if (atom->getAtomicNum() == 0 && atom->getDegree() == 1 &&
@@ -428,7 +428,7 @@ void RCore::buildMatchingMol() {
           //  If we are were set as an RLABEL of type Isotope we probably
           //   have a query of named "AtomIsotope"
           //   we DO strip these unless they have an additional query
-          if (           q != "AtomIsotope" || !atom->getPropIfPresent(internKey(RLABEL_TYPE), type) ||
+          if (           q != "AtomIsotope" || !atom->getPropIfPresent(common_properties::rgd_RLABEL_TYPE, type) ||
               type != RGroupLabels::IsotopeLabels) {
             continue;
           }
@@ -505,8 +505,8 @@ std::vector<MatchVectType> RCore::matchTerminalUserRGroups(
     std::sort(dummyIndexes.begin(), dummyIndexes.end(), [this](int a, int b) {
       auto dummy = core->getAtomWithIdx(a);
       auto otherDummy = core->getAtomWithIdx(b);
-      auto l1 = dummy->getProp<int>(internKey(RLABEL));
-      auto l2 = otherDummy->getProp<int>(internKey(RLABEL));
+      auto l1 = dummy->getProp<int>(common_properties::rgd_RLABEL);
+      auto l2 = otherDummy->getProp<int>(common_properties::rgd_RLABEL);
       return l1 > 0 && l2 > 0 ? l1 < l2 : l1 > l2;
     });
 
@@ -617,7 +617,7 @@ std::vector<MatchVectType> RCore::matchTerminalUserRGroups(
         // unlabeled core attachment atom or a user R label connected to a
         // query or wildcard atom
         const auto dummy = core->getAtomWithIdx(dummyIdx);
-        if (dummy->hasProp(internKey(UNLABELED_CORE_ATTACHMENT))) {
+        if (dummy->hasProp(common_properties::rgd_UNLABELED_CORE_ATTACHMENT)) {
           missingDummies.push_back(dummyIdx);
         } else if (isUserRLabel(*dummy) &&
                    (coreAtom->getAtomicNum() == 0 || coreAtom->hasQuery())) {
@@ -670,7 +670,7 @@ std::vector<MatchVectType> RCore::matchTerminalUserRGroups(
     // query before atom-by-atom matching.  Create a copy of the query for that
     // and use properties to map atoms back to the core
     for (auto atom : core->atoms()) {
-      atom->setProp(internKey(indexProp), atom->getIdx());
+      atom->setProp(common_properties::__core_index__, atom->getIdx());
     }
     checkCore = std::make_unique<RWMol>(*core);
     std::sort(missingDummies.begin(), missingDummies.end(),
@@ -684,11 +684,11 @@ std::vector<MatchVectType> RCore::matchTerminalUserRGroups(
     }
     size_t index = 0U;
     for (const auto atom : checkCore->atoms()) {
-      auto coreIndex = atom->getProp<int>(internKey(indexProp));
+      auto coreIndex = atom->getProp<int>(common_properties::__core_index__);
       coreToCheck[coreIndex] = index++;
     }
     for (auto atom : core->atoms()) {
-      atom->clearProp(internKey(indexProp));
+      atom->clearProp(common_properties::__core_index__);
     }
   }
 
@@ -819,9 +819,9 @@ bool RCore::checkAllBondsToRGroupPresent(
 // Convert a matching molecule index to a core index
 int RCore::matchingIndexToCoreIndex(int matchingIndex) const {
   auto atom = matchingMol->getAtomWithIdx(matchingIndex);
-  CHECK_INVARIANT(atom->hasProp(internKey(RLABEL_CORE_INDEX)),
+  CHECK_INVARIANT(atom->hasProp(common_properties::rgd_RLABEL_CORE_INDEX),
                   "Matched atom missing core index");
-  return atom->getProp<int>(internKey(RLABEL_CORE_INDEX));
+  return atom->getProp<int>(common_properties::rgd_RLABEL_CORE_INDEX);
 }
 
 // Create tautomer query for the matching mol on demand and cache for

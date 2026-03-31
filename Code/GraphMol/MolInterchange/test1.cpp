@@ -147,7 +147,7 @@ void test1() {
 void roundtripSmi(const char *smi) {
   std::unique_ptr<RWMol> mol(SmilesToMol(smi));
   TEST_ASSERT(mol);
-  mol->setProp(internKey("_Name"), "test mol");
+  mol->setProp(common_properties::_Name, "test mol");
   auto json = MolInterchange::MolToJSONData(*mol);
   std::cerr << json << std::endl;
   std::string smi1 = MolToSmiles(*mol);
@@ -168,7 +168,7 @@ void test2() {
   {
     std::unique_ptr<RWMol> mol(SmilesToMol("CC"));
     TEST_ASSERT(mol);
-    mol->setProp(internKey("_Name"), "mol1 name");
+    mol->setProp(common_properties::_Name, "mol1 name");
     auto json = MolInterchange::MolToJSONData(*mol);
     std::cerr << json << std::endl;
   }
@@ -407,7 +407,7 @@ void testGithub2046() {
     UseLegacyStereoPerceptionFixture lf(true);
     std::unique_ptr<RWMol> mol(SmilesToMol("C1CCO[C@H]1F"));
     TEST_ASSERT(mol);
-    mol->setProp(internKey("_Name"), "mol1 name");
+    mol->setProp(common_properties::_Name, "mol1 name");
     auto jsond = MolInterchange::MolToJSONData(*mol);
     auto mols = MolInterchange::JSONDataToMols(jsond);
     TEST_ASSERT(mols[0]->getAtomWithIdx(3)->getProp<unsigned int>(

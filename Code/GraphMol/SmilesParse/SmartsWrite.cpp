@@ -319,9 +319,9 @@ std::string getAtomSmartsSimple(const QueryAtom *qatom,
   if (qatom->hasOwningMol() &&
       qatom->getOwningMol().hasProp(common_properties::_doIsoSmiles)) {
     if (qatom->getChiralTag() != Atom::CHI_UNSPECIFIED &&
-        !qatom->hasProp(internKey(_qatomHasStereoSet)) &&
+        !qatom->hasProp(common_properties::_qatomHasStereoSet) &&
         !qatom->hasProp(common_properties::_brokenChirality)) {
-      qatom->setProp(internKey(_qatomHasStereoSet), 1);
+      qatom->setProp(common_properties::_qatomHasStereoSet, 1);
       switch (qatom->getChiralTag()) {
         case Atom::CHI_TETRAHEDRAL_CW:
           res << "@@";
@@ -756,9 +756,9 @@ std::string getNonQueryAtomSmarts(const Atom *atom) {
   if (atom->hasOwningMol() &&
       atom->getOwningMol().hasProp(common_properties::_doIsoSmiles)) {
     if (atom->getChiralTag() != Atom::CHI_UNSPECIFIED &&
-        !atom->hasProp(internKey(_qatomHasStereoSet)) &&
+        !atom->hasProp(common_properties::_qatomHasStereoSet) &&
         !atom->hasProp(common_properties::_brokenChirality)) {
-      atom->setProp(internKey(_qatomHasStereoSet), 1);
+      atom->setProp(common_properties::_qatomHasStereoSet, 1);
       switch (atom->getChiralTag()) {
         case Atom::CHI_TETRAHEDRAL_CW:
           res << "@@";

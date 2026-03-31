@@ -49,9 +49,9 @@ SubstanceGroup *createMolSubstanceGroup(ROMol &mol, std::string type) {
 SubstanceGroup *createMolDataSubstanceGroup(ROMol &mol, std::string fieldName,
                                             std::string value) {
   SubstanceGroup sg(&mol, "DAT");
-  sg.setProp(internKey("FIELDNAME"), fieldName);
+  sg.setProp(common_properties::sgFIELDNAME, fieldName);
   STR_VECT dataFields{value};
-  sg.setProp(internKey("DATAFIELDS"), dataFields);
+  sg.setProp(common_properties::sgDATAFIELDS, dataFields);
   addSubstanceGroup(mol, sg);
   return &(getSubstanceGroups(mol).back());
 }

@@ -43,7 +43,7 @@
 namespace RDKit {
 namespace ChemDraw {
 void ReactionStepInfo::set_reaction_data(
-    std::string type, std::string prop, const std::vector<int> &frag_ids,
+    std::string type, DictKey prop, const std::vector<int> &frag_ids,
     const std::map<unsigned int, size_t> &fragments,
     std::map<unsigned int, std::vector<int>> &grouped_fragments,
     const std::vector<std::unique_ptr<RWMol>> &mols) const {
@@ -66,9 +66,9 @@ void ReactionStepInfo::set_reaction_data(
         continue;
       }
       auto &mol = mols[fragment->second];
-      mol->setProp(internKey(CDX_SCHEME_ID), scheme_id);
-      mol->setProp(internKey(CDX_STEP_ID), step_id);
-      mol->setProp(internKey(prop), reagent_idx);
+      mol->setProp(common_properties::CDX_SCHEME_ID, scheme_id);
+      mol->setProp(common_properties::CDX_STEP_ID, step_id);
+      mol->setProp(prop, reagent_idx);
     }
     reagent_idx += 1;
   }
@@ -80,15 +80,15 @@ void ReactionStepInfo::set_reaction_step(
     std::map<unsigned int, std::vector<int>> &grouped_fragments,
     const std::vector<std::unique_ptr<RWMol>> &mols) const {
   // Set the molecule properties
-  set_reaction_data("ReactionStepReactants", CDX_REAGENT_ID,
+  set_reaction_data("ReactionStepReactants", common_properties::CDX_REAGENT_ID,
                     ReactionStepReactants, fragments, grouped_fragments, mols);
-  set_reaction_data("ReactionStepProducts", CDX_PRODUCT_ID,
+  set_reaction_data("ReactionStepProducts", common_properties::CDX_PRODUCT_ID,
                     ReactionStepProducts, fragments, grouped_fragments, mols);
 
   auto agents = ReactionStepObjectsAboveArrow;
   agents.insert(agents.end(), ReactionStepObjectsBelowArrow.begin(),
                 ReactionStepObjectsBelowArrow.end());
-  set_reaction_data("ReactionStepAgents", CDX_AGENT_ID, agents, fragments,
+  set_reaction_data("ReactionStepAgents", common_properties::CDX_AGENT_ID, agents, fragments,
                     grouped_fragments, mols);
 
   // Set the Atom Maps
@@ -147,10 +147,10 @@ void ReactionInfo::set_reaction_steps(
     std::map<unsigned int, Atom *> atoms;
     size_t mol_idx = 0;
     for (auto &mol : mols) {
-      auto idx = mol->getProp<unsigned int>(internKey(CDX_FRAG_ID));
+      auto idx = mol->getProp<unsigned int>(common_properties::CDX_FRAG_ID);
       fragments[idx] = mol_idx++;
       for (auto &atom : mol->atoms()) {
-        auto idx = atom->getProp<unsigned int>(internKey(CDX_ATOM_ID));
+        auto idx = atom->getProp<unsigned int>(common_properties::_CDX_ATOM_ID);
         atoms[idx] = atom;
       }
     }

@@ -1649,7 +1649,7 @@ TEST_CASE(
     for (const auto atom : q0->atoms()) {
       CHECK(!atom->hasProp(common_properties::reactantAtomIdx));
       CHECK(!atom->hasProp(common_properties::reactionMapNum));
-      CHECK(!atom->hasProp(internKey("was_dummy")));
+      CHECK(!atom->hasProp(common_properties::was_dummy));
     }
   }
 }

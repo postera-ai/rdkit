@@ -299,7 +299,7 @@ void readSubstanceGroups(RWMol *mol, const bj::value &sgVals) {
 
     parseProperties(sg, sgVal.at("properties"));
     std::string pval;
-    if (sg.getPropIfPresent(internKey("SUBTYPE"), pval) &&
+    if (sg.getPropIfPresent(common_properties::sgSUBTYPE, pval) &&
         !SubstanceGroupChecks::isValidSubType(pval)) {
       throw FileParseException(
           (boost::format(
@@ -307,7 +307,7 @@ void readSubstanceGroups(RWMol *mol, const bj::value &sgVals) {
            pval)
               .str());
     }
-    if (sg.getPropIfPresent(internKey("CONNECT"), pval) &&
+    if (sg.getPropIfPresent(common_properties::sgCONNECT, pval) &&
         !SubstanceGroupChecks::isValidConnectType(pval)) {
       throw FileParseException(
           (boost::format(

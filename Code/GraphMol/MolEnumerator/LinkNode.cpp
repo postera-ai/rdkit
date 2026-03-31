@@ -40,14 +40,14 @@ void LinkNodeOp::initFromMol() {
     return;
   }
 
-  if (!dp_mol->hasProp(internKey(detail::idxPropName))) {
+  if (!dp_mol->hasProp(common_properties::_enumeratorOrigIdx)) {
     detail::preserveOrigIndices(*dp_mol);
   }
 
   d_atomMap.clear();
   for (auto atom : dp_mol->atoms()) {
     unsigned int oidx;
-    if (atom->getPropIfPresent(internKey(detail::idxPropName), oidx)) {
+    if (atom->getPropIfPresent(common_properties::_enumeratorOrigIdx, oidx)) {
       d_atomMap[oidx] = atom;
     }
   }

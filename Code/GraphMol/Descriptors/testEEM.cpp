@@ -56,7 +56,7 @@ void testEEM1() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp(RDKit::internKey("_Name"), nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
     int errorAtoms = 0;
 
     std::vector<std::string> myrow = data[nDone];
@@ -139,7 +139,7 @@ void testEEM2() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp(RDKit::internKey("_Name"), nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
     int errorAtoms = 0;
 
     std::vector<std::string> myrow = data[nDone];

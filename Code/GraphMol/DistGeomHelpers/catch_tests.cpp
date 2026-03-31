@@ -432,7 +432,7 @@ TEST_CASE("nontetrahedral stereo", "[nontetrahedral]") {
     {
       auto m = "Cl[Pt@SP1](<-N)(<-N)[Cl]"_smiles;
       REQUIRE(m);
-      m->setProp(internKey("_Name"), "cis platin");
+      m->setProp(common_properties::_Name, "cis platin");
       MolOps::addHs(*m);
       CHECK(DGeomHelpers::EmbedMolecule(*m) == 0);
       auto mb = MolToV3KMolBlock(*m);
@@ -449,7 +449,7 @@ TEST_CASE("nontetrahedral stereo", "[nontetrahedral]") {
     {
       auto m = "Cl[Pt@SP3](<-N)(<-N)[Cl]"_smiles;
       REQUIRE(m);
-      m->setProp(internKey("_Name"), "trans platin");
+      m->setProp(common_properties::_Name, "trans platin");
       MolOps::addHs(*m);
       CHECK(DGeomHelpers::EmbedMolecule(*m) == 0);
       auto mb = MolToV3KMolBlock(*m);

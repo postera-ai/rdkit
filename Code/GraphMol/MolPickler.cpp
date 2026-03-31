@@ -132,7 +132,7 @@ inline void unpickleExplicitProperties(std::istream &ss, RDProps &props,
       if (bprops & pr.second) {
         SAVEAS bv;
         streamRead(ss, bv, version);
-        props.setProp(internKey(pr.first), static_cast<STOREAS>(bv));
+        props.setProp(pr.first, static_cast<STOREAS>(bv));
       }
     }
   }
@@ -145,7 +145,7 @@ inline bool pickleExplicitProperties(std::ostream &ss, const RDProps &props,
   std::vector<SAVEAS> ps;
   SAVEAS bv;
   for (const auto &pr : explicitProps) {
-    if (props.getPropIfPresent(internKey(pr.first), bv)) {
+    if (props.getPropIfPresent(pr.first, bv)) {
       bprops |= pr.second;
       ps.push_back(bv);
     }
@@ -166,33 +166,33 @@ class PropTracker {
   // this is stored as bitflags in a byte, so don't exceed 8 entries or we need
   // to update the pickle format.
   // the properties themselves are stored as std::int8_t
-  static constexpr std::array<std::pair<std::string_view, std::uint16_t>, 5>
+  static constexpr std::array<std::pair<DictKey, std::uint16_t>, 5>
       explicitBondProps{{
-          {kWellKnownKeys[common_properties::_MolFileBondType], 0x1},
-          {kWellKnownKeys[common_properties::_MolFileBondStereo], 0x2},
-          {kWellKnownKeys[common_properties::_MolFileBondCfg], 0x4},
-          {kWellKnownKeys[common_properties::_MolFileBondQuery], 0x8},
-          {kWellKnownKeys[common_properties::molStereoCare], 0x10},
+          {common_properties::_MolFileBondType, 0x1},
+          {common_properties::_MolFileBondStereo, 0x2},
+          {common_properties::_MolFileBondCfg, 0x4},
+          {common_properties::_MolFileBondQuery, 0x8},
+          {common_properties::molStereoCare, 0x10},
       }};
   // this is stored as bitflags in a byte, so don't exceed 8 entries or we need
   // to update the pickle format.
   // the properties themselves are stored as std::int16_t
-  static constexpr std::array<std::pair<std::string_view, std::uint16_t>, 4>
+  static constexpr std::array<std::pair<DictKey, std::uint16_t>, 4>
       explicitAtomProps{{
-          {kWellKnownKeys[common_properties::molStereoCare], 0x1},
-          {kWellKnownKeys[common_properties::molParity], 0x2},
-          {kWellKnownKeys[common_properties::molInversionFlag], 0x4},
-          {kWellKnownKeys[common_properties::_ChiralityPossible], 0x8},
+          {common_properties::molStereoCare, 0x1},
+          {common_properties::molParity, 0x2},
+          {common_properties::molInversionFlag, 0x4},
+          {common_properties::_ChiralityPossible, 0x8},
 
       }};
-  static constexpr std::array<std::string_view, 2> ignoreAtomProps{
-      kWellKnownKeys[common_properties::molAtomMapNumber],
-      kWellKnownKeys[common_properties::dummyLabel],
+  static constexpr std::array<DictKey, 2> ignoreAtomProps{
+      common_properties::molAtomMapNumber,
+      common_properties::dummyLabel,
   };
   std::unordered_set<std::string_view> ignoreBondProps;
   PropTracker() {
     for (const auto &pr : explicitBondProps) {
-      ignoreBondProps.insert(pr.first);
+      ignoreBondProps.insert(keyToString(pr.first));
     }
   };
 };
@@ -203,10 +203,10 @@ bool pickleAtomProperties(std::ostream &ss, const RDProps &props,
   static std::unordered_set<std::string_view> ignoreProps;
   if (ignoreProps.empty()) {
     for (const auto &pr : aprops.explicitAtomProps) {
-      ignoreProps.insert(pr.first);
+      ignoreProps.insert(keyToString(pr.first));
     }
     for (const auto &pn : aprops.ignoreAtomProps) {
-      ignoreProps.insert(pn);
+      ignoreProps.insert(keyToString(pn));
     }
   }
 
@@ -2377,7 +2377,7 @@ void MolPickler::_pickleSubstanceGroup(std::ostream &ss,
     streamWrite(ss, tmpT);
 
     // Vector -- existence depends on SubstanceGroup type
-    if ("SUP" == sgroup.getProp<std::string>(internKey("TYPE"))) {
+    if ("SUP" == sgroup.getProp<std::string>(common_properties::sgTYPE)) {
       float tmpFloat;
       tmpFloat = static_cast<float>(cstate.vector.x);
       streamWrite(ss, tmpFloat);
@@ -2468,7 +2468,7 @@ SubstanceGroup MolPickler::_getSubstanceGroupFromPickle(std::istream &ss,
     streamRead(ss, tmpT, version);
     RDGeom::Point3D vector;
 
-    if ("SUP" == sgroup.getProp<std::string>(internKey("TYPE"))) {
+    if ("SUP" == sgroup.getProp<std::string>(common_properties::sgTYPE)) {
       streamRead(ss, tmpFloat, version);
       vector.x = static_cast<double>(tmpFloat);
       streamRead(ss, tmpFloat, version);

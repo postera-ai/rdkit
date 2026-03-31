@@ -6912,12 +6912,12 @@ void testGithub1269() {
     TEST_ASSERT(prods[0][0]->getAtomWithIdx(0)->getAtomicNum() == 8);
     TEST_ASSERT(prods[0][0]->getAtomWithIdx(0)->hasProp(
         common_properties::reactantAtomIdx));
-    TEST_ASSERT(prods[0][0]->getAtomWithIdx(0)->getProp<unsigned int>(internKey("react_atom_idx")) == 1);
+    TEST_ASSERT(prods[0][0]->getAtomWithIdx(0)->getProp<unsigned int>(common_properties::reactantAtomIdx) == 1);
     TEST_ASSERT(!prods[0][0]->getAtomWithIdx(1)->hasProp(
         common_properties::reactantAtomIdx));
     TEST_ASSERT(prods[0][0]->getAtomWithIdx(2)->hasProp(
         common_properties::reactantAtomIdx));
-    TEST_ASSERT(prods[0][0]->getAtomWithIdx(2)->getProp<unsigned int>(internKey("react_atom_idx")) == 0);
+    TEST_ASSERT(prods[0][0]->getAtomWithIdx(2)->getProp<unsigned int>(common_properties::reactantAtomIdx) == 0);
 
     delete rxn;
   }
@@ -7188,7 +7188,7 @@ void testOtherBondStereo() {
         TEST_ASSERT(Bond::BondStereo::STEREONONE == bond->getStereo());
 
         // Make sure the temporary mark set in the reaction has been removed.
-        TEST_ASSERT(!bond->hasProp(internKey("_UnknownStereoRxnBond")));
+        TEST_ASSERT(!bond->hasProp(common_properties::_UnknownStereoRxnBond));
 
         if (bond->getIdx() == 1) {
           TEST_ASSERT(Bond::BondType::DOUBLE == bond->getBondType());
@@ -7531,7 +7531,7 @@ void testGithub3078() {
   TEST_ASSERT(bond->getStereo() == Bond::STEREONONE);
 
   // Make sure the temporary mark set in the reaction has been removed.
-  TEST_ASSERT(!bond->hasProp(internKey("_UnknownStereoRxnBond")));
+  TEST_ASSERT(!bond->hasProp(common_properties::_UnknownStereoRxnBond));
 }
 
 void testGithub4162() {

@@ -1235,7 +1235,7 @@ TEST_CASE("testSDSupplierFromText") {
     ROMol *mol = reader.next();
     std::string mname;
     REQUIRE(mol->hasProp(common_properties::_Name));
-    REQUIRE(mol->hasProp(internKey("ID")));
+    REQUIRE(mol->hasProp(common_properties::sgID));
     i++;
     delete mol;
   }
@@ -1308,7 +1308,7 @@ TEST_CASE("testSDSupplierFromTextStrLax1") {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
       if (i == 0) {
-        REQUIRE(!mol->hasProp(internKey("ID")));
+        REQUIRE(!mol->hasProp(common_properties::sgID));
       }
       REQUIRE(!mol->hasProp(internKey("ANOTHER_PROPERTY")));
       i++;
@@ -1326,7 +1326,7 @@ TEST_CASE("testSDSupplierFromTextStrLax1") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp(internKey("ID")));
+      REQUIRE(mol->hasProp(common_properties::sgID));
       REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       i++;
       delete mol;
@@ -1391,10 +1391,10 @@ TEST_CASE("testSDSupplierFromTextStrLax2") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp(internKey("ID")));
+      REQUIRE(mol->hasProp(common_properties::sgID));
       REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       std::string s;
-      mol->getProp(internKey("ID"), s);
+      mol->getProp(common_properties::sgID, s);
       REQUIRE(s == "Lig1");
       mol->getProp(internKey("ANOTHER_PROPERTY"), s);
       REQUIRE(s ==
@@ -1417,10 +1417,10 @@ TEST_CASE("testSDSupplierFromTextStrLax2") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp(internKey("ID")));
+      REQUIRE(mol->hasProp(common_properties::sgID));
       REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       std::string s;
-      mol->getProp(internKey("ID"), s);
+      mol->getProp(common_properties::sgID, s);
       REQUIRE(s == "Lig2");
       mol->getProp(internKey("ANOTHER_PROPERTY"), s);
       REQUIRE(s == "Value2");
@@ -1443,7 +1443,7 @@ TEST_CASE("testSDSupplierStrLax1") {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
       if (i == 0) {
-        REQUIRE(!mol->hasProp(internKey("ID")));
+        REQUIRE(!mol->hasProp(common_properties::sgID));
       }
       REQUIRE(!mol->hasProp(internKey("ANOTHER_PROPERTY")));
       i++;
@@ -1459,7 +1459,7 @@ TEST_CASE("testSDSupplierStrLax1") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp(internKey("ID")));
+      REQUIRE(mol->hasProp(common_properties::sgID));
       REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       i++;
       delete mol;
@@ -1479,10 +1479,10 @@ TEST_CASE("testSDSupplierStrLax2") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp(internKey("ID")));
+      REQUIRE(mol->hasProp(common_properties::sgID));
       REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       std::string s;
-      mol->getProp(internKey("ID"), s);
+      mol->getProp(common_properties::sgID, s);
       REQUIRE(s == "Lig1");
       mol->getProp(internKey("ANOTHER_PROPERTY"), s);
       REQUIRE(s ==
@@ -1503,10 +1503,10 @@ TEST_CASE("testSDSupplierStrLax2") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp(internKey("ID")));
+      REQUIRE(mol->hasProp(common_properties::sgID));
       REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       std::string s;
-      mol->getProp(internKey("ID"), s);
+      mol->getProp(common_properties::sgID, s);
       REQUIRE(s == "Lig2");
       mol->getProp(internKey("ANOTHER_PROPERTY"), s);
       REQUIRE(s == "Value2");
@@ -1538,7 +1538,7 @@ TEST_CASE("testSDErrorHandling") {
   REQUIRE(!sdsup->atEnd());
   nmol = sdsup->next();
   REQUIRE(nmol);
-  REQUIRE(!nmol->hasProp(internKey("ID")));
+  REQUIRE(!nmol->hasProp(common_properties::sgID));
   delete sdsup;
   delete nmol;
 
@@ -1662,7 +1662,7 @@ TEST_CASE("testMixIterAndRandom") {
   while (!sdsup->atEnd()) {
     mol = sdsup->next();
     if (mol) {
-      REQUIRE(mol->hasProp(internKey("ID")));
+      REQUIRE(mol->hasProp(common_properties::sgID));
       delete mol;
     }
     i++;
@@ -1677,29 +1677,29 @@ TEST_CASE("testMixIterAndRandom") {
 
   mol = sdsup->next();
   REQUIRE(mol);
-  REQUIRE(mol->hasProp(internKey("ID")));
-  mol->getProp(internKey("ID"), name);
+  REQUIRE(mol->hasProp(common_properties::sgID));
+  mol->getProp(common_properties::sgID, name);
   REQUIRE(name == "Lig1");
   delete mol;
 
   mol = (*sdsup)[0];
   REQUIRE(mol);
-  REQUIRE(mol->hasProp(internKey("ID")));
-  mol->getProp(internKey("ID"), name);
+  REQUIRE(mol->hasProp(common_properties::sgID));
+  mol->getProp(common_properties::sgID, name);
   REQUIRE(name == "Lig1");
   delete mol;
 
   sdsup->reset();
   mol = sdsup->next();
   REQUIRE(mol);
-  REQUIRE(mol->hasProp(internKey("ID")));
-  mol->getProp(internKey("ID"), name);
+  REQUIRE(mol->hasProp(common_properties::sgID));
+  mol->getProp(common_properties::sgID, name);
   REQUIRE(name == "Lig1");
   delete mol;
   mol = sdsup->next();
   REQUIRE(mol);
-  REQUIRE(mol->hasProp(internKey("ID")));
-  mol->getProp(internKey("ID"), name);
+  REQUIRE(mol->hasProp(common_properties::sgID));
+  mol->getProp(common_properties::sgID, name);
   REQUIRE(name == "Lig2");
   delete mol;
   delete sdsup;

@@ -38,8 +38,8 @@ bool hasLabel(const Atom *atom, unsigned int autoLabels) {
   // don't match negative rgroups as these are used by AtomIndexRLabels which
   // are set for the template core before the MCS and after the MCS for the
   // other core
-  if (atom->hasProp(internKey(RLABEL))) {
-    auto label = atom->getProp<int>(internKey(RLABEL));
+  if (atom->hasProp(common_properties::rgd_RLABEL)) {
+    auto label = atom->getProp<int>(common_properties::rgd_RLABEL);
     atomHasLabel |= label > 0;
   }
   return atomHasLabel;
@@ -197,10 +197,10 @@ bool RGroupDecompositionParameters::prepareCore(RWMol &core,
               coreAtm->clearProp(common_properties::_MolFileRLabel);
               coreAtm->setIsotope(0);
             }
-            if (alignCoreAtm->hasProp(internKey(RLABEL))) {
-              int rlabel = alignCoreAtm->getProp<int>(internKey(RLABEL));
+            if (alignCoreAtm->hasProp(common_properties::rgd_RLABEL)) {
+              int rlabel = alignCoreAtm->getProp<int>(common_properties::rgd_RLABEL);
               maxLabel = (std::max)(maxLabel, rlabel + 1);
-              coreAtm->setProp(internKey(RLABEL), rlabel);
+              coreAtm->setProp(common_properties::rgd_RLABEL, rlabel);
             }
           }
         }
@@ -214,9 +214,9 @@ bool RGroupDecompositionParameters::prepareCore(RWMol &core,
   for (auto atom : core.atoms()) {
     bool found = false;
 
-    if (atom->hasProp(internKey(RLABEL))) {
+    if (atom->hasProp(common_properties::rgd_RLABEL)) {
       // set from MCS match
-      if (setLabel(atom, atom->getProp<int>(internKey(RLABEL)), foundLabels, maxLabel,
+      if (setLabel(atom, atom->getProp<int>(common_properties::rgd_RLABEL), foundLabels, maxLabel,
                    relabel, Labelling::INTERNAL_LABELS)) {
         found = true;
       }
@@ -252,7 +252,7 @@ bool RGroupDecompositionParameters::prepareCore(RWMol &core,
       }
 
       if (!found && (autoLabels & DummyAtomLabels) && atom->getDegree() == 1 &&
-          !atom->hasProp(internKey(UNLABELED_CORE_ATTACHMENT))) {
+          !atom->hasProp(common_properties::rgd_UNLABELED_CORE_ATTACHMENT)) {
         const bool forceRelabellingWithDummies = true;
         int defaultDummyStartLabel = maxLabel;
         if (setLabel(atom, defaultDummyStartLabel, foundLabels, maxLabel,
@@ -279,7 +279,7 @@ bool RGroupDecompositionParameters::prepareCore(RWMol &core,
     clearInputLabels(atom);
 
     int rlabel;
-    if (atom->getPropIfPresent(internKey(RLABEL), rlabel)) {
+    if (atom->getPropIfPresent(common_properties::rgd_RLABEL, rlabel)) {
       atomToLabel[atom->getIdx()] = rlabel;
     }
   }
@@ -290,7 +290,7 @@ bool RGroupDecompositionParameters::prepareCore(RWMol &core,
   adjustParams.adjustDegree = false;
   adjustQueryProperties(core, &adjustParams);
   for (auto &it : atomToLabel) {
-    core.getAtomWithIdx(it.first)->setProp(internKey(RLABEL), it.second);
+    core.getAtomWithIdx(it.first)->setProp(common_properties::rgd_RLABEL, it.second);
   }
 
   return true;
@@ -356,7 +356,7 @@ void RGroupDecompositionParameters::addDummyAtomsToUnlabelledCoreAtoms(
     std::vector<int> newIndices;
     for (int i = 0; i < dummiesToAdd; i++) {
       const auto newAtom = new Atom(0);
-      newAtom->setProp<bool>(internKey(UNLABELED_CORE_ATTACHMENT), true);
+      newAtom->setProp<bool>(common_properties::rgd_UNLABELED_CORE_ATTACHMENT, true);
       const auto newIdx = core.addAtom(newAtom, false, true);
       newIndices.push_back(newIdx);
       auto *qb = new QueryBond();

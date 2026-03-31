@@ -23,7 +23,7 @@ void PositionVariationOp::initFromMol() {
   if (!dp_mol) {
     return;
   }
-  if (!dp_mol->hasProp(internKey(detail::idxPropName))) {
+  if (!dp_mol->hasProp(common_properties::_enumeratorOrigIdx)) {
     detail::preserveOrigIndices(*dp_mol);
   }
   for (const auto bond : dp_mol->bonds()) {

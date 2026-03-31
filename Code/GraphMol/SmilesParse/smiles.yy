@@ -206,7 +206,7 @@ mol: atomd {
   int atomIdx2=mp->addAtom($2,true,true);
   mp->addBond(atomIdx1,atomIdx2,
 	      SmilesParseOps::GetUnspecifiedBondType(mp,a1,mp->getAtomWithIdx(atomIdx2)));
-  mp->getBondBetweenAtoms(atomIdx1,atomIdx2)->setProp(internKey("_cxsmilesBondIdx"),numBondsParsed++);
+  mp->getBondBetweenAtoms(atomIdx1,atomIdx2)->setProp(common_properties::_cxsmilesBondIdx,numBondsParsed++);
   //delete $2;
 }
 
@@ -226,7 +226,7 @@ mol: atomd {
     $2->setBeginAtomIdx(atomIdx1);
     $2->setEndAtomIdx(atomIdx2);
   }
-  $2->setProp(internKey("_cxsmilesBondIdx"),numBondsParsed++);
+  $2->setProp(common_properties::_cxsmilesBondIdx,numBondsParsed++);
   mp->addBond($2,true);
   //delete $3;
 }
@@ -236,7 +236,7 @@ mol: atomd {
   int atomIdx1 = mp->getActiveAtom()->getIdx();
   int atomIdx2 = mp->addAtom($3,true,true);
   mp->addBond(atomIdx1,atomIdx2,Bond::SINGLE);
-  mp->getBondBetweenAtoms(atomIdx1,atomIdx2)->setProp(internKey("_cxsmilesBondIdx"),numBondsParsed++);
+  mp->getBondBetweenAtoms(atomIdx1,atomIdx2)->setProp(common_properties::_cxsmilesBondIdx,numBondsParsed++);
   //delete $3;
 }
 
@@ -256,7 +256,7 @@ mol: atomd {
   mp->setBondBookmark(newB,$2);
   newB->setProp(RDKit::common_properties::_unspecifiedOrder,1);
   if(!(mp->getAllBondsWithBookmark($2).size()%2)){
-    newB->setProp(internKey("_cxsmilesBondIdx"),numBondsParsed++);
+    newB->setProp(common_properties::_cxsmilesBondIdx,numBondsParsed++);
   }
 
   SmilesParseOps::CheckRingClosureBranchStatus(atom,mp);
@@ -279,7 +279,7 @@ mol: atomd {
   mp->setAtomBookmark(atom,$3);
   mp->setBondBookmark(newB,$3);
   if(!(mp->getAllBondsWithBookmark($3).size()%2)){
-    newB->setProp(internKey("_cxsmilesBondIdx"),numBondsParsed++);
+    newB->setProp(common_properties::_cxsmilesBondIdx,numBondsParsed++);
   }
 
   SmilesParseOps::CheckRingClosureBranchStatus(atom,mp);
@@ -299,7 +299,7 @@ mol: atomd {
   mp->setAtomBookmark(atom,$3);
   mp->setBondBookmark(newB,$3);
   if(!(mp->getAllBondsWithBookmark($3).size()%2)){
-    newB->setProp(internKey("_cxsmilesBondIdx"),numBondsParsed++);
+    newB->setProp(common_properties::_cxsmilesBondIdx,numBondsParsed++);
   }
 
   SmilesParseOps::CheckRingClosureBranchStatus(atom,mp);
@@ -317,7 +317,7 @@ mol: atomd {
   int atomIdx2=mp->addAtom($3,true,true);
   mp->addBond(atomIdx1,atomIdx2,
 	      SmilesParseOps::GetUnspecifiedBondType(mp,a1,mp->getAtomWithIdx(atomIdx2)));
-  mp->getBondBetweenAtoms(atomIdx1,atomIdx2)->setProp(internKey("_cxsmilesBondIdx"),numBondsParsed++);
+  mp->getBondBetweenAtoms(atomIdx1,atomIdx2)->setProp(common_properties::_cxsmilesBondIdx,numBondsParsed++);
   branchPoints.push_back({atomIdx1, $2});
 }
 | mol branch_open_token BOND_TOKEN atomd  {
@@ -336,7 +336,7 @@ mol: atomd {
     $3->setBeginAtomIdx(atomIdx1);
     $3->setEndAtomIdx(atomIdx2);
   }
-  $3->setProp(internKey("_cxsmilesBondIdx"),numBondsParsed++);
+  $3->setProp(common_properties::_cxsmilesBondIdx,numBondsParsed++);
   mp->addBond($3,true);
 
   branchPoints.push_back({atomIdx1, $2});
@@ -346,7 +346,7 @@ mol: atomd {
   int atomIdx1 = mp->getActiveAtom()->getIdx();
   int atomIdx2 = mp->addAtom($4,true,true);
   mp->addBond(atomIdx1,atomIdx2,Bond::SINGLE);
-  mp->getBondBetweenAtoms(atomIdx1,atomIdx2)->setProp(internKey("_cxsmilesBondIdx"),numBondsParsed++);
+  mp->getBondBetweenAtoms(atomIdx1,atomIdx2)->setProp(common_properties::_cxsmilesBondIdx,numBondsParsed++);
   branchPoints.push_back({atomIdx1, $2});
 }
 | mol GROUP_CLOSE_TOKEN {

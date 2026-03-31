@@ -419,7 +419,7 @@ RWMOL_SPTR convertTemplateToMol(const ROMOL_SPTR prodTemplateSptr) {
                nullptr ||
            Chirality::getNeighboringDirectedBond(*prodTemplate, endAtom) ==
                nullptr)) {
-        newB->setProp(internKey(_UnknownStereoRxnBond), 1);
+        newB->setProp(common_properties::_UnknownStereoRxnBond, 1);
       }
     }
 
@@ -674,9 +674,9 @@ void updateStereoBonds(RWMOL_SPTR product, const ROMol &reactant,
     // We are only interested in double bonds
     if (pBond->getBondType() != Bond::BondType::DOUBLE) {
       continue;
-    } else if (pBond->hasProp(internKey(_UnknownStereoRxnBond))) {
+    } else if (pBond->hasProp(common_properties::_UnknownStereoRxnBond)) {
       pBond->setStereo(Bond::BondStereo::STEREONONE);
-      pBond->clearProp(internKey(_UnknownStereoRxnBond));
+      pBond->clearProp(common_properties::_UnknownStereoRxnBond);
       continue;
     }
 
@@ -839,11 +839,11 @@ void setReactantAtomPropertiesToProduct(Atom *productAtom,
     if (productAtom->hasProp(common_properties::_MolFileRLabel)) {
       productAtom->clearProp(common_properties::_MolFileRLabel);
     }
-    productAtom->setProp(internKey(WAS_DUMMY), true);
+    productAtom->setProp(common_properties::was_dummy, true);
   } else {
     // remove bookkeeping labels (if present)
-    if (productAtom->hasProp(internKey(WAS_DUMMY))) {
-      productAtom->clearProp(internKey(WAS_DUMMY));
+    if (productAtom->hasProp(common_properties::was_dummy)) {
+      productAtom->clearProp(common_properties::was_dummy);
     }
   }
   productAtom->setProp<unsigned int>(common_properties::reactantAtomIdx,
@@ -2017,7 +2017,7 @@ ROMol *reduceProductToSideChains(const ROMOL_SPTR &product,
       for (const auto nbr : mol->atomNeighbors(scaffold_atom)) {
         if (!nbr->hasProp(common_properties::reactionMapNum) &&
             nbr->hasProp(common_properties::reactantAtomIdx)) {
-          if (nbr->hasProp(internKey(WAS_DUMMY))) {
+          if (nbr->hasProp(common_properties::was_dummy)) {
             bonds_to_product.emplace_back(
                 nbr,
                 mol->getBondBetweenAtoms(scaffold_atom->getIdx(), nbr->getIdx())

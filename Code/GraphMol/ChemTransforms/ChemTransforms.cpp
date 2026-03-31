@@ -393,7 +393,7 @@ int findNbrBond(RWMol &mol, Bond *bond, Atom *bondAtom, const INT_VECT &bring,
   int res = -1;
   for (const auto nbrBond : mol.atomBonds(bondAtom)) {
     if (nbrBond != bond &&
-        (nbrBond->hasProp(internKey(replaceCoreDummyBond)) ||
+        (nbrBond->hasProp(common_properties::_replaceCoreDummyBond) ||
          (!removedAtoms[nbrBond->getOtherAtomIdx(bondAtom->getIdx())] &&
           std::find(bring.begin(), bring.end(), nbrBond->getIdx()) !=
               bring.end()))) {
@@ -689,7 +689,7 @@ ROMol *replaceCore(const ROMol &mol, const ROMol &core,
       }
       // add the bonds now, after we've finished the loop over neighbors:
       for (auto &newBond : newBonds) {
-        newBond->setProp(internKey(replaceCoreDummyBond), 1);
+        newBond->setProp(common_properties::_replaceCoreDummyBond, 1);
         newMol->addBond(newBond, true);
       }
     }
@@ -726,7 +726,7 @@ ROMol *replaceCore(const ROMol &mol, const ROMol &core,
   if (removedRingAtom) {
     setSubMolBrokenRingStereo(*newMol, removedAtoms);
     for (auto bond : newMol->bonds()) {
-      bond->clearProp(internKey(replaceCoreDummyBond));
+      bond->clearProp(common_properties::_replaceCoreDummyBond);
     }
   }
   newMol->commitBatchEdit();

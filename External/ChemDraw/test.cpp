@@ -840,14 +840,14 @@ TEST_CASE("REACTIONS") {
     auto mols = MolsFromChemDrawFile(fname);
     int i = 0;
     for (auto &mol : mols) {
-      CHECK(mol->getProp<unsigned int>(internKey("CDX_SCHEME_ID")) == 397);
-      CHECK(mol->getProp<unsigned int>(internKey("CDX_STEP_ID")) == 398);
+      CHECK(mol->getProp<unsigned int>(common_properties::CDX_SCHEME_ID) == 397);
+      CHECK(mol->getProp<unsigned int>(common_properties::CDX_STEP_ID) == 398);
       if (i == 0) {
-        CHECK(mol->getProp<unsigned int>(internKey("CDX_REAGENT_ID")) == 0);
+        CHECK(mol->getProp<unsigned int>(common_properties::CDX_REAGENT_ID) == 0);
       } else if (i == 1) {
-        CHECK(mol->getProp<unsigned int>(internKey("CDX_REAGENT_ID")) == 1);
+        CHECK(mol->getProp<unsigned int>(common_properties::CDX_REAGENT_ID) == 1);
       } else if (i == 2) {
-        CHECK(mol->getProp<unsigned int>(internKey("CDX_PRODUCT_ID")) == 0);
+        CHECK(mol->getProp<unsigned int>(common_properties::CDX_PRODUCT_ID) == 0);
       }
       CHECK(MolToSmiles(*mol) == expected[i++]);
     }

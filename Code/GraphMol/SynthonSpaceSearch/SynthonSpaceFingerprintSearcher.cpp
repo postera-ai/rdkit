@@ -268,7 +268,7 @@ bool SynthonSpaceFingerprintSearcher::verifyHit(ROMol &hit) const {
   const std::unique_ptr<ExplicitBitVect> fp(d_fpGen.getFingerprint(hit));
   if (const auto sim = TanimotoSimilarity(*fp, *d_queryFP);
       sim >= getParams().similarityCutoff) {
-    hit.setProp<double>(internKey("Similarity"), sim);
+    hit.setProp<double>(common_properties::Similarity, sim);
     return true;
   }
   return false;

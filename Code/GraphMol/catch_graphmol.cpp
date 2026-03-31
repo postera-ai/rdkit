@@ -3535,7 +3535,7 @@ $$$$
   // This bond was a dashed bond (dash is removed when parity is resolved)
   auto bond = m->getBondWithIdx(0);
   int bond_dir = 0;
-  REQUIRE(bond->getPropIfPresent(internKey("_MolFileBondCfg"), bond_dir) == true);
+  REQUIRE(bond->getPropIfPresent(common_properties::_MolFileBondCfg, bond_dir) == true);
   REQUIRE(bond_dir == 3);  // dashed bond
 
   auto begin_atom = bond->getBeginAtom();
@@ -4071,7 +4071,7 @@ M  END
 
         const auto &sg = sgs[sg_idx];
 
-        CHECK(sg.getProp<std::string>(internKey("TYPE")) == "SUP");
+        CHECK(sg.getProp<std::string>(common_properties::sgTYPE) == "SUP");
         CHECK(sg.getAtoms() == atoms);
         CHECK(sg.getBonds() == bonds);
 

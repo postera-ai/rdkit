@@ -79,13 +79,13 @@ TEST_CASE("callbacks SDF") {
       }
       // Check some arbitrary property present in all molecules in test file
       // just to make sure we got *something*.
-      CHECK(mol->hasProp(internKey("AMW")));
+      CHECK(mol->hasProp(common_properties::AMW));
     }
   }
   SECTION("writeCallback") {
     auto callback = [](RWMol &mol, const std::string &, unsigned int recordId) {
       MolOps::addHs(mol);
-      mol.setProp(internKey("recordId"), recordId);
+      mol.setProp(common_properties::recordId, recordId);
     };
     auto &suppl = sdsuppl;
     suppl.setWriteCallback(callback);
@@ -96,8 +96,8 @@ TEST_CASE("callbacks SDF") {
       }
 
       CHECK(!MolOps::needsHs(*mol));
-      CHECK(mol->hasProp(internKey("recordId")));
-      CHECK(mol->getProp<unsigned int>(internKey("recordId")) == suppl.getLastRecordId());
+      CHECK(mol->hasProp(common_properties::recordId));
+      CHECK(mol->getProp<unsigned int>(common_properties::recordId) == suppl.getLastRecordId());
     }
   }
   SECTION("writeCallbackException") {
@@ -111,7 +111,7 @@ TEST_CASE("callbacks SDF") {
       if (!mol) {
         continue;
       }
-      CHECK(mol->hasProp(internKey("AMW")));
+      CHECK(mol->hasProp(common_properties::AMW));
     }
   }
   SECTION("readCallback") {
@@ -134,8 +134,8 @@ TEST_CASE("callbacks SDF") {
       if (!mol) {
         continue;
       }
-      CHECK(mol->hasProp(internKey("recordId")));
-      CHECK(mol->getProp<unsigned int>(internKey("recordId")) == suppl.getLastRecordId());
+      CHECK(mol->hasProp(common_properties::recordId));
+      CHECK(mol->getProp<unsigned int>(common_properties::recordId) == suppl.getLastRecordId());
     }
   }
   SECTION("readCallbackException") {
@@ -150,7 +150,7 @@ TEST_CASE("callbacks SDF") {
       if (!mol) {
         continue;
       }
-      CHECK(mol->hasProp(internKey("AMW")));
+      CHECK(mol->hasProp(common_properties::AMW));
     }
   }
 }
@@ -184,7 +184,7 @@ TEST_CASE("callbacks smiles") {
   SECTION("writeCallback") {
     auto callback = [](RWMol &mol, const std::string &, unsigned int recordId) {
       MolOps::addHs(mol);
-      mol.setProp(internKey("recordId"), recordId);
+      mol.setProp(common_properties::recordId, recordId);
     };
     suppl.setWriteCallback(callback);
     while (!suppl.atEnd()) {
@@ -194,8 +194,8 @@ TEST_CASE("callbacks smiles") {
       }
 
       CHECK(!MolOps::needsHs(*mol));
-      CHECK(mol->hasProp(internKey("recordId")));
-      CHECK(mol->getProp<unsigned int>(internKey("recordId")) == suppl.getLastRecordId());
+      CHECK(mol->hasProp(common_properties::recordId));
+      CHECK(mol->getProp<unsigned int>(common_properties::recordId) == suppl.getLastRecordId());
     }
   }
 }

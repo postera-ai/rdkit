@@ -207,8 +207,8 @@ TEST_CASE("CXSMILES and mol name") {
     CHECK(m->getNumAtoms() == 3);
     CHECK(m->getAtomWithIdx(0)->getProp<std::string>(
               common_properties::atomLabel) == "foo");
-    CHECK(m->getProp<std::string>(internKey("_CXSMILES_Data")) == "|$foo;;bar$|");
-    CHECK(!m->hasProp(internKey("_Name")));
+    CHECK(m->getProp<std::string>(common_properties::_CXSMILES_Data) == "|$foo;;bar$|");
+    CHECK(!m->hasProp(common_properties::_Name));
     delete m;
   }
   {
@@ -222,7 +222,7 @@ TEST_CASE("CXSMILES and mol name") {
     CHECK(m->getNumAtoms() == 3);
     CHECK(m->getAtomWithIdx(0)->getProp<std::string>(
               common_properties::atomLabel) == "foo");
-    CHECK(m->getProp<std::string>(internKey("_CXSMILES_Data")) == "|$foo;;bar$|");
+    CHECK(m->getProp<std::string>(common_properties::_CXSMILES_Data) == "|$foo;;bar$|");
     CHECK(m->getProp<std::string>(common_properties::_Name) == "ourname");
     delete m;
   }

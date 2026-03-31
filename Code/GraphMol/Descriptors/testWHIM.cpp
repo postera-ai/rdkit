@@ -34,7 +34,7 @@ void testWHIM2() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp(RDKit::internKey("_Name"), nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> dwhim;
 
@@ -63,7 +63,7 @@ void testWHIM3() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp(RDKit::internKey("_Name"), nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> dwhim;
 
@@ -95,7 +95,7 @@ void testWHIM1() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp(RDKit::internKey("_Name"), nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> dwhim;
     // for (int i=1;i<11;i++) {
@@ -149,7 +149,7 @@ void testWHIM() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp(RDKit::internKey("_Name"), nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
     std::vector<double> dwhim;
     RDKit::Descriptors::WHIM(*m, dwhim, -1, 0.01);
     std::vector<std::string> myrow = data[nDone];

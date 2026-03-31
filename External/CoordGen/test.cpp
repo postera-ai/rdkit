@@ -32,7 +32,7 @@ void test1() {
   {
     ROMol *m = SmilesToMol("c1cc(CC)cnc1CC(=O)O");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "test1");
+    m->setProp(common_properties::_Name, "test1");
 
     TEST_ASSERT(CoordGen::addCoords(*m) == 0);
     TEST_ASSERT(m->getNumConformers() == 1);
@@ -45,7 +45,7 @@ void test1() {
 
     ROMol *m = SmilesToMol("ClC(O)(F)C");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "test2");
+    m->setProp(common_properties::_Name, "test2");
 
     TEST_ASSERT(CoordGen::addCoords(*m) == 0);
     TEST_ASSERT(m->getNumConformers() == 1);
@@ -61,7 +61,7 @@ void test1() {
         "[C@@H]([C@H](C)C/C=C/"
         "C)O)C)C(C)C)C)CC(C)C)C)CC(C)C)C)C)C)CC(C)C)C)C(C)C)CC(C)C)C)C");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "cyclosporine a");
+    m->setProp(common_properties::_Name, "cyclosporine a");
 
     TEST_ASSERT(CoordGen::addCoords(*m) == 0);
     TEST_ASSERT(m->getNumConformers() == 1);
@@ -75,7 +75,7 @@ void test1() {
 
     ROMol *m = SmilesToMol("CCCNC=CNCOC=CC=CC=COC");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "single-double");
+    m->setProp(common_properties::_Name, "single-double");
 
     TEST_ASSERT(CoordGen::addCoords(*m) == 0);
     TEST_ASSERT(m->getNumConformers() == 1);
@@ -88,7 +88,7 @@ void test1() {
   {
     ROMol *m = SmilesToMol("O/C=C/C=C/C=C\\C=C/N");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "cis-trans");
+    m->setProp(common_properties::_Name, "cis-trans");
 
     TEST_ASSERT(CoordGen::addCoords(*m) == 0);
     TEST_ASSERT(m->getNumConformers() == 1);
@@ -100,7 +100,7 @@ void test1() {
   {
     ROMol *m = SmilesToMol("C1C3CC2CC(CC1C2)C3");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "admntn");
+    m->setProp(common_properties::_Name, "admntn");
 
     TEST_ASSERT(CoordGen::addCoords(*m) == 0);
     TEST_ASSERT(m->getNumConformers() == 1);
@@ -116,7 +116,7 @@ void test1() {
         "[H]C([H])=C1C#C/C2=C(/C#C/C3=C(\\C#CC2=C([H])[H])C(=C([H])[H])C#CCC(=C=O)C#C3)C(=C([H])[H])C#CC(=O)C1=C([H])[H]",
         params);
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "github 4845 - nan coordinates but no crash");
+    m->setProp(common_properties::_Name, "github 4845 - nan coordinates but no crash");
 
     TEST_ASSERT(CoordGen::addCoords(*m) == 0);
     TEST_ASSERT(m->getNumConformers() == 1);
@@ -168,7 +168,7 @@ void test2() {
   {
     ROMol *core = SmilesToMol("C1CON1");
     TEST_ASSERT(core);
-    core->setProp(internKey("_Name"), "core");
+    core->setProp(common_properties::_Name, "core");
 
     TEST_ASSERT(CoordGen::addCoords(*core) == 0);
     TEST_ASSERT(core->getNumConformers() == 1);
@@ -177,7 +177,7 @@ void test2() {
 
     ROMol *m = SmilesToMol("C1C(CCC)ON1");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "core+sidechain");
+    m->setProp(common_properties::_Name, "core+sidechain");
 
     MatchVectType mv;
     SubstructMatch(*m, *core, mv);
@@ -200,7 +200,7 @@ void test2() {
       params.dbg_useFixed = true;
       TEST_ASSERT(CoordGen::addCoords(*m, &params) == 0);
       TEST_ASSERT(m->getNumConformers() == 1);
-      // m->setProp(internKey("_Name"), "templated");
+      // m->setProp(common_properties::_Name, "templated");
       // mb = MolToMolBlock(*m);
       // std::cerr << mb << std::endl;
       TEST_ASSERT(compareConfs(m, core, mv));
@@ -211,7 +211,7 @@ void test2() {
       params.dbg_useFixed = true;
       TEST_ASSERT(CoordGen::addCoords(*m, &params) == 0);
       TEST_ASSERT(m->getNumConformers() == 1);
-      m->setProp(internKey("_Name"), "templated");
+      m->setProp(common_properties::_Name, "templated");
       mb = MolToMolBlock(*m);
       std::cerr << mb << std::endl;
       TEST_ASSERT(compareConfs(m, core, mv));
@@ -223,7 +223,7 @@ void test2() {
   {
     ROMol *core = SmilesToMol("C1CCCCCONCN1");
     TEST_ASSERT(core);
-    core->setProp(internKey("_Name"), "core");
+    core->setProp(common_properties::_Name, "core");
 
     TEST_ASSERT(CoordGen::addCoords(*core) == 0);
     TEST_ASSERT(core->getNumConformers() == 1);
@@ -232,7 +232,7 @@ void test2() {
 
     ROMol *m = SmilesToMol("C1CCCCONC(CC)NC1");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "core+sidechain");
+    m->setProp(common_properties::_Name, "core+sidechain");
 
     MatchVectType mv;
     SubstructMatch(*m, *core, mv);
@@ -255,7 +255,7 @@ void test2() {
       params.dbg_useFixed = true;
       TEST_ASSERT(CoordGen::addCoords(*m, &params) == 0);
       TEST_ASSERT(m->getNumConformers() == 1);
-      // m->setProp(internKey("_Name"), "templated");
+      // m->setProp(common_properties::_Name, "templated");
       // mb = MolToMolBlock(*m);
       // std::cerr << mb << std::endl;
       TEST_ASSERT(compareConfs(m, core, mv));
@@ -266,7 +266,7 @@ void test2() {
       params.dbg_useFixed = true;
       TEST_ASSERT(CoordGen::addCoords(*m, &params) == 0);
       TEST_ASSERT(m->getNumConformers() == 1);
-      m->setProp(internKey("_Name"), "templated");
+      m->setProp(common_properties::_Name, "templated");
       mb = MolToMolBlock(*m);
       std::cerr << mb << std::endl;
       TEST_ASSERT(compareConfs(m, core, mv));
@@ -279,7 +279,7 @@ void test2() {
   {
     ROMol *core = SmilesToMol("C1CCCCCONCN1");
     TEST_ASSERT(core);
-    core->setProp(internKey("_Name"), "core");
+    core->setProp(common_properties::_Name, "core");
 
     TEST_ASSERT(CoordGen::addCoords(*core) == 0);
     TEST_ASSERT(core->getNumConformers() == 1);
@@ -288,7 +288,7 @@ void test2() {
 
     ROMol *m = SmilesToMol("C1CCCCONC(CCCCCC)NC1");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "core+sidechain");
+    m->setProp(common_properties::_Name, "core+sidechain");
 
     MatchVectType mv;
     SubstructMatch(*m, *core, mv);
@@ -312,7 +312,7 @@ void test2() {
       params.dbg_useFixed = true;
       TEST_ASSERT(CoordGen::addCoords(*m, &params) == 0);
       TEST_ASSERT(m->getNumConformers() == 1);
-      // m->setProp(internKey("_Name"), "templated");
+      // m->setProp(common_properties::_Name, "templated");
       // mb = MolToMolBlock(*m);
       // std::cerr << mb << std::endl;
       TEST_ASSERT(compareConfs(m, core, mv));
@@ -323,7 +323,7 @@ void test2() {
       params.dbg_useFixed = true;
       TEST_ASSERT(CoordGen::addCoords(*m, &params) == 0);
       TEST_ASSERT(m->getNumConformers() == 1);
-      m->setProp(internKey("_Name"), "templated");
+      m->setProp(common_properties::_Name, "templated");
       mb = MolToMolBlock(*m);
       std::cerr << mb << std::endl;
       TEST_ASSERT(compareConfs(m, core, mv));
@@ -335,7 +335,7 @@ void test2() {
   {
     ROMol *core = SmilesToMol("C1CCCC2C1NCC2");
     TEST_ASSERT(core);
-    core->setProp(internKey("_Name"), "core");
+    core->setProp(common_properties::_Name, "core");
 
     CoordGen::addCoords(*core);
     TEST_ASSERT(core->getNumConformers() == 1);
@@ -344,7 +344,7 @@ void test2() {
 
     ROMol *m = SmilesToMol("C1C(CCC)CC(CC3CC3)C2C1N(C(C)C)CC2");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "core+sidechain");
+    m->setProp(common_properties::_Name, "core+sidechain");
 
     MatchVectType mv;
     SubstructMatch(*m, *core, mv);
@@ -362,7 +362,7 @@ void test2() {
       params.templateMol = core;
       CoordGen::addCoords(*m, &params);
       TEST_ASSERT(m->getNumConformers() == 1);
-      m->setProp(internKey("_Name"), "templated");
+      m->setProp(common_properties::_Name, "templated");
       mb = MolToMolBlock(*m);
       std::cerr << mb << std::endl;
       TEST_ASSERT(compareConfs(m, core, mv, true, -1, -1, 0.3));
@@ -374,7 +374,7 @@ void test2() {
   {
     ROMol *core = SmilesToMol("CC(N)CC");
     TEST_ASSERT(core);
-    core->setProp(internKey("_Name"), "core");
+    core->setProp(common_properties::_Name, "core");
 
     CoordGen::addCoords(*core);
     TEST_ASSERT(core->getNumConformers() == 1);
@@ -383,7 +383,7 @@ void test2() {
 
     ROMol *m = SmilesToMol("CC(N)CC(O)C");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "core+sidechain");
+    m->setProp(common_properties::_Name, "core+sidechain");
 
     MatchVectType mv;
     SubstructMatch(*m, *core, mv);
@@ -402,7 +402,7 @@ void test2() {
       params.templateMol = core;
       CoordGen::addCoords(*m, &params);
       TEST_ASSERT(m->getNumConformers() == 1);
-      m->setProp(internKey("_Name"), "templated");
+      m->setProp(common_properties::_Name, "templated");
       mb = MolToMolBlock(*m);
       std::cerr << mb << std::endl;
       TEST_ASSERT(compareConfs(m, core, mv, true, -1, -1, 0.05));
@@ -422,7 +422,7 @@ void testGithub1929() {
   {
     ROMol *m = SmilesToMol("c1cc(CC)cnc1CC(=O)O");
     TEST_ASSERT(m);
-    m->setProp(internKey("_Name"), "test1");
+    m->setProp(common_properties::_Name, "test1");
     CoordGen::CoordGenParams params;
     params.templateFileDir = "I_do_not_exist";
 

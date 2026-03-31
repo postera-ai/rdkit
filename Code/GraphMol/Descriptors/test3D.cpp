@@ -63,7 +63,7 @@ void testPMI1() {
     TEST_ASSERT(m);
     RDKit::ROMol mcpy(*m);
     std::string nm;
-    m->getProp(internKey("_Name"), nm);
+    m->getProp(common_properties::_Name, nm);
     std::string inm;
     instrm >> inm;
     TEST_ASSERT(inm == nm);
@@ -254,7 +254,7 @@ void testNPR1() {
     TEST_ASSERT(m);
     RDKit::ROMol mcpy(*m);
     std::string nm;
-    m->getProp(internKey("_Name"), nm);
+    m->getProp(common_properties::_Name, nm);
 
     double val;
     double pmi1_m, pmi2_m, pmi3_m, pmi1_nom, pmi2_nom, pmi3_nom;

@@ -129,7 +129,7 @@ std::unique_ptr<RWMol> MolFromXYZDataStream(std::istream &inStream) {
   if (numAtoms) {
     Conformer *conf = new Conformer(numAtoms);
     if (!comment.empty()) {
-      mol->setProp(internKey("_FileComments"), comment);
+      mol->setProp(common_properties::_FileComments, comment);
     }
     for (unsigned int i = 0; i < numAtoms; i++) {
       if (inStream.eof()) {

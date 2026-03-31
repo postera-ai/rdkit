@@ -328,8 +328,8 @@ M  END
   std::unique_ptr<ROMol> mol(MolBlockToMol(molblock));
   SECTION("basics, make sure we can parse the original data") {
     REQUIRE(mol);
-    CHECK(mol->getAtomWithIdx(10)->hasProp(internKey("_MolFile_PXA")));
-    CHECK(!mol->getAtomWithIdx(11)->hasProp(internKey("_MolFile_PXA")));
+    CHECK(mol->getAtomWithIdx(10)->hasProp(common_properties::_MolFile_PXA));
+    CHECK(!mol->getAtomWithIdx(11)->hasProp(common_properties::_MolFile_PXA));
   }
   SECTION("basics, can we write it?") {
     REQUIRE(mol);
@@ -1323,10 +1323,10 @@ M  END
     REQUIRE(mol);
     const auto &sgroups = getSubstanceGroups(*mol);
     CHECK(sgroups.size() == 1);
-    CHECK(sgroups[0].hasProp(internKey("TYPE")));
-    CHECK(sgroups[0].getProp<std::string>(internKey("TYPE")) == "DAT");
-    CHECK(sgroups[0].hasProp(internKey("FIELDNAME")));
-    CHECK(sgroups[0].getProp<std::string>(internKey("FIELDNAME")) ==
+    CHECK(sgroups[0].hasProp(common_properties::sgTYPE));
+    CHECK(sgroups[0].getProp<std::string>(common_properties::sgTYPE) == "DAT");
+    CHECK(sgroups[0].hasProp(common_properties::sgFIELDNAME));
+    CHECK(sgroups[0].getProp<std::string>(common_properties::sgFIELDNAME) ==
           "FAKE_MRV_IMPLICIT_H");
   }
 }
@@ -2342,14 +2342,14 @@ TEST_CASE(
 
     const auto &sgroups = getSubstanceGroups(*mol);
     CHECK(sgroups.size() == 3);
-    CHECK(sgroups[0].hasProp(internKey("TYPE")));
-    CHECK(sgroups[0].getProp<std::string>(internKey("TYPE")) == "SUP");
+    CHECK(sgroups[0].hasProp(common_properties::sgTYPE));
+    CHECK(sgroups[0].getProp<std::string>(common_properties::sgTYPE) == "SUP");
     CHECK(sgroups[0].getAttachPoints().size() == 1);
-    CHECK(sgroups[1].hasProp(internKey("TYPE")));
-    CHECK(sgroups[1].getProp<std::string>(internKey("TYPE")) == "SUP");
+    CHECK(sgroups[1].hasProp(common_properties::sgTYPE));
+    CHECK(sgroups[1].getProp<std::string>(common_properties::sgTYPE) == "SUP");
     CHECK(sgroups[1].getAttachPoints().size() == 1);
-    CHECK(sgroups[2].hasProp(internKey("TYPE")));
-    CHECK(sgroups[2].getProp<std::string>(internKey("TYPE")) == "SUP");
+    CHECK(sgroups[2].hasProp(common_properties::sgTYPE));
+    CHECK(sgroups[2].getProp<std::string>(common_properties::sgTYPE) == "SUP");
     CHECK(sgroups[2].getAttachPoints().size() == 2);
   }
 }
@@ -2413,16 +2413,16 @@ TEST_CASE("XBHEAD and XBCORR causing parser failures", "[bug][reader]") {
     REQUIRE(mol);
     const auto &sgroups = getSubstanceGroups(*mol);
     CHECK(sgroups.size() == 1);
-    CHECK(sgroups[0].hasProp(internKey("TYPE")));
-    CHECK(sgroups[0].getProp<std::string>(internKey("TYPE")) == "SRU");
-    CHECK(sgroups[0].hasProp(internKey("XBHEAD")));
-    auto v = sgroups[0].getProp<std::vector<unsigned int>>(internKey("XBHEAD"));
+    CHECK(sgroups[0].hasProp(common_properties::sgTYPE));
+    CHECK(sgroups[0].getProp<std::string>(common_properties::sgTYPE) == "SRU");
+    CHECK(sgroups[0].hasProp(common_properties::sgXBHEAD));
+    auto v = sgroups[0].getProp<std::vector<unsigned int>>(common_properties::sgXBHEAD);
     CHECK(v.size() == 2);
     CHECK(v[0] == 5);
     CHECK(v[1] == 0);
 
-    CHECK(sgroups[0].hasProp(internKey("XBCORR")));
-    CHECK(sgroups[0].getProp<std::vector<unsigned int>>(internKey("XBCORR")).size() == 4);
+    CHECK(sgroups[0].hasProp(common_properties::sgXBCORR));
+    CHECK(sgroups[0].getProp<std::vector<unsigned int>>(common_properties::sgXBCORR).size() == 4);
 
     auto mb = MolToV3KMolBlock(*mol);
     CHECK(mb.find("XBHEAD=(2 6 1)") != std::string::npos);
@@ -3120,9 +3120,9 @@ M  END
     CHECK(m->getNumBonds() == 6);
     auto sgs = getSubstanceGroups(*m);
     REQUIRE(sgs.size() == 1);
-    CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "DAT");
-    CHECK(sgs[0].getProp<std::string>(internKey("FIELDINFO")) == "\"");
-    CHECK(sgs[0].getProp<std::string>(internKey("QUERYOP")) == "\"");
+    CHECK(sgs[0].getProp<std::string>(common_properties::sgTYPE) == "DAT");
+    CHECK(sgs[0].getProp<std::string>(common_properties::sgFIELDINFO) == "\"");
+    CHECK(sgs[0].getProp<std::string>(common_properties::sgQUERYOP) == "\"");
   }
   SECTION("empty string") {
     auto m = R"CTAB(
@@ -3160,9 +3160,9 @@ M  END
     CHECK(m->getNumBonds() == 6);
     auto sgs = getSubstanceGroups(*m);
     REQUIRE(sgs.size() == 1);
-    CHECK(sgs[0].getProp<std::string>(internKey("TYPE")) == "DAT");
-    CHECK(sgs[0].getProp<std::string>(internKey("FIELDINFO")).empty());
-    CHECK(sgs[0].getProp<std::string>(internKey("QUERYOP")) == "\"");
+    CHECK(sgs[0].getProp<std::string>(common_properties::sgTYPE) == "DAT");
+    CHECK(sgs[0].getProp<std::string>(common_properties::sgFIELDINFO).empty());
+    CHECK(sgs[0].getProp<std::string>(common_properties::sgQUERYOP) == "\"");
   }
 }
 
@@ -3528,8 +3528,8 @@ M  END
     auto sgs = getSubstanceGroups(*m);
     REQUIRE(sgs.size() == 1);
     auto sg = sgs[0];
-    CHECK(sg.getProp<std::string>(internKey("FIELDINFO")) == "\"");
-    CHECK(sg.getProp<std::string>(internKey("QUERYOP")) == "\"\"");
+    CHECK(sg.getProp<std::string>(common_properties::sgFIELDINFO) == "\"");
+    CHECK(sg.getProp<std::string>(common_properties::sgQUERYOP) == "\"\"");
     auto mb = MolToV3KMolBlock(*m);
     CHECK(mb.find("FIELDINFO=\"\"\"\"") != std::string::npos);
     CHECK(mb.find("QUERYOP=\"\"\"\"\"") != std::string::npos);
@@ -3560,8 +3560,8 @@ M  END
     auto sgs = getSubstanceGroups(*m);
     REQUIRE(sgs.size() == 1);
     auto sg = sgs[0];
-    CHECK(sg.getProp<std::string>(internKey("FIELDINFO")) == "foo\"");
-    CHECK(sg.getProp<std::string>(internKey("QUERYOP")) == "(bar)");
+    CHECK(sg.getProp<std::string>(common_properties::sgFIELDINFO) == "foo\"");
+    CHECK(sg.getProp<std::string>(common_properties::sgQUERYOP) == "(bar)");
     auto mb = MolToV3KMolBlock(*m);
     CHECK(mb.find("FIELDINFO=\"foo\"\"\"") != std::string::npos);
     CHECK(mb.find("QUERYOP=\"(bar)\"") != std::string::npos);
@@ -4381,10 +4381,10 @@ M  END
     REQUIRE(m);
     REQUIRE(getSubstanceGroups(*m).size() == 1);
     const auto sg = getSubstanceGroups(*m)[0];
-    CHECK(sg.hasProp(internKey("QUERYTYPE")));
-    CHECK(sg.getProp<std::string>(internKey("QUERYTYPE")) == "PQ");
-    CHECK(sg.hasProp(internKey("QUERYOP")));
-    CHECK(sg.getProp<std::string>(internKey("QUERYOP")) == "=");
+    CHECK(sg.hasProp(common_properties::sgQUERYTYPE));
+    CHECK(sg.getProp<std::string>(common_properties::sgQUERYTYPE) == "PQ");
+    CHECK(sg.hasProp(common_properties::sgQUERYOP));
+    CHECK(sg.getProp<std::string>(common_properties::sgQUERYOP) == "=");
   }
 }
 
@@ -6058,7 +6058,7 @@ TEST_CASE("MaeMolSupplier setData and reset methods",
       REQUIRE(mol != nullptr);
 
       std::string mol_name;
-      REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
+      REQUIRE(mol->getPropIfPresent(common_properties::_Name, mol_name) == true);
       REQUIRE(j < mol_names1.size());
       CHECK(mol_name == mol_names1[j]);
 
@@ -6111,7 +6111,7 @@ TEST_CASE("MaeMolSupplier length", "[mae][MaeMolSupplier][reader]") {
     std::unique_ptr<ROMol> mol(supplier.next());
 
     std::string mol_name;
-    REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
+    REQUIRE(mol->getPropIfPresent(common_properties::_Name, mol_name) == true);
     CHECK(mol_name == mol_names[i]);
   }
 
@@ -6121,7 +6121,7 @@ TEST_CASE("MaeMolSupplier length", "[mae][MaeMolSupplier][reader]") {
     std::unique_ptr<ROMol> mol(supplier.next());
 
     std::string mol_name;
-    REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
+    REQUIRE(mol->getPropIfPresent(common_properties::_Name, mol_name) == true);
     CHECK(mol_name == mol_names[i]);
     ++i;
   }
@@ -6146,12 +6146,12 @@ TEST_CASE("MaeMolSupplier and operator[]", "[mae][MaeMolSupplier][reader]") {
   std::string mol_name;
   for (unsigned i = 0; i < mols_in_file; ++i) {
     std::unique_ptr<ROMol> mol(supplier[i]);
-    REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
+    REQUIRE(mol->getPropIfPresent(common_properties::_Name, mol_name) == true);
     CHECK(mol_name == mol_names[i]);
 
     auto j = mols_in_file - (i + 1);
     mol.reset(supplier[j]);
-    REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
+    REQUIRE(mol->getPropIfPresent(common_properties::_Name, mol_name) == true);
     CHECK(mol_name == mol_names[j]);
   }
 
@@ -6169,7 +6169,7 @@ TEST_CASE("MaeMolSupplier is3D flag", "[mae][MaeMolSupplier][reader]") {
   std::unique_ptr<ROMol> mol(supplier[0]);
 
   std::string mol_name;
-  REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
+  REQUIRE(mol->getPropIfPresent(common_properties::_Name, mol_name) == true);
   CHECK(mol_name == "48");
 
   CHECK(mol->getConformer().is3D() == true);
@@ -6181,7 +6181,7 @@ TEST_CASE("MaeMolSupplier is3D flag", "[mae][MaeMolSupplier][reader]") {
 
   mol.reset(supplier[0]);
 
-  REQUIRE(mol->getPropIfPresent(internKey("_Name"), mol_name) == true);
+  REQUIRE(mol->getPropIfPresent(common_properties::_Name, mol_name) == true);
   CHECK(mol_name == "Structure1");
 
   CHECK(mol->getConformer().is3D() == false);
@@ -6923,7 +6923,7 @@ TEST_CASE("MaeWriter should not prefix Maestro-formatted properties") {
 
   // MaeMolSupplier should ignore the i_m_ct_enhanced_stereo_status property
   // (it's meaningless to the RDKit)
-  CHECK(mol->hasProp(internKey("i_m_ct_enhanced_stereo_status")) == false);
+  CHECK(mol->hasProp(common_properties::i_m_ct_enhanced_stereo_status) == false);
 
   std::string mae_block;
   {
@@ -7382,8 +7382,8 @@ void testFragmentation(const std::string &fileName,
     // same
     for (unsigned int sgIndex = 0;
          sgIndex < getSubstanceGroups(*largestFrag).size(); ++sgIndex) {
-      CHECK(getSubstanceGroups(*largestFrag)[sgIndex].getProp<std::string>(internKey("TYPE")) ==
-            getSubstanceGroups(*mol)[sgIndex].getProp<std::string>(internKey("TYPE")));
+      CHECK(getSubstanceGroups(*largestFrag)[sgIndex].getProp<std::string>(common_properties::sgTYPE) ==
+            getSubstanceGroups(*mol)[sgIndex].getProp<std::string>(common_properties::sgTYPE));
     }
   }
 }
@@ -7536,7 +7536,7 @@ TEST_CASE("ZBOs in V3K blocks") {
       CHECK(m->getAtomWithIdx(1)->getFormalCharge() == 0);
       CHECK(m->getAtomWithIdx(0)->getTotalNumHs() == 3);
       CHECK(m->getAtomWithIdx(1)->getTotalNumHs() == 3);
-      CHECK(m->getAtomWithIdx(0)->hasProp(internKey("_ZBO_H")));
+      CHECK(m->getAtomWithIdx(0)->hasProp(common_properties::_ZBO_H));
     };
     std::string fName;
     fName = rdbase + "H3BNH3.mol";

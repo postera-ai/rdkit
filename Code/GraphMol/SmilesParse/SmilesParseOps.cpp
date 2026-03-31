@@ -527,9 +527,9 @@ void CloseMolRings(RWMol *mol, bool toleratePartials) {
 
           // we use the _cxsmilesBondIdx value from the second one, if it's
           // there
-          if (bond2->hasProp(internKey("_cxsmilesBondIdx"))) {
-            bond1->setProp(internKey("_cxsmilesBondIdx"),
-                           bond2->getProp<unsigned int>(internKey("_cxsmilesBondIdx")));
+          if (bond2->hasProp(common_properties::_cxsmilesBondIdx)) {
+            bond1->setProp(common_properties::_cxsmilesBondIdx,
+                           bond2->getProp<unsigned int>(common_properties::_cxsmilesBondIdx));
           }
 
           Bond *matchedBond;
@@ -652,10 +652,10 @@ void CleanupAfterParsing(RWMol *mol) {
   }
   for (auto bond : mol->bonds()) {
     bond->clearProp(common_properties::_unspecifiedOrder);
-    bond->clearProp(internKey("_cxsmilesBondIdx"));
+    bond->clearProp(common_properties::_cxsmilesBondIdx);
   }
   for (auto sg : RDKit::getSubstanceGroups(*mol)) {
-    sg.clearProp(internKey("_cxsmilesindex"));
+    sg.clearProp(common_properties::_cxsmilesindex);
   }
   if (!Chirality::getAllowNontetrahedralChirality()) {
     bool needWarn = false;

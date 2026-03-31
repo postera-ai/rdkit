@@ -93,7 +93,7 @@ void visit_children(
                          missing_frag_id)) {
         continue;
       }
-      unsigned int frag_id = mol->getProp<int>(internKey(CDX_FRAG_ID));
+      unsigned int frag_id = mol->getProp<int>(common_properties::CDX_FRAG_ID);
       pagedata.fragmentLookup[frag_id] = pagedata.mols.size();
       if (group_id != -1) {
         pagedata.groupedFragments[group_id].push_back(frag_id);
@@ -101,8 +101,8 @@ void visit_children(
         pagedata.groupedFragments[frag_id].push_back(frag_id);
       }
 
-      if (mol->hasProp(internKey(NEEDS_FUSE))) {
-        mol->clearProp(internKey(NEEDS_FUSE));
+      if (mol->hasProp(common_properties::CDX_NEEDS_FUSE)) {
+        mol->clearProp(common_properties::CDX_NEEDS_FUSE);
         std::unique_ptr<ROMol> fused;
         try {
           replaceFragments(*mol);
@@ -114,7 +114,7 @@ void visit_children(
           // mols.push_back(std::move(mol));
           continue;
         }
-        fused->setProp<int>(internKey(CDX_FRAG_ID), static_cast<int>(frag_id));
+        fused->setProp<int>(common_properties::CDX_FRAG_ID, static_cast<int>(frag_id));
         pagedata.mols.emplace_back(dynamic_cast<RWMol *>(fused.release()));
       } else {
         pagedata.mols.push_back(std::move(mol));
@@ -128,9 +128,9 @@ void visit_children(
       for (auto &atm : res->atoms()) {
         RDGeom::Point3D p{0.0, 0.0, 0.0};
 
-        if (atm->hasProp(internKey(CDX_ATOM_POS))) {
+        if (atm->hasProp(common_properties::CDX_ATOM_POS)) {
           hasConf = true;
-          const auto coord = atm->getProp<std::vector<double>>(internKey(CDX_ATOM_POS));
+          const auto coord = atm->getProp<std::vector<double>>(common_properties::CDX_ATOM_POS);
 
           p.x = coord[0];
           p.y = -1 * coord[1];  // CDXML uses an inverted coordinate
@@ -143,7 +143,7 @@ void visit_children(
           }
         }
         conf->setAtomPos(atm->getIdx(), p);
-        atm->clearProp(internKey(CDX_ATOM_POS));
+        atm->clearProp(common_properties::CDX_ATOM_POS);
       }
 
       if (hasConf) {

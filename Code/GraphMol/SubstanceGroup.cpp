@@ -31,7 +31,7 @@ SubstanceGroup::SubstanceGroup(ROMol *owning_mol, const std::string &type)
   PRECONDITION(owning_mol, "supplied owning molecule is bad");
 
   // TYPE is required to be set , as other properties will depend on it.
-  setProp<std::string>(internKey("TYPE"), type);
+  setProp<std::string>(common_properties::sgTYPE, type);
 }
 
 void SubstanceGroup::setOwningMol(ROMol *mol) {
@@ -345,7 +345,7 @@ bool SubstanceGroupChecks::isSubstanceGroupIdFree(const ROMol &mol,
                                                   unsigned int id) {
   auto match_sgroup = [id](const SubstanceGroup &sg) {
     unsigned int storedId;
-    return sg.getPropIfPresent(internKey("ID"), storedId) && id == storedId;
+    return sg.getPropIfPresent(common_properties::sgID, storedId) && id == storedId;
   };
 
   const auto &sgroups = getSubstanceGroups(mol);
@@ -395,7 +395,7 @@ bool removedParentInHierarchy(
   }
 
   unsigned int parent;
-  if (sgs[idx].getPropIfPresent(internKey("PARENT"), parent)) {
+  if (sgs[idx].getPropIfPresent(common_properties::sgPARENT, parent)) {
     auto piter = indexLookup.find(parent);
     if (piter != indexLookup.end()) {
       return removedParentInHierarchy(piter->second, sgs, toRemove,
@@ -415,7 +415,7 @@ void removeSubstanceGroupsReferencing(RWMol &mol, unsigned int idx) {
     unsigned int nRemoved = 0;
     bool parentsPresent = false;
     for (unsigned int i = 0; i < sgs.size(); ++i) {
-      if (!parentsPresent && sgs[i].hasProp(internKey("PARENT"))) {
+      if (!parentsPresent && sgs[i].hasProp(common_properties::sgPARENT)) {
         parentsPresent = true;
       }
       if (INCLUDES_METHOD(sgs[i], idx)) {
@@ -430,7 +430,7 @@ void removeSubstanceGroupsReferencing(RWMol &mol, unsigned int idx) {
     if (parentsPresent && nRemoved) {
       for (unsigned int i = 0; i < sgs.size(); ++i) {
         unsigned int index;
-        if (sgs[i].getPropIfPresent(internKey("index"), index)) {
+        if (sgs[i].getPropIfPresent(common_properties::sgIndex, index)) {
           indexLookup[index] = i;
         }
       }
@@ -443,13 +443,13 @@ void removeSubstanceGroupsReferencing(RWMol &mol, unsigned int idx) {
     for (auto &&sg : sgs) {
       if (!toRemove[i]) {
         // we might be keeping it. Check the parent
-        if (!parentsPresent || !sg.hasProp(internKey("PARENT"))) {
+        if (!parentsPresent || !sg.hasProp(common_properties::sgPARENT)) {
           ADJUST_METHOD(sg, idx);
           newsgs.push_back(std::move(sg));
         } else if (parentsPresent) {
           unsigned int parent;
           // has our parent been removed?
-          if (sg.getPropIfPresent(internKey("PARENT"), parent)) {
+          if (sg.getPropIfPresent(common_properties::sgPARENT, parent)) {
             auto piter = indexLookup.find(parent);
             bool keepIt = false;
             if (piter == indexLookup.end()) {
@@ -495,7 +495,7 @@ void removeSubstanceGroupsReferencingBond(RWMol &mol, unsigned int idx) {
 std::ostream &operator<<(std::ostream &target,
                          const RDKit::SubstanceGroup &sgroup) {
   target << sgroup.getIndexInMol() << ' '
-         << sgroup.getProp<std::string>(RDKit::internKey("TYPE"));
+         << sgroup.getProp<std::string>(RDKit::common_properties::sgTYPE);
 
   auto brackets = sgroup.getBrackets();
   if (!brackets.empty()) {

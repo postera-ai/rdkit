@@ -32,9 +32,9 @@ void outputTagClasses(const t_obj *obj, std::ostream &d_os,
   if (!d_activeClass.empty()) {
     d_os << " " << d_activeClass;
   }
-  if (obj->hasProp(internKey("_tagClass"))) {
+  if (obj->hasProp(common_properties::_tagClass)) {
     std::string value;
-    obj->getProp(internKey("_tagClass"), value);
+    obj->getProp(common_properties::_tagClass, value);
     std::replace(value.begin(), value.end(), '\"', '_');
     std::replace(value.begin(), value.end(), '\'', '_');
     std::replace(value.begin(), value.end(), '.', '_');

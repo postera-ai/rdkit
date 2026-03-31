@@ -178,7 +178,7 @@ std::vector<std::pair<std::vector<unsigned int>, unsigned int>> extractFeatures(
       feature_idx_type;
   if (shapeOpts.useColors) {
     std::string features;
-    if (mol.getPropIfPresent(internKey(pubchemFeatureName), features)) {
+    if (mol.getPropIfPresent(common_properties::PUBCHEM_PHARMACOPHORE_FEATURES, features)) {
       // regular atoms have type 0; feature "atoms" (features represented by a
       // single point+radius) must have type > 0
       static const std::map<std::string, unsigned int> atomTypes = {
@@ -655,8 +655,8 @@ std::pair<double, double> AlignMolecule(
                             refShape.inertialRot[8]};
   }
   TransformConformer(finalTrans, finalRot, matrix, fitShape, fit_conformer);
-  fit.setProp(internKey("shape_align_shape_tanimoto"), tanis.first);
-  fit.setProp(internKey("shape_align_color_tanimoto"), tanis.second);
+  fit.setProp(common_properties::shape_align_shape_tanimoto, tanis.first);
+  fit.setProp(common_properties::shape_align_color_tanimoto, tanis.second);
 
   return tanis;
 }

@@ -513,11 +513,11 @@ TEST_CASE("tag atoms in SVG", "[drawing][SVG]") {
 
     for (auto atom : m1->atoms()) {
       auto prop = boost::format("__prop_class_atom_%d") % atom->getIdx();
-      atom->setProp(internKey("_tagClass"), prop.str());
+      atom->setProp(common_properties::_tagClass, prop.str());
     }
     for (auto bond : m1->bonds()) {
       auto prop = boost::format("__prop_class_bond_%d") % bond->getIdx();
-      bond->setProp(internKey("_tagClass"), prop.str());
+      bond->setProp(common_properties::_tagClass, prop.str());
     }
 
     MolDraw2DSVG drawer(200, 200, -1, -1, NO_FREETYPE);
@@ -1288,8 +1288,8 @@ TEST_CASE("github #3258: ", "[drawing][bug]") {
     drawer.finishDrawing();
     std::string text = drawer.getDrawingText();
     CHECK(text.find(">,</text>") == std::string::npos);
-    CHECK(!dm1.hasProp(internKey("_atomIndicesAdded")));
-    CHECK(!dm1.hasProp(internKey("_bondIndicesAdded")));
+    CHECK(!dm1.hasProp(common_properties::_atomIndicesAdded));
+    CHECK(!dm1.hasProp(common_properties::_bondIndicesAdded));
   }
 }
 
@@ -1500,9 +1500,9 @@ TEST_CASE("Github #3577", "[bug]") {
     auto m = "CCC"_smiles;
     REQUIRE(m);
     MolDraw2DUtils::prepareMolForDrawing(*m);
-    m->getAtomWithIdx(1)->setProp(internKey("atomNote"), "CCC");
-    m->getAtomWithIdx(2)->setProp(internKey("atomNote"), "ccc");
-    m->getBondWithIdx(0)->setProp(internKey("bondNote"), "CCC");
+    m->getAtomWithIdx(1)->setProp(common_properties::atomNote, "CCC");
+    m->getAtomWithIdx(2)->setProp(common_properties::atomNote, "ccc");
+    m->getBondWithIdx(0)->setProp(common_properties::bondNote, "CCC");
 
     MolDraw2DSVG drawer(350, 300);
     drawer.drawMolecule(*m);
@@ -2685,10 +2685,10 @@ M  END
     }
     {
       MolDraw2DSVG drawer(350, 300);
-      m->getBondWithIdx(3)->setProp(internKey("bondNote"), "S/D");
-      m->getBondWithIdx(4)->setProp(internKey("bondNote"), "S/A");
-      m->getBondWithIdx(5)->setProp(internKey("bondNote"), "D/A");
-      m->getBondWithIdx(6)->setProp(internKey("bondNote"), "Any");
+      m->getBondWithIdx(3)->setProp(common_properties::bondNote, "S/D");
+      m->getBondWithIdx(4)->setProp(common_properties::bondNote, "S/A");
+      m->getBondWithIdx(5)->setProp(common_properties::bondNote, "D/A");
+      m->getBondWithIdx(6)->setProp(common_properties::bondNote, "Any");
       drawer.drawMolecule(*m);
       drawer.finishDrawing();
       auto text = drawer.getDrawingText();
@@ -3550,7 +3550,7 @@ TEST_CASE("support annotation colors", "[drawing]") {
     MolDraw2DSVG drawer(300, 300, panelWidth, panelHeight, noFreeType);
     drawer.drawOptions().annotationColour = DrawColour{0, 0, 1, 1};
     drawer.drawOptions().addAtomIndices = true;
-    m->setProp(internKey("molNote"), "foo");
+    m->setProp(common_properties::molNote, "foo");
     drawer.drawMolecule(*m, "blue annotations");
     drawer.finishDrawing();
     std::ofstream outs("testAnnotationColors.svg");
@@ -5208,7 +5208,7 @@ M  END
     }
     {
       auto m = "C[C@H](I)CC(Cl)C[C@@H](F)C"_smiles;
-      m->setProp<std::string>(internKey("_Name"), "mol3");
+      m->setProp<std::string>(common_properties::_Name, "mol3");
       REQUIRE(m);
       MolDraw2DUtils::prepareMolForDrawing(*m);
       MolDraw2DSVG drawer(-1, -1);
@@ -5223,7 +5223,7 @@ M  END
     }
     {
       auto m = "CC(I)CC(Cl)CC(F)C"_smiles;
-      m->setProp<std::string>(internKey("_Name"), "mol4");
+      m->setProp<std::string>(common_properties::_Name, "mol4");
       REQUIRE(m);
       MolDraw2DUtils::prepareMolForDrawing(*m);
       MolDraw2DSVG drawer(-1, -1);
@@ -7375,7 +7375,7 @@ TEST_CASE("ACS1996 mode crops small molecules - Github 6111") {
   {
     auto m = "[*:1]N[*:2]"_smiles;
     RDDepict::compute2DCoords(*m);
-    m->setProp<std::string>(internKey("_Name"), "mol1");
+    m->setProp<std::string>(common_properties::_Name, "mol1");
     REQUIRE(m);
     MolDraw2DSVG drawer(-1, -1);
     MolDraw2DUtils::drawMolACS1996(drawer, *m, "", nullptr, nullptr);
@@ -7408,7 +7408,7 @@ TEST_CASE("ACS1996 mode crops small molecules - Github 6111") {
 TEST_CASE("ACS1996 should not throw exception with no coords - Github 6112") {
   std::string nameBase = "test_github6112";
   auto m = "C[C@H](I)CC(Cl)C[C@@H](F)C"_smiles;
-  m->setProp<std::string>(internKey("_Name"), "mol1");
+  m->setProp<std::string>(common_properties::_Name, "mol1");
   REQUIRE(m);
   MolDraw2DSVG drawer(-1, -1);
   MolDraw2DUtils::drawMolACS1996(drawer, *m, "Mol 1", nullptr, nullptr);
@@ -7428,7 +7428,7 @@ TEST_CASE("Bad double bond - Github 6160") {
                                   "c1ccccc1NC=NCCS(=O)(=CCC(Cl)(F)C)N"};
   for (auto i = 0u; i < smiles.size(); ++i) {
     std::unique_ptr<ROMol> m(SmilesToMol(smiles[i]));
-    m->setProp<std::string>(internKey("_Name"), "mol" + std::to_string(i + 1));
+    m->setProp<std::string>(common_properties::_Name, "mol" + std::to_string(i + 1));
     REQUIRE(m);
     MolDraw2DSVG drawer(300, 300, -1, -1, NO_FREETYPE);
     // it's a bit easier to deal with in BW.

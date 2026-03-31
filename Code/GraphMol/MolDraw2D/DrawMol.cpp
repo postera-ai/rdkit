@@ -614,15 +614,15 @@ void DrawMol::extractSGroupData() {
 
   for (const auto &sg : sgs) {
     std::string typ;
-    if (sg.getPropIfPresent(internKey("TYPE"), typ) && typ == "DAT") {
+    if (sg.getPropIfPresent(common_properties::sgTYPE, typ) && typ == "DAT") {
       std::string text;
       // it seems like we should be rendering FIELDNAME, but
       // Marvin Sketch, Biovia Draw, and ChemDraw don't do it
-      // if (sg.getPropIfPresent(internKey("FIELDNAME"), text)) {
+      // if (sg.getPropIfPresent(common_properties::sgFIELDNAME, text)) {
       //   text += "=";
       // };
-      if (sg.hasProp(internKey("DATAFIELDS"))) {
-        STR_VECT dfs = sg.getProp<STR_VECT>(internKey("DATAFIELDS"));
+      if (sg.hasProp(common_properties::sgDATAFIELDS)) {
+        STR_VECT dfs = sg.getProp<STR_VECT>(common_properties::sgDATAFIELDS);
         for (const auto &df : dfs) {
           text += df + "|";
         }
@@ -638,7 +638,7 @@ void DrawMol::extractSGroupData() {
       bool located = false;
       std::string fieldDisp;
       Point2D origLoc(0.0, 0.0);
-      if (sg.getPropIfPresent(internKey("FIELDDISP"), fieldDisp)) {
+      if (sg.getPropIfPresent(common_properties::sgFIELDDISP, fieldDisp)) {
         double xp = FileParserUtils::stripSpacesAndCast<double>(
             fieldDisp.substr(0, 10));
         double yp = FileParserUtils::stripSpacesAndCast<double>(
@@ -657,10 +657,10 @@ void DrawMol::extractSGroupData() {
             located = true;
           }
         } else {
-          if (drawMol_->hasProp(internKey("_centroidx"))) {
+          if (drawMol_->hasProp(common_properties::_centroidx)) {
             Point2D centroid;
-            drawMol_->getProp(internKey("_centroidx"), centroid.x);
-            drawMol_->getProp(internKey("_centroidy"), centroid.y);
+            drawMol_->getProp(common_properties::_centroidx, centroid.x);
+            drawMol_->getProp(common_properties::_centroidy, centroid.y);
             // opposite sign for y
             origLoc.x += centroid.x;
             origLoc.y -= centroid.y;
@@ -882,7 +882,7 @@ void DrawMol::extractBrackets() {
         }
       }
       std::string connect;
-      if (sg.getPropIfPresent(internKey("CONNECT"), connect)) {
+      if (sg.getPropIfPresent(common_properties::sgCONNECT, connect)) {
         // annotations go on the last bracket of an sgroup
         const auto &brkShp = *postShapes_[labelBrk];
         // CONNECT goes at the top, but that's now the bottom due to the y
@@ -907,11 +907,11 @@ void DrawMol::extractBrackets() {
       }
 
       std::string label;
-      if (sg.getPropIfPresent(internKey("LABEL"), label)) {
+      if (sg.getPropIfPresent(common_properties::sgLABEL, label)) {
         auto da = drawBottomLabel(label, *postShapes_[labelBrk], drawOptions_,
                                   textDrawer_, horizontal);
         annotations_.emplace_back(da);
-      } else if (sg.getPropIfPresent(internKey("TYPE"), label)) {
+      } else if (sg.getPropIfPresent(common_properties::sgTYPE, label)) {
         if (label == "GEN") {
           // ChemDraw doesn't draw the GEN (type=generic) label.
           continue;
@@ -1593,7 +1593,7 @@ std::string DrawMol::getAtomSymbol(const Atom &atom,
   } else if (isComplexQuery(&atom)) {
     symbol = "?";
     std::string mapNum;
-    if (atom.getPropIfPresent(internKey("molAtomMapNumber"), mapNum)) {
+    if (atom.getPropIfPresent(common_properties::molAtomMapNumber, mapNum)) {
       symbol += ":" + mapNum;
     }
   } else if (drawOptions_.atomLabelDeuteriumTritium &&
@@ -1606,7 +1606,7 @@ std::string DrawMol::getAtomSymbol(const Atom &atom,
 
     // first thing after the symbol is the atom map
     std::string mapNum;
-    if (atom.getPropIfPresent(internKey("molAtomMapNumber"), mapNum)) {
+    if (atom.getPropIfPresent(common_properties::molAtomMapNumber, mapNum)) {
       postText.push_back(std::string(":") + mapNum);
     }
 

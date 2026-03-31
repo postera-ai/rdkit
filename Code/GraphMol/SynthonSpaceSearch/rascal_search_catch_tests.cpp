@@ -51,7 +51,7 @@ std::set<std::string> bruteForceSearch(
     auto res = rascalMCES(queryMol, *mol, rascalOptions);
     if (!res.empty() &&
         res.front().getSimilarity() > rascalOptions.similarityThreshold) {
-      mol->setProp<double>(internKey("Similarity"), res.front().getSimilarity());
+      mol->setProp<double>(common_properties::Similarity, res.front().getSimilarity());
       names.insert(name);
     }
   }

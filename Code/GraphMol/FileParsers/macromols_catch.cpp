@@ -375,15 +375,15 @@ TEST_CASE("nestedParens", "nestedParens") {
     // macroatom. we willcheck just a couple of them
 
     std::string sgroupName;
-    getSubstanceGroups(*mol)[1].getProp(internKey("LABEL"), sgroupName);
+    getSubstanceGroups(*mol)[1].getProp(common_properties::sgLABEL, sgroupName);
     std::string expected = "((cPr)O(2S-Me)Et)NGly";
     CHECK(sgroupName.substr(0, expected.length()) == expected);
 
-    getSubstanceGroups(*mol)[5].getProp(internKey("LABEL"), sgroupName);
+    getSubstanceGroups(*mol)[5].getProp(common_properties::sgLABEL, sgroupName);
     expected = "Phe(b-Me2)";
     CHECK(sgroupName.substr(0, expected.length()) == expected);
 
-    getSubstanceGroups(*mol)[7].getProp(internKey("LABEL"), sgroupName);
+    getSubstanceGroups(*mol)[7].getProp(common_properties::sgLABEL, sgroupName);
     expected = "(PhO(2S-Me)Et)NGly";
     CHECK(sgroupName.substr(0, expected.length()) == expected);
   }

@@ -1464,15 +1464,15 @@ void testGithub488() {
   {
     ROMol *m1 = SmilesToMol("O");
     TEST_ASSERT(m1);
-    m1->setProp(internKey("_Name"), "");
+    m1->setProp(common_properties::_Name, "");
     std::stringstream ss;
     SmilesWriter w(&ss);
     w.write(*m1);
-    m1->setProp(internKey("_Name"), "foo");
+    m1->setProp(common_properties::_Name, "foo");
     w.write(*m1);
-    m1->clearProp(internKey("_Name"));
+    m1->clearProp(common_properties::_Name);
     w.write(*m1);
-    m1->setProp(internKey("_Name"), " ");
+    m1->setProp(common_properties::_Name, " ");
     w.write(*m1);
     w.close();
     std::string txt = ss.str();
