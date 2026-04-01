@@ -36,8 +36,8 @@ void test1() {
   TEST_ASSERT(m->hasProp(common_properties::_Name));
   m->getProp(common_properties::_Name, propVal);
   TEST_ASSERT(propVal == "compound 2");
-  TEST_ASSERT(m->hasProp("Conf_1_Name"));
-  m->getProp("Conf_1_Name", propVal);
+  TEST_ASSERT(m->hasProp(internKey("Conf_1_Name")));
+  m->getProp(internKey("Conf_1_Name"), propVal);
   TEST_ASSERT(propVal == "conf 1");
 
   conf = m->getConformer(0);
@@ -82,8 +82,8 @@ void test2() {
   TEST_ASSERT(m->hasProp(common_properties::_Name));
   m->getProp(common_properties::_Name, propVal);
   TEST_ASSERT(propVal == "compound 1");
-  TEST_ASSERT(m->hasProp("Conf_1_Name"));
-  m->getProp("Conf_1_Name", propVal);
+  TEST_ASSERT(m->hasProp(internKey("Conf_1_Name")));
+  m->getProp(internKey("Conf_1_Name"), propVal);
   TEST_ASSERT(propVal == "conf9");
 
   std::stringstream strm;
@@ -98,8 +98,8 @@ void test2() {
   TEST_ASSERT(m2->hasProp(common_properties::_Name));
   m2->getProp(common_properties::_Name, propVal);
   TEST_ASSERT(propVal == "compound 1");
-  TEST_ASSERT(m2->hasProp("Conf_1_Name"));
-  m2->getProp("Conf_1_Name", propVal);
+  TEST_ASSERT(m2->hasProp(internKey("Conf_1_Name")));
+  m2->getProp(internKey("Conf_1_Name"), propVal);
   TEST_ASSERT(propVal == "conformer_1");
 
   std::stringstream strm2;
@@ -114,8 +114,8 @@ void test2() {
   TEST_ASSERT(m2->hasProp(common_properties::_Name));
   m2->getProp(common_properties::_Name, propVal);
   TEST_ASSERT(propVal == "compound 1");
-  TEST_ASSERT(m2->hasProp("Conf_1_Name"));
-  m2->getProp("Conf_1_Name", propVal);
+  TEST_ASSERT(m2->hasProp(internKey("Conf_1_Name")));
+  m2->getProp(internKey("Conf_1_Name"), propVal);
   TEST_ASSERT(propVal == "conformer_1");
 
   delete m;

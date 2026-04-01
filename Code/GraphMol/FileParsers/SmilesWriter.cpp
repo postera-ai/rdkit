@@ -139,7 +139,7 @@ void SmilesWriter::write(const ROMol &mol, int) {
     // FIX: we will assume that any property that the user requests is castable
     // to
     // a std::string
-    if (mol.getPropIfPresent(*pi, pval)) {
+    if (mol.getPropIfPresent(internKey(*pi), pval)) {
       (*dp_ostream) << d_delim << pval;
     } else {
       (*dp_ostream) << d_delim << "";

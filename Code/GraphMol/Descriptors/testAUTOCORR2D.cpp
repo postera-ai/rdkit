@@ -57,7 +57,7 @@ void testautocorrelation() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(common_properties::_Name, nm);
 
     std::vector<double> res2d;
 

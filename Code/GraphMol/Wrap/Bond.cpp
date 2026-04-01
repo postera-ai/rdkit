@@ -43,19 +43,19 @@ void setQuery(QueryBond *self, const QueryBond *other) {
 }
 
 int BondHasProp(const Bond *bond, const char *key) {
-  int res = bond->hasProp(key);
+  int res = bond->hasProp(internKey(key));
   return res;
 }
 
 template <class T>
 void BondSetProp(const Bond *bond, const char *key, const T &val) {
-  bond->setProp<T>(key, val);
+  bond->setProp<T>(internKey(key), val);
 }
 void BondClearProp(const Bond *bond, const char *key) {
-  if (!bond->hasProp(key)) {
+  if (!bond->hasProp(internKey(key))) {
     return;
   }
-  bond->clearProp(key);
+  bond->clearProp(internKey(key));
 }
 
 bool BondIsInRing(const Bond *bond) {

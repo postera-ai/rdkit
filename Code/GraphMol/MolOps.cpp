@@ -1023,7 +1023,7 @@ unsigned getNumAtomsWithDistinctProperty(const ROMol &mol,
                                          const std::string_view &prop) {
   unsigned numPropAtoms = 0;
   for (const auto atom : mol.atoms()) {
-    if (atom->hasProp(prop)) {
+    if (atom->hasProp(internKey(prop))) {
       ++numPropAtoms;
     }
   }

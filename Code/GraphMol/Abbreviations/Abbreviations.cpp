@@ -26,9 +26,9 @@ void applyMatches(RWMol &mol, const std::vector<AbbreviationMatch> &matches) {
   std::vector<unsigned int> addedBonds;
   addedBonds.reserve(mol.getNumBonds());
   bool hasPrevMapping =
-      mol.getPropIfPresent(common_properties::origAtomMapping,
+      mol.getPropIfPresent(::RDKit::common_properties::origAtomMapping,
                            prevAtomMapping) &&
-      mol.getPropIfPresent(common_properties::origBondMapping, prevBondMapping);
+      mol.getPropIfPresent(::RDKit::common_properties::origBondMapping, prevBondMapping);
   for (const auto &amatch : matches) {
     // if we have bonds, then atom 0 in the match will be the dummy atom
     // and atom 1 will end up being the abbreviation.
@@ -125,15 +125,15 @@ void applyMatches(RWMol &mol, const std::vector<AbbreviationMatch> &matches) {
                   "atomMapping mismatch");
   CHECK_INVARIANT(bondMapping.size() == mol.getNumBonds(),
                   "bondMapping mismatch");
-  mol.setProp(common_properties::origAtomMapping, atomMapping);
-  mol.setProp(common_properties::origBondMapping, bondMapping);
+  mol.setProp(::RDKit::common_properties::origAtomMapping, atomMapping);
+  mol.setProp(::RDKit::common_properties::origBondMapping, bondMapping);
 }
 
 void labelMatches(RWMol &mol, const std::vector<AbbreviationMatch> &matches) {
   for (const auto &amatch : matches) {
     // throughout this remember that atom 0 in the match is the dummy
     SubstanceGroup sg(&mol, "SUP");
-    sg.setProp("LABEL", amatch.abbrev.label);
+    sg.setProp(::RDKit::common_properties::sgLABEL, amatch.abbrev.label);
 
     for (unsigned int i = 1; i < amatch.match.size(); ++i) {
       const auto &pr = amatch.match[i];
@@ -171,7 +171,7 @@ std::vector<AbbreviationMatch> findApplicableAbbreviationMatches(
     CHECK_INVARIANT(abbrev.mol, "molecule is null");
     if (maxCoverage > 0) {
       unsigned int nDummies;
-      abbrev.mol->getProp(common_properties::numDummies, nDummies);
+      abbrev.mol->getProp(::RDKit::common_properties::numDummies, nDummies);
       if (double(abbrev.mol->getNumAtoms() - nDummies) / nAtoms >=
           maxCoverage) {
         continue;
@@ -249,10 +249,10 @@ RDKIT_ABBREVIATIONS_EXPORT void condenseAbbreviationSubstanceGroups(
   auto &molSGroups = getSubstanceGroups(mol);
   std::vector<AbbreviationMatch> abbrevMatches;
   for (const auto &sg : molSGroups) {
-    if (sg.getProp<std::string>("TYPE") == "SUP") {
+    if (sg.getProp<std::string>(::RDKit::common_properties::sgTYPE) == "SUP") {
       AbbreviationMatch abbrevMatch;
       std::string label = "abbrev";
-      sg.getPropIfPresent("LABEL", label);
+      sg.getPropIfPresent(::RDKit::common_properties::sgLABEL, label);
       abbrevMatch.abbrev.label = label;
       auto ats = sg.getAtoms();
       auto bnds = sg.getBonds();

@@ -121,8 +121,8 @@ bool classifyAtoms(ROMol &mol, std::vector<double> &radii,
     }
 
     radii.push_back(radius);
-    atom->setProp<int>(common_properties::Atom::SASAClass, (int)cls);
-    atom->setProp(common_properties::Atom::SASAClassName, classification);
+    atom->setProp<int>(common_properties::SASAClass, (int)cls);
+    atom->setProp(common_properties::SASAClassName, classification);
   }
 
   return success;
@@ -166,11 +166,11 @@ double internalCalcSASA(const ROMol &mol, const std::vector<double> &radii,
                   "freesasa didn't return the correct number of atoms");
 
   double sasa = res->total;
-  mol.setProp(common_properties::Molecule::SASA, sasa);
+  mol.setProp(common_properties::SASA, sasa);
   size_t i = 0;
   for (ROMol::ConstAtomIterator at = mol.beginAtoms(); at != mol.endAtoms();
        ++at, ++i) {
-    (*at)->setProp(common_properties::Atom::SASA, res->sasa[i]);
+    (*at)->setProp(common_properties::SASA, res->sasa[i]);
   }
 
   freesasa_result_free(res);
@@ -187,7 +187,7 @@ double calcSASA(const RDKit::ROMol &mol, const std::vector<double> &radii,
     for (ROMol::ConstQueryAtomIterator at = mol.beginQueryAtoms(query);
          at != mol.endQueryAtoms(); ++at) {
       const Atom *atom = *at;
-      result += atom->getProp<double>("SASA");
+      result += atom->getProp<double>(common_properties::SASA);
     }
   }
   return result;

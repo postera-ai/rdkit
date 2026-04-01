@@ -262,7 +262,7 @@ void set_mol_properties(RWMol &mol, const mae::Block &ct_block) {
       parseStereoBondLabel(mol, value);
     } else {
       auto propName = strip_prefix_from_mae_property(prop_name);
-      mol.setProp(propName, value);
+      mol.setProp(internKey(propName), value);
     }
   }
 
@@ -272,7 +272,7 @@ void set_mol_properties(RWMol &mol, const mae::Block &ct_block) {
     }
 
     auto propName = strip_prefix_from_mae_property(prop.first);
-    mol.setProp(propName, prop.second);
+    mol.setProp(internKey(propName), prop.second);
   }
   for (const auto &prop : ct_block.getProperties<int>()) {
     if (is_ignored_property(prop.first)) {
@@ -280,7 +280,7 @@ void set_mol_properties(RWMol &mol, const mae::Block &ct_block) {
     }
 
     auto propName = strip_prefix_from_mae_property(prop.first);
-    mol.setProp(propName, prop.second);
+    mol.setProp(internKey(propName), prop.second);
   }
   for (const auto &prop : ct_block.getProperties<mae::BoolProperty>()) {
     if (is_ignored_property(prop.first)) {
@@ -288,7 +288,7 @@ void set_mol_properties(RWMol &mol, const mae::Block &ct_block) {
     }
 
     auto propName = strip_prefix_from_mae_property(prop.first);
-    mol.setProp(propName, static_cast<bool>(prop.second));
+    mol.setProp(internKey(propName), static_cast<bool>(prop.second));
   }
 }
 
@@ -307,7 +307,7 @@ void set_atom_properties(Atom &atom, const mae::IndexedBlock &atom_block,
     }
 
     auto propName = strip_prefix_from_mae_property(prop.first);
-    atom.setProp(propName, prop.second->at(i));
+    atom.setProp(internKey(propName), prop.second->at(i));
   }
 
   for (const auto &prop : atom_block.getProperties<double>()) {
@@ -324,7 +324,7 @@ void set_atom_properties(Atom &atom, const mae::IndexedBlock &atom_block,
     }
 
     auto propName = strip_prefix_from_mae_property(prop.first);
-    atom.setProp(propName, prop.second->at(i));
+    atom.setProp(internKey(propName), prop.second->at(i));
   }
   for (const auto &prop : atom_block.getProperties<int>()) {
     if (prop.first == mae::ATOM_ATOMIC_NUM) {
@@ -346,7 +346,7 @@ void set_atom_properties(Atom &atom, const mae::IndexedBlock &atom_block,
       atom.setProp(common_properties::_MolFileRLabel, prop.second->at(i));
     } else {
       auto propName = strip_prefix_from_mae_property(prop.first);
-      atom.setProp(propName, prop.second->at(i));
+      atom.setProp(internKey(propName), prop.second->at(i));
     }
   }
   for (const auto &prop : atom_block.getProperties<mae::BoolProperty>()) {
@@ -355,7 +355,7 @@ void set_atom_properties(Atom &atom, const mae::IndexedBlock &atom_block,
     }
 
     auto propName = strip_prefix_from_mae_property(prop.first);
-    atom.setProp(propName, static_cast<bool>(prop.second->at(i)));
+    atom.setProp(internKey(propName), static_cast<bool>(prop.second->at(i)));
   }
 }
 

@@ -3715,7 +3715,7 @@ void test38AddRecursiveQueriesToReaction() {
 
     smi = "[C:1](=[O:2])";
     mol = SmartsToMol(smi);
-    mol->getAtomWithIdx(0)->setProp("replaceme", "foo");
+    mol->getAtomWithIdx(0)->setProp(internKey("replaceme"), "foo");
     TEST_ASSERT(mol);
     rxn.addReactantTemplate(ROMOL_SPTR(mol));
     TEST_ASSERT(rxn.getNumReactantTemplates() == 1);
@@ -3766,7 +3766,7 @@ void test38AddRecursiveQueriesToReaction() {
 
     smi = "[C:1](=[O:2])";
     mol = SmartsToMol(smi);
-    mol->getAtomWithIdx(0)->setProp("replaceme", "foo");
+    mol->getAtomWithIdx(0)->setProp(internKey("replaceme"), "foo");
     TEST_ASSERT(mol);
     rxn.addReactantTemplate(ROMOL_SPTR(mol));
     TEST_ASSERT(rxn.getNumReactantTemplates() == 1);
@@ -3809,7 +3809,7 @@ void test38AddRecursiveQueriesToReaction() {
 
     smi = "[C:1](=[O:2])";
     mol = SmartsToMol(smi);
-    mol->getAtomWithIdx(0)->setProp("replaceme", "foo");
+    mol->getAtomWithIdx(0)->setProp(internKey("replaceme"), "foo");
     TEST_ASSERT(mol);
     rxn.addReactantTemplate(ROMOL_SPTR(mol));
     TEST_ASSERT(rxn.getNumReactantTemplates() == 2);
@@ -6697,17 +6697,17 @@ void testReactionProperties() {
 
     ChemicalReaction *rxn = RxnSmartsToChemicalReaction(smarts);
     TEST_ASSERT(rxn);
-    TEST_ASSERT(!rxn->hasProp("fooprop"));
-    rxn->setProp("fooprop", 3);
-    TEST_ASSERT(rxn->hasProp("fooprop"));
-    TEST_ASSERT(rxn->getProp<int>("fooprop") == 3);
+    TEST_ASSERT(!rxn->hasProp(internKey("fooprop")));
+    rxn->setProp(internKey("fooprop"), 3);
+    TEST_ASSERT(rxn->hasProp(internKey("fooprop")));
+    TEST_ASSERT(rxn->getProp<int>(internKey("fooprop")) == 3);
 
     {
       std::string pkl;
       ReactionPickler::pickleReaction(rxn, pkl);
       auto *lrxn = new ChemicalReaction();
       ReactionPickler::reactionFromPickle(pkl, lrxn);
-      TEST_ASSERT(!lrxn->hasProp("fooprop"));
+      TEST_ASSERT(!lrxn->hasProp(internKey("fooprop")));
       delete lrxn;
     }
 
@@ -6716,8 +6716,8 @@ void testReactionProperties() {
       ReactionPickler::pickleReaction(rxn, pkl, PicklerOps::AllProps);
       auto *lrxn = new ChemicalReaction();
       ReactionPickler::reactionFromPickle(pkl, lrxn);
-      TEST_ASSERT(lrxn->hasProp("fooprop"));
-      TEST_ASSERT(lrxn->getProp<int>("fooprop") == 3);
+      TEST_ASSERT(lrxn->hasProp(internKey("fooprop")));
+      TEST_ASSERT(lrxn->getProp<int>(internKey("fooprop")) == 3);
       delete lrxn;
     }
     delete rxn;
@@ -6912,14 +6912,12 @@ void testGithub1269() {
     TEST_ASSERT(prods[0][0]->getAtomWithIdx(0)->getAtomicNum() == 8);
     TEST_ASSERT(prods[0][0]->getAtomWithIdx(0)->hasProp(
         common_properties::reactantAtomIdx));
-    TEST_ASSERT(prods[0][0]->getAtomWithIdx(0)->getProp<unsigned int>(
-                    "react_atom_idx") == 1);
+    TEST_ASSERT(prods[0][0]->getAtomWithIdx(0)->getProp<unsigned int>(common_properties::reactantAtomIdx) == 1);
     TEST_ASSERT(!prods[0][0]->getAtomWithIdx(1)->hasProp(
         common_properties::reactantAtomIdx));
     TEST_ASSERT(prods[0][0]->getAtomWithIdx(2)->hasProp(
         common_properties::reactantAtomIdx));
-    TEST_ASSERT(prods[0][0]->getAtomWithIdx(2)->getProp<unsigned int>(
-                    "react_atom_idx") == 0);
+    TEST_ASSERT(prods[0][0]->getAtomWithIdx(2)->getProp<unsigned int>(common_properties::reactantAtomIdx) == 0);
 
     delete rxn;
   }
@@ -7190,7 +7188,7 @@ void testOtherBondStereo() {
         TEST_ASSERT(Bond::BondStereo::STEREONONE == bond->getStereo());
 
         // Make sure the temporary mark set in the reaction has been removed.
-        TEST_ASSERT(!bond->hasProp("_UnknownStereoRxnBond"));
+        TEST_ASSERT(!bond->hasProp(common_properties::_UnknownStereoRxnBond));
 
         if (bond->getIdx() == 1) {
           TEST_ASSERT(Bond::BondType::DOUBLE == bond->getBondType());
@@ -7533,7 +7531,7 @@ void testGithub3078() {
   TEST_ASSERT(bond->getStereo() == Bond::STEREONONE);
 
   // Make sure the temporary mark set in the reaction has been removed.
-  TEST_ASSERT(!bond->hasProp("_UnknownStereoRxnBond"));
+  TEST_ASSERT(!bond->hasProp(common_properties::_UnknownStereoRxnBond));
 }
 
 void testGithub4162() {
@@ -7571,7 +7569,7 @@ void testGithub4114() {
   // as EITHERDOUBLE
   for (unsigned int i = 0; i < mol[0]->getNumBonds(); ++i) {
     auto bnd = mol[0]->getBondWithIdx(i);
-    bnd->setProp(DUMMY_PROP, i);
+    bnd->setProp(internKey(DUMMY_PROP), i);
 
     if (i >= 3 && i <= 6) {
       TEST_ASSERT(bnd->getBondType() == Bond::DOUBLE);
@@ -7599,10 +7597,10 @@ void testGithub4114() {
     // Bonds > 4 are reactant bonds, and should keep their properties.
     auto rBndIdx = rBnd->getIdx();
     if (rBndIdx == 0 || rBndIdx == 1 || rBndIdx == 4) {
-      TEST_ASSERT(!pBnd->hasProp(DUMMY_PROP));
+      TEST_ASSERT(!pBnd->hasProp(internKey(DUMMY_PROP)));
     } else {
       unsigned int dummy_prop;
-      TEST_ASSERT(pBnd->getPropIfPresent(DUMMY_PROP, dummy_prop));
+      TEST_ASSERT(pBnd->getPropIfPresent(internKey(DUMMY_PROP), dummy_prop));
       TEST_ASSERT(dummy_prop == rBndIdx);
     }
 

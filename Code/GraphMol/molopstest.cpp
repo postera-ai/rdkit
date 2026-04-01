@@ -5545,14 +5545,14 @@ TEST_CASE("Testing adjustQueryProperties()") {
   {  // dummies from SMILES 2
     std::string smiles = "C1CCC1[*:1]";
     ROMol *qm = SmilesToMol(smiles);
-    qm->getAtomWithIdx(4)->setProp<int>("foo", 2);
+    qm->getAtomWithIdx(4)->setProp<int>(internKey("foo"), 2);
 
     REQUIRE(qm);
     REQUIRE(qm->getNumAtoms() == 5);
     ROMol *aqm = MolOps::adjustQueryProperties(*qm);
     REQUIRE(aqm);
     REQUIRE(aqm->getNumAtoms() == 5);
-    REQUIRE(aqm->getAtomWithIdx(4)->getProp<int>("foo") == 2);
+    REQUIRE(aqm->getAtomWithIdx(4)->getProp<int>(internKey("foo")) == 2);
     REQUIRE(aqm->getAtomWithIdx(4)->getAtomMapNum() == 1);
     {
       smiles = "C1CCC1CC";

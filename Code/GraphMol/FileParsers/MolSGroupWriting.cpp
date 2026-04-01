@@ -29,7 +29,7 @@ std::string BuildV2000STYLines(const ROMol &mol) {
   const auto &sgroups = getSubstanceGroups(mol);
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
-         << FormatV2000StringField(sg->getProp<std::string>("TYPE"), 3, true,
+         << FormatV2000StringField(sg->getProp<std::string>(common_properties::sgTYPE), 3, true,
                                    true);
     if (++count == 8) {
       ret << "M  STY" << FormatV2000NumEntriesField(8) << temp.str() << "\n";
@@ -46,7 +46,7 @@ std::string BuildV2000STYLines(const ROMol &mol) {
 
 std::string BuildV2000StringPropLines(const unsigned int entriesPerLine,
                                       const ROMol &mol,
-                                      const std::string &propName,
+                                      DictKey propName,
                                       const std::string &propCode,
                                       const unsigned int fieldWitdh) {
   std::ostringstream ret;
@@ -56,7 +56,6 @@ std::string BuildV2000StringPropLines(const unsigned int entriesPerLine,
   const auto &sgroups = getSubstanceGroups(mol);
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     std::string propValue;
-    // Write field only if defined
     if (sg->getPropIfPresent(propName, propValue)) {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
            << FormatV2000StringField(propValue, fieldWitdh, true, true);
@@ -85,7 +84,7 @@ std::string BuildV2000SLBLines(const ROMol &mol) {
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     unsigned int id;
     // Write value if assigned, else 0
-    if (sg->getPropIfPresent("ID", id)) {
+    if (sg->getPropIfPresent(common_properties::sgID, id)) {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
            << FormatV2000IntField(id);
       if (++count == 8) {
@@ -111,7 +110,7 @@ std::string BuildV2000SDSLines(const ROMol &mol) {
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     // Write field only if defined
     std::string eState;
-    if (sg->getPropIfPresent("ESTATE", eState) && eState == "E") {
+    if (sg->getPropIfPresent(common_properties::sgESTATE, eState) && eState == "E") {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()));
       if (++count == 15) {
         ret << "M  SDS EXP" << FormatV2000NumEntriesField(15) << temp.str()
@@ -138,7 +137,7 @@ std::string BuildV2000SPLLines(const ROMol &mol) {
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     // Write field only if a parent is defined
     unsigned int parentIdx = -1;
-    if (sg->getPropIfPresent("PARENT", parentIdx)) {
+    if (sg->getPropIfPresent(common_properties::sgPARENT, parentIdx)) {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
            << FormatV2000IntField(parentIdx);
       if (++count == 8) {
@@ -164,7 +163,7 @@ std::string BuildV2000SNCLines(const ROMol &mol) {
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     unsigned int compno;
     // Write field only if compno is set
-    if (sg->getPropIfPresent("COMPNO", compno)) {
+    if (sg->getPropIfPresent(common_properties::sgCOMPNO, compno)) {
       temp << FormatV2000IntField(1 + (sg - sgroups.begin()))
            << FormatV2000IntField(compno);
       if (++count == 8) {
@@ -189,7 +188,7 @@ std::string BuildV2000SBTLines(const ROMol &mol) {
   const auto &sgroups = getSubstanceGroups(mol);
   for (auto sg = sgroups.begin(); sg != sgroups.end(); ++sg) {
     std::string bracketType;
-    if (sg->getPropIfPresent("BRKTYP", bracketType)) {
+    if (sg->getPropIfPresent(common_properties::sgBRKTYP, bracketType)) {
       unsigned int idx = 1 + (sg - sgroups.begin());
       if (bracketType == "BRACKET") {
         temp << FormatV2000IntField(idx) << FormatV2000IntField(0);
@@ -244,9 +243,9 @@ std::string BuildV2000SMTLine(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   std::string smtValue;
-  if ((sgroup.getProp<std::string>("TYPE") == "MUL" &&
-       sgroup.getPropIfPresent("MULT", smtValue)) ||
-      sgroup.getPropIfPresent("LABEL", smtValue)) {
+  if ((sgroup.getProp<std::string>(common_properties::sgTYPE) == "MUL" &&
+       sgroup.getPropIfPresent(common_properties::sgMULT, smtValue)) ||
+      sgroup.getPropIfPresent(common_properties::sgLABEL, smtValue)) {
     ret << "M  SMT" << FormatV2000IntField(idx)
         << FormatV2000StringField(smtValue, 69, false, true) << "\n";
   }
@@ -278,7 +277,7 @@ std::string BuildV2000SBVLine(const int idx, const SubstanceGroup &sgroup) {
   for (const auto &cstate : sgroup.getCStates()) {
     ret << "M  SBV" << FormatV2000IntField(idx)
         << FormatV2000IntField(cstate.bondIdx + 1);
-    if (sgroup.getProp<std::string>("TYPE") == "SUP") {
+    if (sgroup.getProp<std::string>(common_properties::sgTYPE) == "SUP") {
       ret << FormatV2000DoubleField(cstate.vector.x);
       ret << FormatV2000DoubleField(cstate.vector.y);
     }
@@ -292,24 +291,24 @@ std::string BuildV2000SDTLine(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   std::string sdtValue;
-  if (sgroup.getPropIfPresent("FIELDNAME", sdtValue)) {
+  if (sgroup.getPropIfPresent(common_properties::sgFIELDNAME, sdtValue)) {
     ret << "M  SDT" << FormatV2000IntField(idx);
     ret << FormatV2000StringField(sdtValue, 30, true, true);
 
-    if (sgroup.getPropIfPresent("FIELDTYPE", sdtValue)) {
+    if (sgroup.getPropIfPresent(common_properties::sgFIELDTYPE, sdtValue)) {
       ret << FormatV2000StringField(sdtValue, 2, true, false);
     } else {
       ret << " T";
     }
 
-    if (sgroup.getPropIfPresent("FIELDINFO", sdtValue)) {
+    if (sgroup.getPropIfPresent(common_properties::sgFIELDINFO, sdtValue)) {
       ret << FormatV2000StringField(sdtValue, 20, true, false);
     }
 
-    if (sgroup.getPropIfPresent("QUERYTYPE", sdtValue)) {
+    if (sgroup.getPropIfPresent(common_properties::sgQUERYTYPE, sdtValue)) {
       ret << FormatV2000StringField(sdtValue, 2, true, false);
     }
-    if (sgroup.getPropIfPresent("QUERYOP", sdtValue)) {
+    if (sgroup.getPropIfPresent(common_properties::sgQUERYOP, sdtValue)) {
       ret << FormatV2000StringField(sdtValue, 15, true, false);
     }
 
@@ -322,7 +321,7 @@ std::string BuildV2000SDDLine(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   std::string sddValue;
-  if (sgroup.getPropIfPresent("FIELDDISP", sddValue)) {
+  if (sgroup.getPropIfPresent(common_properties::sgFIELDDISP, sddValue)) {
     ret << "M  SDD" << FormatV2000IntField(idx);
     ret << FormatV2000StringField(sddValue, 69, false, true);
     ret << "\n";
@@ -335,7 +334,7 @@ std::string BuildV2000SCDSEDLines(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   STR_VECT dataFields;
-  if (sgroup.getPropIfPresent("DATAFIELDS", dataFields)) {
+  if (sgroup.getPropIfPresent(common_properties::sgDATAFIELDS, dataFields)) {
     for (const auto &data : dataFields) {
       unsigned int length = data.size();
       if (length > 200) {
@@ -394,7 +393,7 @@ std::string BuildV2000SCLLine(const int idx, const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   std::string sclValue;
-  if (sgroup.getPropIfPresent("CLASS", sclValue)) {
+  if (sgroup.getPropIfPresent(common_properties::sgCLASS, sclValue)) {
     ret << "M  SCL" << FormatV2000IntField(idx);
     ret << FormatV2000StringField(sclValue, 69, false, true);
     ret << "\n";
@@ -409,8 +408,8 @@ const std::string GetMolFileSGroupInfo(const RWMol &mol) {
   // multiple group per line properties
   ret << BuildV2000STYLines(mol);
   ret << BuildV2000SLBLines(mol);
-  ret << BuildV2000StringPropLines(8, mol, "SUBTYPE", "SST", 3);
-  ret << BuildV2000StringPropLines(8, mol, "CONNECT", "SCN", 3);
+  ret << BuildV2000StringPropLines(8, mol, common_properties::sgSUBTYPE, "SST", 3);
+  ret << BuildV2000StringPropLines(8, mol, common_properties::sgCONNECT, "SCN", 3);
   ret << BuildV2000SDSLines(mol);
   ret << BuildV2000SPLLines(mol);
   ret << BuildV2000SNCLines(mol);
@@ -482,26 +481,26 @@ std::string BuildV3000BondsBlock(const SubstanceGroup &sgroup) {
   ret << BuildV3000IdxVectorDataBlock("XBONDS", bonds.begin(), first_cbond);
   ret << BuildV3000IdxVectorDataBlock("CBONDS", first_cbond, bonds.end());
 
-  if (sgroup.hasProp("XBHEAD")) {
-    auto v = sgroup.getProp<std::vector<unsigned int>>("XBHEAD");
+  if (sgroup.hasProp(common_properties::sgXBHEAD)) {
+    auto v = sgroup.getProp<std::vector<unsigned int>>(common_properties::sgXBHEAD);
     ret << BuildV3000IdxVectorDataBlock("XBHEAD", v.begin(), v.end());
   }
-  if (sgroup.hasProp("XBCORR")) {
-    auto v = sgroup.getProp<std::vector<unsigned int>>("XBCORR");
+  if (sgroup.hasProp(common_properties::sgXBCORR)) {
+    auto v = sgroup.getProp<std::vector<unsigned int>>(common_properties::sgXBCORR);
     ret << BuildV3000IdxVectorDataBlock("XBCORR", v.begin(), v.end());
   }
 
   return ret.str();
 }
 
-std::string FormatV3000StringPropertyBlock(const std::string &prop,
+std::string FormatV3000StringPropertyBlock(DictKey prop,
                                            const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   std::string propValue;
   if (sgroup.getPropIfPresent(prop, propValue)) {
     if (!propValue.empty()) {
-      ret << ' ' << prop << '=';
+      ret << ' ' << keyToString(prop) << '=';
       // CTAB spec says: "Strings that contain blank spaces or start with left
       // parenthesis or double quote, must be surrounded by double quotes A
       // double quote can be entered literally by doubling it."
@@ -537,7 +536,7 @@ std::string FormatV3000ParentBlock(const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   unsigned int parentIdx = -1;
-  if (sgroup.getPropIfPresent("PARENT", parentIdx)) {
+  if (sgroup.getPropIfPresent(common_properties::sgPARENT, parentIdx)) {
     ret << " PARENT=" << parentIdx;
   }
 
@@ -549,7 +548,7 @@ std::string FormatV3000CompNoBlock(const SubstanceGroup &sgroup) {
 
   unsigned int compno;
 
-  if (sgroup.getPropIfPresent("COMPNO", compno)) {
+  if (sgroup.getPropIfPresent(common_properties::sgCOMPNO, compno)) {
     ret << " COMPNO=" << compno;
   }
 
@@ -578,7 +577,7 @@ std::string FormatV3000FieldDataBlock(const SubstanceGroup &sgroup) {
   std::ostringstream ret;
 
   STR_VECT dataFields;
-  if (sgroup.getPropIfPresent("DATAFIELDS", dataFields)) {
+  if (sgroup.getPropIfPresent(common_properties::sgDATAFIELDS, dataFields)) {
     for (const auto &data : dataFields) {
       ret << " FIELDDATA=\"" << data << "\"";
     }
@@ -593,7 +592,7 @@ std::string FormatV3000CStateBlock(const SubstanceGroup &sgroup) {
   for (const auto &cstate : sgroup.getCStates()) {
     unsigned int xbondIdx = 1 + cstate.bondIdx;
     ret << " CSTATE=(";
-    if (sgroup.getProp<std::string>("TYPE") == "SUP") {
+    if (sgroup.getProp<std::string>(common_properties::sgTYPE) == "SUP") {
       ret << "4 " << xbondIdx;
       ret << ' ' << FormatV3000DoubleField(cstate.vector.x);
       ret << ' ' << FormatV3000DoubleField(cstate.vector.y);
@@ -665,10 +664,10 @@ const std::string GetV3000MolFileSGroupLines(const unsigned int idx,
   std::ostringstream os;
 
   unsigned int id = 0;
-  sgroup.getPropIfPresent("ID", id);
+  sgroup.getPropIfPresent(common_properties::sgID, id);
 
   std::string currLine = (boost::format("M  V30 %d %s %d") % idx %
-                          sgroup.getProp<std::string>("TYPE") % id)
+                          sgroup.getProp<std::string>(common_properties::sgTYPE) % id)
                              .str();
   addBlockToSGroupString(
       BuildV3000IdxVectorDataBlock("ATOMS", sgroup.getAtoms()), currLine, os);
@@ -677,39 +676,39 @@ const std::string GetV3000MolFileSGroupLines(const unsigned int idx,
   addBlockToSGroupString(
       BuildV3000IdxVectorDataBlock("PATOMS", sgroup.getParentAtoms()), currLine,
       os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("SUBTYPE", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgSUBTYPE, sgroup),
                          currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("MULT", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgMULT, sgroup),
                          currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("CONNECT", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgCONNECT, sgroup),
                          currLine, os);
   addBlockToSGroupString(FormatV3000ParentBlock(sgroup), currLine, os);
   addBlockToSGroupString(FormatV3000CompNoBlock(sgroup), currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("LABEL", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgLABEL, sgroup),
                          currLine, os);
   addBlockToSGroupString(FormatV3000BracketBlock(sgroup.getBrackets()),
                          currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("ESTATE", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgESTATE, sgroup),
                          currLine, os);
   addBlockToSGroupString(FormatV3000CStateBlock(sgroup), currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("FIELDNAME", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgFIELDNAME, sgroup),
                          currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("FIELDINFO", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgFIELDINFO, sgroup),
                          currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("FIELDDISP", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgFIELDDISP, sgroup),
                          currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("QUERYTYPE", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgQUERYTYPE, sgroup),
                          currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("QUERYOP", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgQUERYOP, sgroup),
                          currLine, os);
   addBlockToSGroupString(FormatV3000FieldDataBlock(sgroup), currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("CLASS", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgCLASS, sgroup),
                          currLine, os);
   addBlockToSGroupString(FormatV3000AttachPointBlock(sgroup.getAttachPoints()),
                          currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("BRKTYP", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgBRKTYP, sgroup),
                          currLine, os);
-  addBlockToSGroupString(FormatV3000StringPropertyBlock("SEQID", sgroup),
+  addBlockToSGroupString(FormatV3000StringPropertyBlock(common_properties::sgSEQID, sgroup),
                          currLine, os);
   std::string res;
   if (!currLine.empty() && currLine != "M  V30") {

@@ -26,10 +26,14 @@ bool getMoments(const ROMol &mol, int confId, bool useAtomicMasses, double &pm1,
   const char *pn2 = useAtomicMasses ? "_PMI2_mass" : "_PMI2";
   const char *pn3 = useAtomicMasses ? "_PMI3_mass" : "_PMI3";
 
-  if (!force && mol.hasProp(pn1) && mol.hasProp(pn2) && mol.hasProp(pn3)) {
-    mol.getProp(pn1, pm1);
-    mol.getProp(pn2, pm2);
-    mol.getProp(pn3, pm3);
+  auto kn1 = internKey(pn1);
+  auto kn2 = internKey(pn2);
+  auto kn3 = internKey(pn3);
+
+  if (!force && mol.hasProp(kn1) && mol.hasProp(kn2) && mol.hasProp(kn3)) {
+    mol.getProp(kn1, pm1);
+    mol.getProp(kn2, pm2);
+    mol.getProp(kn3, pm3);
     return true;
   }
 
@@ -56,9 +60,9 @@ bool getMoments(const ROMol &mol, int confId, bool useAtomicMasses, double &pm1,
     pm1 = moments(0);
     pm2 = moments(1);
     pm3 = moments(2);
-    mol.setProp(pn1, pm1, true);
-    mol.setProp(pn2, pm2, true);
-    mol.setProp(pn3, pm3, true);
+    mol.setProp(kn1, pm1, true);
+    mol.setProp(kn2, pm2, true);
+    mol.setProp(kn3, pm3, true);
   }
   return res;
 }
@@ -69,10 +73,14 @@ bool getMomentsFromGyration(const ROMol &mol, int confId, bool useAtomicMasses,
   const char *pn2 = useAtomicMasses ? "_PMI2_mass_cov" : "_PMI2_cov";
   const char *pn3 = useAtomicMasses ? "_PMI3_mass_cov" : "_PMI3_cov";
 
-  if (!force && mol.hasProp(pn1) && mol.hasProp(pn2) && mol.hasProp(pn3)) {
-    mol.getProp(pn1, pm1);
-    mol.getProp(pn2, pm2);
-    mol.getProp(pn3, pm3);
+  auto kn1 = internKey(pn1);
+  auto kn2 = internKey(pn2);
+  auto kn3 = internKey(pn3);
+
+  if (!force && mol.hasProp(kn1) && mol.hasProp(kn2) && mol.hasProp(kn3)) {
+    mol.getProp(kn1, pm1);
+    mol.getProp(kn2, pm2);
+    mol.getProp(kn3, pm3);
     return true;
   }
 
@@ -99,9 +107,9 @@ bool getMomentsFromGyration(const ROMol &mol, int confId, bool useAtomicMasses,
     pm1 = moments(0);
     pm2 = moments(1);
     pm3 = moments(2);
-    mol.setProp(pn1, pm1, true);
-    mol.setProp(pn2, pm2, true);
-    mol.setProp(pn3, pm3, true);
+    mol.setProp(kn1, pm1, true);
+    mol.setProp(kn2, pm2, true);
+    mol.setProp(kn3, pm3, true);
   }
   return res;
 }

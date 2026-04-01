@@ -1595,7 +1595,7 @@ void testGithub774() {
       TEST_ASSERT(feq(acoords.y, 2.0));
       check_file_hash(nameBase + ".svg");
     }
-    // m->setProp("_Name","mol");
+    // m->setProp(common_properties::_Name,"mol");
     // std::cerr<<MolToMolBlock(*m)<<std::endl;
     delete m;
   }
@@ -1627,7 +1627,7 @@ void testGithub774() {
       outs.close();
       check_file_hash(nameBase + ".svg");
     }
-    // m->setProp("_Name","mol");\home\tad\cdd\cdd_rdkit\pr_atropisomers2\rdkit\Code\GraphMol\MolDraw2D\test1.cppChirality::
+    // m->setProp(common_properties::_Name,"mol");\home\tad\cdd\cdd_rdkit\pr_atropisomers2\rdkit\Code\GraphMol\MolDraw2D\test1.cppChirality::
     // std::cerr<<MolToMolBlock(*m)<<std::endl;
     delete m;
   }
@@ -4051,9 +4051,9 @@ void test20Annotate() {
   {
     auto m1 = "S=C1N=C(NC(CC#N)(C)C=C=C)NC2=NNN=C21"_smiles;
     auto atom = m1->getAtomWithIdx(3);
-    atom->setProp("atomNote", "foolish annotation");
+    atom->setProp(common_properties::atomNote, "foolish annotation");
     auto bond = m1->getBondWithIdx(5);
-    bond->setProp("bondNote", "way too long to be useful");
+    bond->setProp(common_properties::bondNote, "way too long to be useful");
 #ifdef RDK_BUILD_CAIRO_SUPPORT
     {
       MolDraw2DCairo drawer(300, 300);

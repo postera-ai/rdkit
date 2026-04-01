@@ -1583,7 +1583,7 @@ RDKIT_GRAPHMOL_EXPORT void canonicalizeFragment(
             }
           }
         } else if (size_t sgidx;
-                   msI.obj.atom->getPropIfPresent("_stereoGroup", sgidx) &&
+                   msI.obj.atom->getPropIfPresent(common_properties::_stereoGroup, sgidx) &&
                    mol.getStereoGroups().size() > sgidx) {
           // make sure that the reference atom in the stereogroup is CCW
           auto &sg = mol.getStereoGroups()[sgidx];
@@ -1714,7 +1714,7 @@ void canonicalizeEnhancedStereo(ROMol &mol,
     // note that we do not forward the Group Ids: this is intentional, so that
     // the Ids are reassigned based on the canonicalized order.
     if (sgAtoms.size() > 0) {
-      sgAtoms.front()->setProp("_stereoGroup", newSgs.size() - 1, true);
+      sgAtoms.front()->setProp(common_properties::_stereoGroup, newSgs.size() - 1, true);
     }
   }
   mol.setStereoGroups(newSgs);

@@ -35,7 +35,7 @@ void test1() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
     double dpbf = RDKit::Descriptors::PBF(*m);
 
     std::string inm;

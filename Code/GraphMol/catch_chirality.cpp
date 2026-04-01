@@ -2198,8 +2198,8 @@ TEST_CASE("nontetrahedral stereo from 3D", "[nontetrahedral]") {
       std::unique_ptr<ROMol> m{suppl.next()};
       REQUIRE(m);
       MolOps::assignChiralTypesFrom3D(*m);
-      auto ct = m->getProp<std::string>("ChiralType");
-      auto cp = m->getProp<unsigned>("ChiralPermutation");
+      auto ct = m->getProp<std::string>(common_properties::ChiralType);
+      auto cp = m->getProp<unsigned>(common_properties::ChiralPermutation);
       auto atom = m->getAtomWithIdx(0);
 
       if (ct == "SP") {
@@ -2225,7 +2225,7 @@ TEST_CASE("nontetrahedral stereo from 3D", "[nontetrahedral]") {
       std::unique_ptr<ROMol> m{suppl.next()};
       REQUIRE(m);
       MolOps::assignChiralTypesFrom3D(*m);
-      auto ct = m->getProp<std::string>("ChiralType");
+      auto ct = m->getProp<std::string>(common_properties::ChiralType);
       auto atom = m->getAtomWithIdx(0);
 
       if (ct == "TH") {
@@ -4958,7 +4958,7 @@ M  END
   REQUIRE(m);
   REQUIRE(m->getNumAtoms() == 4);
 
-  CHECK(m->hasProp("_needsDetectBondStereo") == false);
+  CHECK(m->hasProp(common_properties::_needsDetectBondStereo) == false);
 }
 
 TEST_CASE(
@@ -6147,8 +6147,8 @@ $$$$
       REQUIRE(mol);
       auto &sgs = mol->getStereoGroups();
       REQUIRE(sgs.size() == 1);
-      REQUIRE(mol->hasProp("StereoGroupOnAtom"));
-      auto aid = std::stoul(mol->getProp<std::string>("StereoGroupOnAtom"));
+      REQUIRE(mol->hasProp(common_properties::StereoGroupOnAtom));
+      auto aid = std::stoul(mol->getProp<std::string>(common_properties::StereoGroupOnAtom));
       CHECK(sgs[0].getAtoms().size() == 1);
       CHECK(sgs[0].getAtoms().at(0)->getIdx() == aid);
     }

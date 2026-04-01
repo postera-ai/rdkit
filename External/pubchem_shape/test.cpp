@@ -54,8 +54,8 @@ TEST_CASE("basic alignment") {
     CHECK_THAT(nbr_ct, Catch::Matchers::WithinAbs(0.303, 0.005));
   }
   SECTION("RDKit features") {
-    ref->clearProp("PUBCHEM_PHARMACOPHORE_FEATURES");
-    probe->clearProp("PUBCHEM_PHARMACOPHORE_FEATURES");
+    ref->clearProp(common_properties::PUBCHEM_PHARMACOPHORE_FEATURES);
+    probe->clearProp(common_properties::PUBCHEM_PHARMACOPHORE_FEATURES);
     std::vector<float> matrix(12, 0.0);
     auto [nbr_st, nbr_ct] =
         AlignMolecule(*ref, *probe, matrix, -1, -1, test_use_colors,
@@ -115,10 +115,10 @@ TEST_CASE("bulk") {
                       test_opt_param, test_max_preiters, test_max_postiters);
     CHECK_THAT(nbr_st,
                Catch::Matchers::WithinAbs(
-                   probe->getProp<float>("shape_align_shape_tanimoto"), 0.005));
+                   probe->getProp<float>(common_properties::shape_align_shape_tanimoto), 0.005));
     CHECK_THAT(nbr_ct,
                Catch::Matchers::WithinAbs(
-                   probe->getProp<float>("shape_align_color_tanimoto"), 0.005));
+                   probe->getProp<float>(common_properties::shape_align_color_tanimoto), 0.005));
   }
 }
 

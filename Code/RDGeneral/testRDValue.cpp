@@ -169,14 +169,14 @@ void testProp(T val) {
 
   {
     RDProps p;
-    p.setProp<T>("foo", val);
+    p.setProp<T>(internKey("foo"), val);
     TEST_ASSERT(streamWriteProps(ss, p));
   }
 
   {
     RDProps p2;
     streamReadProps(ss, p2);
-    TEST_ASSERT(p2.getProp<T>("foo") == val);
+    TEST_ASSERT(p2.getProp<T>(internKey("foo")) == val);
   }
 };
 
@@ -206,83 +206,83 @@ TEST_CASE("testPickleBinaryString") {
 
   {
     RDProps p;
-    p.setProp<std::string>("foo", str);
+    p.setProp<std::string>(internKey("foo"), str);
     REQUIRE(streamWriteProps(ss, p));
   }
 
   {
     RDProps p2;
     streamReadProps(ss, p2);
-    REQUIRE(p2.getProp<std::string>("foo") == str);
+    REQUIRE(p2.getProp<std::string>(internKey("foo")) == str);
   }
 }
 
 TEST_CASE("testIntConversions") {
   RDProps p;
-  p.setProp<int>("foo", 1);
-  p.getProp<std::int64_t>("foo");
-  p.getProp<std::int8_t>("foo");
-  p.getProp<std::int16_t>("foo");
-  p.getProp<std::uint16_t>("foo");
+  p.setProp<int>(internKey("foo"), 1);
+  p.getProp<std::int64_t>(internKey("foo"));
+  p.getProp<std::int8_t>(internKey("foo"));
+  p.getProp<std::int16_t>(internKey("foo"));
+  p.getProp<std::uint16_t>(internKey("foo"));
 
-  p.setProp<int64_t>("foo", 1);
-  p.getProp<int64_t>("foo");
+  p.setProp<int64_t>(internKey("foo"), 1);
+  p.getProp<int64_t>(internKey("foo"));
 
-  p.setProp<unsigned int>("foo", 1);
-  p.getProp<std::uint64_t>("foo");
-  p.getProp<std::uint8_t>("foo");
-  p.getProp<std::uint16_t>("foo");
+  p.setProp<unsigned int>(internKey("foo"), 1);
+  p.getProp<std::uint64_t>(internKey("foo"));
+  p.getProp<std::uint8_t>(internKey("foo"));
+  p.getProp<std::uint16_t>(internKey("foo"));
 
-  p.getProp<std::int16_t>("foo");
+  p.getProp<std::int16_t>(internKey("foo"));
 
-  p.setProp<unsigned int>("foo", 0);
-  p.getProp<std::uint8_t>("foo");
-  p.getProp<std::uint16_t>("foo");
+  p.setProp<unsigned int>(internKey("foo"), 0);
+  p.getProp<std::uint8_t>(internKey("foo"));
+  p.getProp<std::uint16_t>(internKey("foo"));
 
-  p.setProp<unsigned int>("foo", 255);
-  p.getProp<std::uint8_t>("foo");
+  p.setProp<unsigned int>(internKey("foo"), 255);
+  p.getProp<std::uint8_t>(internKey("foo"));
 
-  p.setProp<unsigned int>("foo", 65535);
-  p.getProp<std::uint16_t>("foo");
+  p.setProp<unsigned int>(internKey("foo"), 65535);
+  p.getProp<std::uint16_t>(internKey("foo"));
 
-  p.setProp<int>("foo", -128);
-  p.getProp<std::int8_t>("foo");
+  p.setProp<int>(internKey("foo"), -128);
+  p.getProp<std::int8_t>(internKey("foo"));
 
-  p.setProp<int>("foo", -32768);
-  p.getProp<std::int16_t>("foo");
+  p.setProp<int>(internKey("foo"), -32768);
+  p.getProp<std::int16_t>(internKey("foo"));
 
-  p.setProp<int>("foo", 127);
-  p.getProp<std::int8_t>("foo");
+  p.setProp<int>(internKey("foo"), 127);
+  p.getProp<std::int8_t>(internKey("foo"));
 
-  p.setProp<int>("foo", 32767);
-  p.getProp<std::int16_t>("foo");
+  p.setProp<int>(internKey("foo"), 32767);
+  p.getProp<std::int16_t>(internKey("foo"));
 
-  p.setProp<int>("foo", 32767 + 1);
-  REQUIRE_THROWS_AS(p.getProp<std::int8_t>("foo"),
+  p.setProp<int>(internKey("foo"), 32767 + 1);
+  REQUIRE_THROWS_AS(p.getProp<std::int8_t>(internKey("foo")),
                     boost::numeric::positive_overflow);
-  REQUIRE_THROWS_AS(p.getProp<std::uint8_t>("foo"),
+  REQUIRE_THROWS_AS(p.getProp<std::uint8_t>(internKey("foo")),
                     boost::numeric::positive_overflow);
-  REQUIRE_THROWS_AS(p.getProp<std::int16_t>("foo"),
+  REQUIRE_THROWS_AS(p.getProp<std::int16_t>(internKey("foo")),
                     boost::numeric::positive_overflow);
-  p.setProp<int>("foo", 65535 + 1);
-  REQUIRE_THROWS_AS(p.getProp<std::uint16_t>("foo"),
+  p.setProp<int>(internKey("foo"), 65535 + 1);
+  REQUIRE_THROWS_AS(p.getProp<std::uint16_t>(internKey("foo")),
                     boost::numeric::positive_overflow);
 
-  p.setProp<int>("foo", -1);
-  REQUIRE_THROWS_AS(p.getProp<std::uint8_t>("foo"),
+  p.setProp<int>(internKey("foo"), -1);
+  REQUIRE_THROWS_AS(p.getProp<std::uint8_t>(internKey("foo")),
                     boost::numeric::negative_overflow);
 
-  p.getProp<std::int16_t>("foo");
-  REQUIRE_THROWS_AS(p.getProp<std::uint16_t>("foo"),
+  p.getProp<std::int16_t>(internKey("foo"));
+  REQUIRE_THROWS_AS(p.getProp<std::uint16_t>(internKey("foo")),
                     boost::numeric::negative_overflow);
 }
 
 TEST_CASE("testStringToDouble") {
   RDProps p;
-  p.setProp<std::string>("foo", "123.0 ");
-  p.setProp<std::string>("bar", " 123.0 ");
-  REQUIRE(p.getProp<double>("foo") == 123.0);
-  REQUIRE(p.getProp<float>("foo") == 123.0f);
-  REQUIRE_THROWS_AS(p.getProp<double>("bar"),
+  p.setProp<std::string>(internKey("foo"), "123.0 ");
+  p.setProp<std::string>(internKey("bar"), " 123.0 ");
+  REQUIRE(p.getProp<double>(internKey("foo")) == 123.0);
+  REQUIRE(p.getProp<float>(internKey("foo")) == 123.0f);
+  REQUIRE_THROWS_AS(p.getProp<double>(internKey("bar")),
 		    std::bad_any_cast);
 }

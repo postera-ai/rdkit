@@ -134,7 +134,7 @@ TEST_CASE("Unassigned") {
   std::unordered_set<std::string> got;
   while (auto isomer = enu1.next()) {
     got.insert(MolToSmiles(*isomer));
-    CHECK(!isomer->hasProp("_MolFileChiralFlag"));
+    CHECK(!isomer->hasProp(common_properties::_MolFileChiralFlag));
   }
   CHECK(got == expected);
 
@@ -146,7 +146,7 @@ TEST_CASE("Unassigned") {
   got.clear();
   while (auto isomer = enu4.next()) {
     std::string prop;
-    CHECK(isomer->getPropIfPresent<std::string>("_MolFileChiralFlag", prop));
+    CHECK(isomer->getPropIfPresent<std::string>(common_properties::_MolFileChiralFlag, prop));
     CHECK(prop == "1");
     got.insert(MolToSmiles(*isomer));
   }
@@ -232,7 +232,7 @@ TEST_CASE("EnhancedStereo") {
   std::unordered_set<std::string> got;
   while (auto isomer = enu1.next()) {
     std::string prop;
-    CHECK(isomer->getPropIfPresent<std::string>("_MolFileChiralFlag", prop));
+    CHECK(isomer->getPropIfPresent<std::string>(common_properties::_MolFileChiralFlag, prop));
     CHECK(prop == "1");
     got.insert(MolToSmiles(*isomer));
   }
@@ -253,7 +253,7 @@ TEST_CASE("EnhancedStereo") {
   StereoisomerEnumerator enu2(*m1, opts);
   while (auto isomer = enu2.next()) {
     std::string prop;
-    CHECK(isomer->getPropIfPresent<std::string>("_MolFileChiralFlag", prop));
+    CHECK(isomer->getPropIfPresent<std::string>(common_properties::_MolFileChiralFlag, prop));
     CHECK(prop == "1");
     CHECK(got.insert(MolToSmiles(*isomer)).second);
   }
@@ -268,7 +268,7 @@ TEST_CASE("Issue 2890") {
   std::unordered_set<std::string> got;
   while (auto isomer = enu1.next()) {
     std::string prop;
-    CHECK(isomer->getPropIfPresent<std::string>("_MolFileChiralFlag", prop));
+    CHECK(isomer->getPropIfPresent<std::string>(common_properties::_MolFileChiralFlag, prop));
     CHECK(prop == "1");
     got.insert(MolToSmiles(*isomer));
   }
@@ -331,12 +331,12 @@ TEST_CASE("Issue 3505") {
   int count = 0;
   while (auto isomer = enu1.next()) {
     std::string prop;
-    CHECK(isomer->getPropIfPresent<std::string>("_MolFileChiralFlag", prop));
+    CHECK(isomer->getPropIfPresent<std::string>(common_properties::_MolFileChiralFlag, prop));
     CHECK(prop == "1");
     auto at = isomer->getAtomWithIdx(2);
     CHECK((at->getChiralTag() == Atom::ChiralType::CHI_TETRAHEDRAL_CW ||
            at->getChiralTag() == Atom::ChiralType::CHI_TETRAHEDRAL_CCW));
-    CHECK(at->hasProp("_ChiralityPossible"));
+    CHECK(at->hasProp(common_properties::_ChiralityPossible));
     ++count;
   }
   CHECK(count == 2);
@@ -353,7 +353,7 @@ TEST_CASE("Either or Double Stereo") {
   std::unordered_set<std::string> got;
   while (auto isomer = enu1.next()) {
     std::string prop;
-    CHECK(isomer->getPropIfPresent<std::string>("_MolFileChiralFlag", prop));
+    CHECK(isomer->getPropIfPresent<std::string>(common_properties::_MolFileChiralFlag, prop));
     CHECK(prop == "1");
     got.insert(MolToSmiles(*isomer));
   }
@@ -385,7 +385,7 @@ TEST_CASE("Issue 6405") {
   StereoisomerEnumerator enu1(*m1);
   while (auto isomer = enu1.next()) {
     std::string prop;
-    CHECK(isomer->getPropIfPresent<std::string>("_MolFileChiralFlag", prop));
+    CHECK(isomer->getPropIfPresent<std::string>(common_properties::_MolFileChiralFlag, prop));
     CHECK(prop == "1");
     CHECK(isomer->getStereoGroups().empty());
   }

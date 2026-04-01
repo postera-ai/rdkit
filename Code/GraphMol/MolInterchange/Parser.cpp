@@ -217,11 +217,11 @@ template <typename T>
 void parseProperties(T &obj, const bj::value &propsVal) {
   for (const auto &propVal : propsVal.as_object()) {
     if (propVal.value().is_int64()) {
-      obj.setProp(propVal.key(), static_cast<int>(propVal.value().as_int64()));
-    } else if (propVal.value().is_double()) {
-      obj.setProp(propVal.key(), propVal.value().as_double());
-    } else if (propVal.value().is_string()) {
-      obj.setProp(propVal.key(), propVal.value().as_string().data());
+      obj.setProp(internKey(std::string(propVal.key())), static_cast<int>(propVal.value().as_int64()));
+     } else if (propVal.value().is_double()) {
+       obj.setProp(internKey(std::string(propVal.key())), propVal.value().as_double());
+     } else if (propVal.value().is_string()) {
+       obj.setProp(internKey(std::string(propVal.key())), propVal.value().as_string().data());
     }
   }
 }
@@ -299,7 +299,7 @@ void readSubstanceGroups(RWMol *mol, const bj::value &sgVals) {
 
     parseProperties(sg, sgVal.at("properties"));
     std::string pval;
-    if (sg.getPropIfPresent("SUBTYPE", pval) &&
+    if (sg.getPropIfPresent(common_properties::sgSUBTYPE, pval) &&
         !SubstanceGroupChecks::isValidSubType(pval)) {
       throw FileParseException(
           (boost::format(
@@ -307,7 +307,7 @@ void readSubstanceGroups(RWMol *mol, const bj::value &sgVals) {
            pval)
               .str());
     }
-    if (sg.getPropIfPresent("CONNECT", pval) &&
+    if (sg.getPropIfPresent(common_properties::sgCONNECT, pval) &&
         !SubstanceGroupChecks::isValidConnectType(pval)) {
       throw FileParseException(
           (boost::format(

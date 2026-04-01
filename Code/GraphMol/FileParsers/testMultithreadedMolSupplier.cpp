@@ -117,7 +117,7 @@ void testSmiProperties() {
     if (mol != nullptr) {
       mol->getProp(common_properties::_Name, tempStr);
       nameVector.push_back(tempStr);
-      mol->getProp("TPSA", tempStr);
+      mol->getProp(internKey("TPSA"), tempStr);
       tpsaVector.push_back(tempStr);
     }
   }
@@ -128,7 +128,7 @@ void testSmiProperties() {
       mol->getProp(common_properties::_Name, tempStr);
       TEST_ASSERT(std::find(nameVector.begin(), nameVector.end(), tempStr) !=
                   nameVector.end());
-      mol->getProp("TPSA", tempStr);
+      mol->getProp(internKey("TPSA"), tempStr);
       TEST_ASSERT(std::find(tpsaVector.begin(), tpsaVector.end(), tempStr) !=
                   tpsaVector.end());
     }
@@ -228,9 +228,9 @@ void testSDProperties() {
       TEST_ASSERT(mol->hasProp(common_properties::_Name));
       mol->getProp(common_properties::_Name, tempStr);
       nameVector.push_back(tempStr);
-      TEST_ASSERT(mol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
-      TEST_ASSERT(mol->hasProp("CAS_RN"));
-      TEST_ASSERT(mol->hasProp("NSC"));
+      TEST_ASSERT(mol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
+      TEST_ASSERT(mol->hasProp(internKey("CAS_RN")));
+      TEST_ASSERT(mol->hasProp(internKey("NSC")));
     }
   }
 

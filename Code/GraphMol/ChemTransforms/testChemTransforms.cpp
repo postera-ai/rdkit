@@ -1337,14 +1337,14 @@ void testAddRecursiveQueries() {
     TEST_ASSERT(!mol1->getAtomWithIdx(0)->hasQuery());
     addRecursiveQueries(*mol1, mp, "replaceme");
     TEST_ASSERT(!mol1->getAtomWithIdx(0)->hasQuery());
-    mol1->getAtomWithIdx(0)->setProp("replaceme", "foo");
+    mol1->getAtomWithIdx(0)->setProp(internKey("replaceme"), "foo");
     addRecursiveQueries(*mol1, mp, "replaceme");
     TEST_ASSERT(mol1->getAtomWithIdx(0)->hasQuery());
     TEST_ASSERT(mol1->getAtomWithIdx(0)->getQuery()->getDescription() ==
                 "AtomAnd");
     TEST_ASSERT(!mol1->getAtomWithIdx(1)->hasQuery());
 
-    mol1->getAtomWithIdx(0)->setProp("replaceme", "bar");
+    mol1->getAtomWithIdx(0)->setProp(internKey("replaceme"), "bar");
     bool ok = false;
     try {
       addRecursiveQueries(*mol1, mp, "replaceme");
@@ -1366,7 +1366,7 @@ void testAddRecursiveQueries() {
 
     std::vector<std::pair<unsigned int, std::string>> labels;
 
-    mol1->getAtomWithIdx(0)->setProp("replaceme", "foo");
+    mol1->getAtomWithIdx(0)->setProp(internKey("replaceme"), "foo");
     addRecursiveQueries(*mol1, mp, "replaceme", &labels);
     TEST_ASSERT(mol1->getAtomWithIdx(0)->hasQuery());
     TEST_ASSERT(labels.size() == 1);
@@ -1389,8 +1389,8 @@ void testAddRecursiveQueries() {
 
     std::vector<std::pair<unsigned int, std::string>> labels;
 
-    mol1->getAtomWithIdx(0)->setProp("replaceme", "foo");
-    mol1->getAtomWithIdx(1)->setProp("replaceme", "bar");
+    mol1->getAtomWithIdx(0)->setProp(internKey("replaceme"), "foo");
+    mol1->getAtomWithIdx(1)->setProp(internKey("replaceme"), "bar");
     addRecursiveQueries(*mol1, mp, "replaceme", &labels);
     TEST_ASSERT(mol1->getAtomWithIdx(0)->hasQuery());
     TEST_ASSERT(mol1->getAtomWithIdx(1)->hasQuery());
@@ -1416,7 +1416,7 @@ void testAddRecursiveQueries() {
     ROMOL_SPTR q2(SmilesToMol(smi2));
     mp["bar"] = q2;
 
-    mol1->getAtomWithIdx(0)->setProp("replaceme", "foo,bar");
+    mol1->getAtomWithIdx(0)->setProp(internKey("replaceme"), "foo,bar");
     addRecursiveQueries(*mol1, mp, "replaceme");
     TEST_ASSERT(mol1->getAtomWithIdx(0)->hasQuery());
     TEST_ASSERT(!mol1->getAtomWithIdx(1)->hasQuery());
@@ -1451,7 +1451,7 @@ void testAddRecursiveQueries() {
     ROMol *mol1 = SmilesToMol(smi1);
 
     std::map<std::string, ROMOL_SPTR> mp;
-    mol1->getAtomWithIdx(0)->setProp("replaceme", "CO");
+    mol1->getAtomWithIdx(0)->setProp(internKey("replaceme"), "CO");
     addRecursiveQueries(*mol1, mp, "replaceme");
     TEST_ASSERT(mol1->getAtomWithIdx(0)->hasQuery());
     TEST_ASSERT(!mol1->getAtomWithIdx(1)->hasQuery());
@@ -2068,7 +2068,7 @@ void testGithub3206() {
     TEST_ASSERT(!mol1->getAtomWithIdx(0)->hasQuery());
     addRecursiveQueries(*mol1, mp, "replaceme");
     TEST_ASSERT(!mol1->getAtomWithIdx(0)->hasQuery());
-    mol1->getAtomWithIdx(0)->setProp("replaceme", "foo,bar,baz");
+    mol1->getAtomWithIdx(0)->setProp(internKey("replaceme"), "foo,bar,baz");
     addRecursiveQueries(*mol1, mp, "replaceme");
     TEST_ASSERT(mol1->getAtomWithIdx(0)->hasQuery());
     TEST_ASSERT(mol1->getAtomWithIdx(0)->getQuery()->getDescription() ==

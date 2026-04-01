@@ -50,20 +50,20 @@ void setQuery(QueryAtom *self, const QueryAtom *other) {
 template <class T>
 void AtomSetProp(const Atom *atom, const std::string &key, const T &val) {
   // std::cerr<<"asp: "<<atom<<" " << key<<" - " << val << std::endl;
-  atom->setProp<T>(key, val);
+  atom->setProp<T>(internKey(key), val);
 }
 
 int AtomHasProp(const Atom *atom, const std::string &key) {
   // std::cerr<<"ahp: "<<atom<<" " << key<< std::endl;
-  int res = atom->hasProp(key);
+  int res = atom->hasProp(internKey(key));
   return res;
 }
 
 void AtomClearProp(const Atom *atom, const std::string &key) {
-  if (!atom->hasProp(key)) {
+  if (!atom->hasProp(internKey(key))) {
     return;
   }
-  atom->clearProp(key);
+  atom->clearProp(internKey(key));
 }
 
 python::tuple AtomGetNeighbors(Atom *atom) {

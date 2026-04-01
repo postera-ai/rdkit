@@ -85,14 +85,14 @@ void test2() {
     TEST_ASSERT(m.get());
     std::vector<double> bcuts = Descriptors::BCUT2D(*m);
     TEST_ASSERT(bcuts.size() == 8);
-    TEST_ASSERT(feq(bcuts[0], m->getProp<double>("bcut1")));
-    TEST_ASSERT(feq(bcuts[1], m->getProp<double>("bcut2")));
-    TEST_ASSERT(feq(bcuts[2], m->getProp<double>("bcut3")));
-    TEST_ASSERT(feq(bcuts[3], m->getProp<double>("bcut4")));
-    TEST_ASSERT(feq(bcuts[4], m->getProp<double>("bcut5")));
-    TEST_ASSERT(feq(bcuts[5], m->getProp<double>("bcut6")));
-    TEST_ASSERT(feq(bcuts[6], m->getProp<double>("bcut7")));
-    TEST_ASSERT(feq(bcuts[7], m->getProp<double>("bcut8")));
+    TEST_ASSERT(feq(bcuts[0], m->getProp<double>(internKey("bcut1"))));
+    TEST_ASSERT(feq(bcuts[1], m->getProp<double>(internKey("bcut2"))));
+    TEST_ASSERT(feq(bcuts[2], m->getProp<double>(internKey("bcut3"))));
+    TEST_ASSERT(feq(bcuts[3], m->getProp<double>(internKey("bcut4"))));
+    TEST_ASSERT(feq(bcuts[4], m->getProp<double>(internKey("bcut5"))));
+    TEST_ASSERT(feq(bcuts[5], m->getProp<double>(internKey("bcut6"))));
+    TEST_ASSERT(feq(bcuts[6], m->getProp<double>(internKey("bcut7"))));
+    TEST_ASSERT(feq(bcuts[7], m->getProp<double>(internKey("bcut8"))));
   }
 }
 

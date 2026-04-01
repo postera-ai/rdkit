@@ -171,7 +171,7 @@ void parseTemplateLine(RWMol *templateMol, std::string lineStr,
       attrValue = getToken(linePtr, ' ');
     }
 
-    templateMol->setProp(attrName, attrValue);
+    templateMol->setProp(internKey(attrName), attrValue);
   }
 
   if (*linePtr != '\0') {
@@ -340,8 +340,8 @@ static std::unique_ptr<SCSRMol> SCSRMolFromSCSRDataStream(
 
             const RDKit::SubstanceGroup *mainSUP = nullptr;
             for (auto &sgroup : RDKit::getSubstanceGroups(*templateMol)) {
-              if (sgroup.getProp<std::string>("TYPE") == "SUP" &&
-                  sgroup.getProp<std::string>("CLASS") == atomClass) {
+              if (sgroup.getProp<std::string>(common_properties::sgTYPE) == "SUP" &&
+                  sgroup.getProp<std::string>(common_properties::sgCLASS) == atomClass) {
                 mainSUP = &sgroup;
                 break;
               }
@@ -581,7 +581,7 @@ class MolFromSCSRMolConverter {
     const std::string typ = "SUP";
     newSgroups.emplace_back(new SubstanceGroup((ROMol *)resMol.get(), typ));
     auto newSgroup = newSgroups.back().get();
-    newSgroup->setProp("LABEL", sgroupName);
+    newSgroup->setProp(common_properties::sgLABEL, sgroupName);
 
     // copy the atoms of the sgroup into the new molecule
 
@@ -1080,9 +1080,9 @@ class MolFromSCSRMolConverter {
         for (auto &sgroupToTest : RDKit::getSubstanceGroups(*templateMol)) {
           std::string sup;
           std::string sgroupAtomClass;
-          if (sgroupToTest.getPropIfPresent<std::string>("TYPE", sup) &&
+          if (sgroupToTest.getPropIfPresent<std::string>(common_properties::sgTYPE, sup) &&
               sup == "SUP" &&
-              sgroupToTest.getPropIfPresent<std::string>("CLASS",
+              sgroupToTest.getPropIfPresent<std::string>(common_properties::sgCLASS,
                                                          sgroupAtomClass) &&
               sgroupAtomClass == atomClass) {
             sgroup = &sgroupToTest;
@@ -1140,9 +1140,9 @@ class MolFromSCSRMolConverter {
               for (auto lgSgroup : getSubstanceGroups(*templateMol)) {
                 std::string lgSup;
                 std::string lgSgroupAtomClass;
-                if (lgSgroup.getPropIfPresent<std::string>("TYPE", lgSup) &&
+                if (lgSgroup.getPropIfPresent<std::string>(common_properties::sgTYPE, lgSup) &&
                     lgSup == "SUP" &&
-                    lgSgroup.getPropIfPresent<std::string>("CLASS",
+                    lgSgroup.getPropIfPresent<std::string>(common_properties::sgCLASS,
                                                            lgSgroupAtomClass) &&
                     lgSgroupAtomClass == "LGRP") {
                   auto lgSgroupAtoms = lgSgroup.getAtoms();
@@ -1267,8 +1267,8 @@ class MolFromSCSRMolConverter {
 
     for (auto &prop : mol->getPropList(false, false)) {
       std::string propVal;
-      if (mol->getPropIfPresent(prop, propVal)) {
-        resMol->setProp(prop, propVal);
+      if (mol->getPropIfPresent(internKey(prop), propVal)) {
+        resMol->setProp(internKey(prop), propVal);
       }
     }
 

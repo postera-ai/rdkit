@@ -245,10 +245,11 @@ void addBond(const Bond &bond, bj::object &bjBond, const bj::object &bjDefaults,
 template <typename T>
 void addProperties(const T &obj, const std::vector<std::string> &propNames,
                    bj::object &properties) {
-  const auto &rd_dict = obj.getDict();
+  const auto rd_data = obj.getDict().getData();
 
-  for (const auto &rdvalue : rd_dict) {
-    if (std::find(propNames.begin(), propNames.end(), rdvalue.key) ==
+  for (const auto &rdvalue : rd_data) {
+    const auto &keyStr = rdvalue.key;
+    if (std::find(propNames.begin(), propNames.end(), keyStr) ==
         propNames.end()) {
       continue;
     }
@@ -256,18 +257,18 @@ void addProperties(const T &obj, const std::vector<std::string> &propNames,
     switch (tag) {
       case RDTypeTag::IntTag:
       case RDTypeTag::UnsignedIntTag:
-        properties[rdvalue.key] = from_rdvalue<int>(rdvalue.val);
+        properties[keyStr] = from_rdvalue<int>(rdvalue.val);
         break;
       case RDTypeTag::DoubleTag:
       case RDTypeTag::FloatTag:
-        properties[rdvalue.key] = from_rdvalue<double>(rdvalue.val);
+        properties[keyStr] = from_rdvalue<double>(rdvalue.val);
         break;
       default:
         try {
-          properties[rdvalue.key] = from_rdvalue<std::string>(rdvalue.val);
+          properties[keyStr] = from_rdvalue<std::string>(rdvalue.val);
         } catch (const std::bad_any_cast &) {
           BOOST_LOG(rdWarningLog)
-              << "Warning: Could not convert property " << rdvalue.key
+              << "Warning: Could not convert property " << keyStr
               << " to a recognized type. Skipping it." << std::endl;
         }
         break;
@@ -326,7 +327,7 @@ void addSubstanceGroup(const SubstanceGroup &sg, bj::object &bjSG) {
     for (const auto &cs : sg.getCStates()) {
       bj::object bjCS;
       bjCS["bond"] = cs.bondIdx;
-      if ("SUP" == sg.getProp<std::string>("TYPE")) {
+      if ("SUP" == sg.getProp<std::string>(common_properties::sgTYPE)) {
         bj::array bjLoc;
         bjLoc.push_back(cs.vector.x);
         bjLoc.push_back(cs.vector.y);

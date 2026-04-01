@@ -181,8 +181,8 @@ double *getDistanceMat(const ROMol &mol, bool useBO, bool useAtomWts,
   if (useAtomWts) {
     propName += "AtomWts";
   }
-  if (!force && mol.hasProp(propName)) {
-    mol.getProp(propName, sptr);
+  if (!force && mol.hasProp(internKey(propName))) {
+    mol.getProp(internKey(propName), sptr);
     return sptr.get();
   }
   int nAts = mol.getNumAtoms();
@@ -228,9 +228,9 @@ double *getDistanceMat(const ROMol &mol, bool useBO, bool useAtomWts,
     }
   }
   sptr.reset(dMat);
-  mol.setProp(propName, sptr, true);
+  mol.setProp(internKey(propName), sptr, true);
   boost::shared_array<int> iSptr(pathMat);
-  mol.setProp(propName + "_Paths", iSptr, true);
+  mol.setProp(internKey(propName + "_Paths"), iSptr, true);
 
   return dMat;
 };
@@ -300,8 +300,8 @@ double *getAdjacencyMatrix(const ROMol &mol, bool useBO, int emptyVal,
   if (useBO) {
     propName += "BO";
   }
-  if (!force && mol.hasProp(propName)) {
-    mol.getProp(propName, sptr);
+  if (!force && mol.hasProp(internKey(propName))) {
+    mol.getProp(internKey(propName), sptr);
     return sptr.get();
   }
 
@@ -329,7 +329,7 @@ double *getAdjacencyMatrix(const ROMol &mol, bool useBO, int emptyVal,
     }
   }
   sptr.reset(res);
-  mol.setProp(propName, sptr, true);
+  mol.setProp(internKey(propName), sptr, true);
 
   return res;
 };
@@ -404,8 +404,8 @@ double *get3DDistanceMat(const ROMol &mol, int confId, bool useAtomWts,
     if (useAtomWts) {
       propName += "_AtomWeights";
     }
-    if (!force && mol.hasProp(propName)) {
-      mol.getProp(propName, sptr);
+    if (!force && mol.hasProp(internKey(propName))) {
+      mol.getProp(internKey(propName), sptr);
       return sptr.get();
     }
   }
@@ -428,7 +428,7 @@ double *get3DDistanceMat(const ROMol &mol, int confId, bool useAtomWts,
 
   if (propName != "") {
     sptr.reset(dMat);
-    mol.setProp(propName, sptr, true);
+    mol.setProp(internKey(propName), sptr, true);
   }
   return dMat;
 }

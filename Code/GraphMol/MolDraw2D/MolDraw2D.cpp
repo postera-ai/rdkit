@@ -1207,7 +1207,7 @@ void MolDraw2D::findReactionHighlights(
       auto fragMol = rxn.getReactants()[midx].get();
       for (auto &atom : fragMol->atoms()) {
         int atomRole = -1;
-        if (atom->getPropIfPresent("molRxnRole", atomRole) && atomRole == 1 &&
+        if (atom->getPropIfPresent(common_properties::molRxnRole, atomRole) && atomRole == 1 &&
             atom->getAtomMapNum()) {
           atomColours.insert(std::make_pair(atom->getAtomMapNum(),
                                             (*colors)[midx % colors->size()]));

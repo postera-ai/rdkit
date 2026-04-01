@@ -61,7 +61,7 @@ unsigned int get_label(const Atom *a, const MolzipParams &p) {
       break;
 
     case MolzipLabel::AtomProperty:
-      a->getPropIfPresent<unsigned int>(p.atomProperty, idx);
+      a->getPropIfPresent<unsigned int>(internKey(p.atomProperty), idx);
       break;
 
     default:
@@ -157,8 +157,8 @@ struct ZipBond {
             a && b && a_dummy && b_dummy && a_link && b_link,
             "molzip: Link Bond is missing one or more labelled atoms");
         newmol.addBond(a, b, linkerBondType);
-        a_link->setProp("__molzip_used", true);
-        b_link->setProp("__molzip_used", true);
+        a_link->setProp(common_properties::__molzip_used, true);
+        b_link->setProp(common_properties::__molzip_used, true);
       } else {
         auto bnd = newmol.getBondBetweenAtoms(a->getIdx(), a_dummy->getIdx());
         CHECK_INVARIANT(
@@ -236,8 +236,8 @@ struct ZipBond {
         newmol.getBondWithIdx(bnd_idx - 1)->setBondDir(bond_dir);
       }
     }
-    a_dummy->setProp("__molzip_used", true);
-    b_dummy->setProp("__molzip_used", true);
+    a_dummy->setProp(common_properties::__molzip_used, true);
+    b_dummy->setProp(common_properties::__molzip_used, true);
 
     return true;
   }
@@ -258,16 +258,15 @@ struct ZipBond {
     }
 
     // now do bond stereo
-    std::string mark = "__molzip_bond_stereo_mark";
     for (auto *bond : a->getOwningMol().bonds()) {
-      if (bond->hasProp(mark)) {
+      if (bond->hasProp(common_properties::__molzip_bond_stereo_mark)) {
         std::vector<int> atoms;
-        for (auto *atom : bond->getProp<std::vector<Atom *>>(mark)) {
+        for (auto *atom : bond->getProp<std::vector<Atom *>>(common_properties::__molzip_bond_stereo_mark)) {
           atoms.push_back(rdcast<int>(atom->getIdx()));
         }
         bond->getStereoAtoms().swap(atoms);
         bond->setStereo(
-            bond->getProp<Bond::BondStereo>("__molzip_bond_stereo"));
+            bond->getProp<Bond::BondStereo>(common_properties::__molzip_bond_stereo));
       }
     }
   }
@@ -280,22 +279,21 @@ struct ZipBond {
     if (chiral_atom->getChiralTag()) {
       std::string mark =
           "__molzip_mark_" + std::to_string(chiral_atom->getIdx());
-      chiral_atom->setProp("__molzip_chiral_mark", mark);
+      chiral_atom->setProp(common_properties::__molzip_chiral_mark, mark);
       int order = 0;
       auto &m = chiral_atom->getOwningMol();
       for (auto nbrIdx :
            boost::make_iterator_range(m.getAtomNeighbors(chiral_atom))) {
-        m[nbrIdx]->setProp(mark, order);
+        m[nbrIdx]->setProp(internKey(mark), order);
         ++order;
       }
-      new_atom->setProp(mark, dummy_atom->getProp<int>(mark));
+      new_atom->setProp(internKey(mark), dummy_atom->getProp<int>(internKey(mark)));
     }
 
     // check bond stereo
     auto &m = chiral_atom->getOwningMol();
     for (auto bond : m.atomBonds(chiral_atom)) {
       if (bond->getStereo() != Bond::BondStereo::STEREONONE) {
-        std::string mark = "__molzip_bond_stereo_mark";
         std::vector<Atom *> atoms;
         bool has_dummy = false;
         for (auto idx : bond->getStereoAtoms()) {
@@ -307,8 +305,8 @@ struct ZipBond {
           }
         }
         if (has_dummy) {
-          bond->setProp(mark, atoms);
-          bond->setProp<Bond::BondStereo>("__molzip_bond_stereo",
+          bond->setProp(common_properties::__molzip_bond_stereo_mark, atoms);
+          bond->setProp<Bond::BondStereo>(common_properties::__molzip_bond_stereo,
                                           bond->getStereo());
         }
       }
@@ -322,13 +320,13 @@ struct ZipBond {
       return;
     }
     std::string mark =
-        chiral_atom->getProp<std::string>("__molzip_chiral_mark");
+        chiral_atom->getProp<std::string>(common_properties::__molzip_chiral_mark);
     // std::vector<unsigned int> orders1;
     std::vector<unsigned int> orders2;
     auto &m = chiral_atom->getOwningMol();
     for (auto nbrIdx :
          boost::make_iterator_range(m.getAtomNeighbors(chiral_atom))) {
-      orders2.push_back(m[nbrIdx]->getProp<int>(mark));
+      orders2.push_back(m[nbrIdx]->getProp<int>(internKey(mark)));
     }
     if (num_swaps_to_interconvert(orders2) % 2 == 1) {
       chiral_atom->invertChirality();
@@ -465,8 +463,8 @@ std::unique_ptr<ROMol> molzip(
         deletions.push_back(atom);
         if (attachmentMapping) {
           if (int otherIndex, dummyIndex;
-              atom->getPropIfPresent(indexPropName, dummyIndex) &&
-              bond.b->getPropIfPresent(indexPropName, otherIndex)) {
+              atom->getPropIfPresent(common_properties::__zipIndex, dummyIndex) &&
+              bond.b->getPropIfPresent(common_properties::__zipIndex, otherIndex)) {
             (*attachmentMapping)[dummyIndex] = otherIndex;
           }
         }
@@ -576,13 +574,13 @@ std::unique_ptr<ROMol> molzip(
           mappings_by_atom[bond.a].push_back(&bond);
           if (attachmentMapping) {
             if (int otherIndex, dummyIndex;
-                bond.a_dummy->getPropIfPresent(indexPropName, dummyIndex) &&
-                bond.b->getPropIfPresent(indexPropName, otherIndex)) {
+                bond.a_dummy->getPropIfPresent(common_properties::__zipIndex, dummyIndex) &&
+                bond.b->getPropIfPresent(common_properties::__zipIndex, otherIndex)) {
               (*attachmentMapping)[dummyIndex] = otherIndex;
             }
             if (int otherIndex, dummyIndex;
-                bond.b_dummy->getPropIfPresent(indexPropName, dummyIndex) &&
-                bond.a->getPropIfPresent(indexPropName, otherIndex)) {
+                bond.b_dummy->getPropIfPresent(common_properties::__zipIndex, dummyIndex) &&
+                bond.a->getPropIfPresent(common_properties::__zipIndex, otherIndex)) {
               (*attachmentMapping)[dummyIndex] = otherIndex;
             }
           }
@@ -619,7 +617,7 @@ std::unique_ptr<ROMol> molzip(
 
   // Remove the used atoms
   for (auto &atom : deletions) {
-    if (atom->hasProp("__molzip_used")) {
+    if (atom->hasProp(common_properties::__molzip_used)) {
       newmol->removeAtom(atom);
     }
   }
@@ -638,7 +636,7 @@ std::unique_ptr<ROMol> molzip(
     auto propnames = atom->getPropList();
     for (auto &prop : propnames) {
       if (prop.find("__molzip") == 0) {
-        atom->clearProp(prop);
+        atom->clearProp(internKey(prop));
       }
     }
   }
@@ -646,7 +644,7 @@ std::unique_ptr<ROMol> molzip(
     auto propnames = bond->getPropList();
     for (auto &prop : propnames) {
       if (prop.find("__molzip") == 0) {
-        bond->clearProp(prop);
+        bond->clearProp(internKey(prop));
       }
     }
   }
@@ -672,7 +670,7 @@ std::unique_ptr<ROMol> molzip(std::vector<ROMOL_SPTR> &decomposition,
     int index = 0;
     for (const auto &mol : decomposition) {
       for (const auto atom : mol->atoms()) {
-        atom->setProp(indexPropName, index++);
+        atom->setProp(common_properties::__zipIndex, index++);
       }
     }
   }
@@ -718,8 +716,8 @@ std::unique_ptr<ROMol> molzip(std::vector<ROMOL_SPTR> &decomposition,
       const auto newConf = new Conformer(mol->getNumAtoms());
       newConf->set3D(false);
       for (const auto atom : mol->atoms()) {
-        int zippedIndex = atom->getProp<int>(indexPropName);
-        atom->clearProp(indexPropName);
+        int zippedIndex = atom->getProp<int>(common_properties::__zipIndex);
+        atom->clearProp(common_properties::__zipIndex);
         if (const auto attachment = attachmentMapping.find(zippedIndex);
             attachment != attachmentMapping.end()) {
           zippedIndex = (*attachment).second;
@@ -728,7 +726,7 @@ std::unique_ptr<ROMol> molzip(std::vector<ROMOL_SPTR> &decomposition,
         auto zippedAtom = std::find_if(
             zipppedAtoms.begin(), zipppedAtoms.end(),
             [zippedIndex](const Atom *zippedAtom) {
-              const auto index = zippedAtom->getProp<int>(indexPropName);
+              const auto index = zippedAtom->getProp<int>(common_properties::__zipIndex);
               return index == zippedIndex;
             });
 
@@ -738,7 +736,7 @@ std::unique_ptr<ROMol> molzip(std::vector<ROMOL_SPTR> &decomposition,
       mol->addConformer(newConf, true);
     }
     for (const auto atom : zippedMol->atoms()) {
-      atom->clearProp(indexPropName);
+      atom->clearProp(common_properties::__zipIndex);
     }
   }
 

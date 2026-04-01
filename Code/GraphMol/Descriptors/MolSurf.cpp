@@ -110,9 +110,9 @@ double getTPSAAtomContribs(const ROMol &mol, std::vector<double> &Vi,
       (boost::format("%s-%s") % keyToString(common_properties::_tpsaAtomContribs) %
        includeSandP)
           .str();
-  if (!force && mol.hasProp(contribsName)) {
-    mol.getProp(contribsName, Vi);
-    mol.getProp(pname, res);
+  if (!force && mol.hasProp(internKey(contribsName))) {
+    mol.getProp(internKey(contribsName), Vi);
+    mol.getProp(internKey(pname), res);
     return res;
   }
   unsigned int nAtoms = mol.getNumAtoms();
@@ -340,16 +340,16 @@ double getTPSAAtomContribs(const ROMol &mol, std::vector<double> &Vi,
     res += tmp;
   }
 
-  mol.setProp(contribsName, Vi, true);
-  mol.setProp(pname, res, true);
+  mol.setProp(internKey(contribsName), Vi, true);
+  mol.setProp(internKey(pname), res, true);
   return res;
 }
 double calcTPSA(const ROMol &mol, bool force, bool includeSandP) {
   std::string pname =
       (boost::format("%s-%s") % keyToString(common_properties::_tpsa) % includeSandP).str();
-  if (!force && mol.hasProp(pname)) {
+  if (!force && mol.hasProp(internKey(pname))) {
     double res;
-    mol.getProp(pname, res);
+    mol.getProp(internKey(pname), res);
     return res;
   }
   std::vector<double> contribs;
@@ -465,8 +465,8 @@ std::vector<double> calcCustomProp_VSA(const ROMol &mol,
 
   std::vector<double> prop(mol.getNumAtoms(), 0.0);
   for (unsigned int i = 0; i < mol.getNumAtoms(); ++i) {
-    if (mol.getAtomWithIdx(i)->hasProp(customPropName)) {
-      prop[i] = mol.getAtomWithIdx(i)->getProp<double>(customPropName);
+    if (mol.getAtomWithIdx(i)->hasProp(internKey(customPropName))) {
+      prop[i] = mol.getAtomWithIdx(i)->getProp<double>(internKey(customPropName));
     } else {
       prop[i] = 1;
     }

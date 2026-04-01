@@ -280,12 +280,12 @@ void SynthonSet::makeSynthonSearchMols() {
       synthonMolCopies[i].emplace_back(
           new RWMol(*d_synthons[i][j].second->getOrigMol().get()));
       for (auto &atom : synthonMolCopies[i][j]->atoms()) {
-        atom->setProp<int>("molNum", i);
-        atom->setProp<int>("idx", atom->getIdx());
+        atom->setProp<int>(common_properties::molNum, i);
+        atom->setProp<int>(common_properties::idx, atom->getIdx());
       }
       for (auto &bond : synthonMolCopies[i][j]->bonds()) {
-        bond->setProp<int>("molNum", i);
-        bond->setProp<int>("idx", bond->getIdx());
+        bond->setProp<int>(common_properties::molNum, i);
+        bond->setProp<int>(common_properties::idx, bond->getIdx());
       }
     }
   }
@@ -302,7 +302,7 @@ void SynthonSet::makeSynthonSearchMols() {
     for (size_t j = 0; j < sampleMols.size(); ++j) {
       std::vector<unsigned int> splitBonds;
       for (const auto &bond : sampleMols[j]->bonds()) {
-        if (!bond->hasProp("molNum")) {
+        if (!bond->hasProp(common_properties::molNum)) {
           splitBonds.push_back(bond->getIdx());
         }
       }
@@ -314,8 +314,8 @@ void SynthonSet::makeSynthonSearchMols() {
       int fragWeWant = -1;
       for (size_t i = 0; i < molFrags.size(); ++i) {
         for (const auto &atom : molFrags[i]->atoms()) {
-          if (atom->hasProp("molNum") &&
-              atom->getProp<unsigned int>("molNum") == synthSetNum) {
+          if (atom->hasProp(common_properties::molNum) &&
+              atom->getProp<unsigned int>(common_properties::molNum) == synthSetNum) {
             fragWeWant = i;
             break;
           }

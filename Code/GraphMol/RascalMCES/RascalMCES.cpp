@@ -394,11 +394,11 @@ void extractRings(const ROMol &mol,
     }
     for (auto ringBondIdx : molBondRings[i]) {
       auto ringBond = ringMol->getBondWithIdx(ringBondIdx);
-      ringBond->setProp<int>("ORIG_INDEX", ringBond->getIdx());
+      ringBond->setProp<int>(common_properties::ORIG_INDEX, ringBond->getIdx());
     }
     ringMol->beginBatchEdit();
     for (auto b : ringMol->bonds()) {
-      if (!b->hasProp("ORIG_INDEX)")) {
+      if (!b->hasProp(common_properties::ORIG_INDEX_paren)) {
         if (!atomsInRing[b->getBeginAtomIdx()]) {
           ringMol->removeAtom(b->getBeginAtom());
         }
@@ -681,9 +681,9 @@ RWMol *makeCliqueFrags(const ROMol &mol,
     }
     bInClique[bond->getIdx()] = 1;
     aInClique.set(bond->getBeginAtomIdx());
-    bond->getBeginAtom()->setProp<int>("ORIG_INDEX", bond->getBeginAtomIdx());
+    bond->getBeginAtom()->setProp<int>(common_properties::ORIG_INDEX, bond->getBeginAtomIdx());
     aInClique.set(bond->getEndAtomIdx());
-    bond->getEndAtom()->setProp<int>("ORIG_INDEX", bond->getEndAtomIdx());
+    bond->getEndAtom()->setProp<int>(common_properties::ORIG_INDEX, bond->getEndAtomIdx());
   }
   molFrags->beginBatchEdit();
   for (auto &a : molFrags->atoms()) {
@@ -707,7 +707,7 @@ int minFragSeparation(const ROMol &mol, const ROMol &molFrags,
   auto extractFragAtoms = [&](int fragNum, std::vector<int> &fragAtoms) {
     for (size_t i = 0u; i < fragMapping.size(); ++i) {
       if (fragMapping[i] == fragNum) {
-        int origIdx = molFrags.getAtomWithIdx(i)->getProp<int>("ORIG_INDEX");
+        int origIdx = molFrags.getAtomWithIdx(i)->getProp<int>(common_properties::ORIG_INDEX);
         fragAtoms.push_back(origIdx);
       }
     }

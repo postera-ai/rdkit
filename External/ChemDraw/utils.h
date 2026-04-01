@@ -50,9 +50,7 @@ const std::string CDX_GROUP_ID("CDX_GROUP_ID");
 const std::string FUSE_LABEL("CDX_NODE_ID");
 const std::string CDX_SCHEME_ID("CDX_SCHEME_ID");
 const std::string CDX_STEP_ID("CDX_STEP_ID");
-const std::string CDX_REAGENT_ID("CDX_REAGENT_ID");
-const std::string CDX_PRODUCT_ID("CDX_PRODUCT_ID");
-const std::string CDX_AGENT_ID("CDX_AGENT_ID");
+
 const std::string CDX_ATOM_POS("CDX_ATOM_POS");
 const std::string CDX_ATOM_ID("_CDX_ATOM_ID");
 const std::string CDX_BOND_ID("_CDX_BOND_ID");

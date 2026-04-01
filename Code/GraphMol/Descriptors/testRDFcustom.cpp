@@ -59,7 +59,7 @@ void testRDFcustom() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> drdf;
     std::vector<double> charges(m->getNumAtoms(), 0);
@@ -125,7 +125,7 @@ void testMORSEcustom() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> dmorse;
     std::vector<double> charges(m->getNumAtoms(), 0);
@@ -192,7 +192,7 @@ void testAUTOCORR3Dcustom() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> dauto3d;
     std::vector<double> charges(m->getNumAtoms(), 0);
@@ -259,7 +259,7 @@ void testWHIMcustom() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> dwhim;
     std::vector<double> charges(m->getNumAtoms(), 0);
@@ -270,7 +270,7 @@ void testWHIMcustom() {
     /*
         for (unsigned int aix = 0; aix < m->getNumAtoms(); aix++) {
           std::cerr <<
-       m->getAtomWithIdx(aix)->getProp<double>("_GasteigerCharge") << ",";
+       m->getAtomWithIdx(aix)->getProp<double>(RDKit::common_properties::_GasteigerCharge) << ",";
         }
         std::cerr << "\n";
     */
@@ -332,12 +332,12 @@ void testWHIMcustom1() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> dwhim;
 
     for (unsigned int aix = 0; aix < m->getNumAtoms(); aix++) {
-      m->getAtomWithIdx(aix)->setProp("_MyCharge", 0.001, true);
+      m->getAtomWithIdx(aix)->setProp(RDKit::internKey("_MyCharge"), 0.001, true);
     }
 
     const std::string atomprop = "_MyCharge";
@@ -401,7 +401,7 @@ void testGETAWAYcustom() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> dgetaway;
     std::vector<double> charges(m->getNumAtoms(), 0);

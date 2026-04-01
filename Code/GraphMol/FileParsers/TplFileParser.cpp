@@ -44,7 +44,7 @@ void ParseTPLAtomLine(std::string text, unsigned int lineNum, RWMol *mol,
 
   atom->setFormalCharge(FileParserUtils::stripSpacesAndCast<int>(splitLine[2]));
   auto partialChg = FileParserUtils::stripSpacesAndCast<double>(splitLine[3]);
-  atom->setProp("TPLCharge", partialChg);
+  atom->setProp(common_properties::TPLCharge, partialChg);
   auto xp = FileParserUtils::stripSpacesAndCast<double>(splitLine[4]);
   auto yp = FileParserUtils::stripSpacesAndCast<double>(splitLine[5]);
   auto zp = FileParserUtils::stripSpacesAndCast<double>(splitLine[6]);
@@ -59,7 +59,7 @@ void ParseTPLAtomLine(std::string text, unsigned int lineNum, RWMol *mol,
   // the number of bonds is 4:
   if (nBonds == 4 && splitLine.size() > 8 + nBonds) {
     std::string stereoChem = splitLine[8 + nBonds];
-    atom->setProp("TPLStereoFlag", stereoChem);
+    atom->setProp(common_properties::TPLStereoFlag, stereoChem);
   }
 }
 
@@ -103,8 +103,8 @@ void ParseTPLBondLine(std::string text, unsigned int lineNum, RWMol *mol) {
   if (splitLine.size() > 5) {
     stereoFlag2 = splitLine[5];
   }
-  mol->getBondWithIdx(bondIdx)->setProp("TPLBondDir1", stereoFlag1);
-  mol->getBondWithIdx(bondIdx)->setProp("TPLBondDir2", stereoFlag2);
+  mol->getBondWithIdx(bondIdx)->setProp(common_properties::TPLBondDir1, stereoFlag1);
+  mol->getBondWithIdx(bondIdx)->setProp(common_properties::TPLBondDir2, stereoFlag2);
 }
 
 Conformer *ParseConfData(std::istream &inStream, unsigned int &line, RWMol *mol,
@@ -126,7 +126,7 @@ Conformer *ParseConfData(std::istream &inStream, unsigned int &line, RWMol *mol,
   }
   std::ostringstream propName;
   propName << "Conf_" << mol->getNumConformers() << keyToString(common_properties::_Name);
-  mol->setProp(propName.str(),
+  mol->setProp(internKey(propName.str()),
                boost::trim_copy(tempStr.substr(4, tempStr.size() - 4)));
 
   auto *conf = new Conformer(mol->getNumAtoms());

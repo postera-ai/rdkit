@@ -378,7 +378,7 @@ void checkChiralityPostMove(const ROMol &mol, const Atom *oAt, Atom *nAt,
   // whether or not we've already been called and what the new atom order is.
   // we do this with a property.
   // this was github #1734
-  if (nAt->getPropIfPresent(newBondOrder, incomingOrder)) {
+  if (nAt->getPropIfPresent(common_properties::_newBondOrder, incomingOrder)) {
     for (int bidx : incomingOrder) {
       if (bidx != check_bond_index) {
         newOrder.push_back(bidx);
@@ -392,7 +392,7 @@ void checkChiralityPostMove(const ROMol &mol, const Atom *oAt, Atom *nAt,
     }
   }
   newOrder.push_back(bond->getIdx());
-  nAt->setProp(newBondOrder, newOrder, true);
+  nAt->setProp(common_properties::_newBondOrder, newOrder, true);
   unsigned int nSwaps = oAt->getPerturbationOrder(newOrder);
   // std::copy(newOrder.begin(), newOrder.end(),
   //           std::ostream_iterator<int>(std::cerr, ", "));
@@ -416,7 +416,7 @@ std::vector<std::pair<Bond *, std::vector<int>>> getNbrBondStereo(
   for (const auto *atom : {bgn, end}) {
     for (auto obnd : mol.atomBonds(atom)) {
       if (obnd->getIdx() != bnd->getIdx() && !obnd->getStereoAtoms().empty()) {
-        obnd->setProp(molfragSaveStereo, obnd->getStereo());
+        obnd->setProp(common_properties::_molfragSaveStereo, obnd->getStereo());
         res.emplace_back(obnd, obnd->getStereoAtoms());
       }
     }
@@ -519,8 +519,8 @@ ROMol *fragmentOnBonds(
                      eidx, idx2);
         stereo_atoms.first->getStereoAtoms().swap(stereo_atoms.second);
         stereo_atoms.first->setStereo(
-            stereo_atoms.first->getProp<Bond::BondStereo>(molfragSaveStereo));
-        stereo_atoms.first->clearProp(molfragSaveStereo);
+            stereo_atoms.first->getProp<Bond::BondStereo>(common_properties::_molfragSaveStereo));
+        stereo_atoms.first->clearProp(common_properties::_molfragSaveStereo);
       }
 
       // figure out if we need to change the stereo tags on the atoms:

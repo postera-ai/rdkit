@@ -1860,8 +1860,8 @@ std::string MolToInchi(const ROMol &mol, ExtraInchiReturnValues &rv,
       std::vector<std::pair<unsigned int, unsigned int>> neighbors;
       while (nbrIter != endNbrIter) {
         int cip = 0;
-        // if (m->getAtomWithIdx(*nbrIter)->hasProp("_CIPRank"))
-        //   m->getAtomWithIdx(*nbrIter)->getProp("_CIPRank", cip);
+        // if (m->getAtomWithIdx(*nbrIter)->hasProp(common_properties::_CIPRank))
+        //   m->getAtomWithIdx(*nbrIter)->getProp(common_properties::_CIPRank, cip);
         neighbors.emplace_back(cip, *nbrIter);
         ++nbrIter;
       }
@@ -1934,7 +1934,7 @@ std::string MolToInchi(const ROMol &mol, ExtraInchiReturnValues &rv,
 
       } else {
         // std::string molParity;
-        // atom->getProp("molParity", molParity);
+        // atom->getProp(common_properties::molParity, molParity);
         // if (molParity == "2") {
         //  stereo0D.parity = INCHI_PARITY_EVEN;
         //  stereo0DEntries.push_back(stereo0D);

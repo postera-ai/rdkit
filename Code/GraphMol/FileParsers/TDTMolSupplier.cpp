@@ -246,7 +246,7 @@ std::unique_ptr<RWMol> TDTMolSupplier::parseMol(std::string inLine) {
           throw FileParseException(errout.str());
         } else {
           std::string propVal = inLine.substr(startP, endP - startP);
-          res->setProp(propName, propVal);
+          res->setProp(internKey(propName), propVal);
           if (propName == d_params.nameRecord) {
             res->setProp(common_properties::_Name, propVal);
           }

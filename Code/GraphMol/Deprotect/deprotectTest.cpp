@@ -33,9 +33,9 @@ TEST_CASE("Standard deprotections", "[deprotect]") {
     auto res = deprotect(*m);
     REQUIRE(res);
     CHECK(MolToSmiles(*res) == "NCc1ccccc1N");
-    CHECK(res->getProp<int>("DEPROTECTION_COUNT") == 2);
+    CHECK(res->getProp<int>(common_properties::DEPROTECTION_COUNT) == 2);
     std::vector<std::string> expected{"Boc", "Boc"};
-    CHECK(res->getProp<std::vector<std::string>>("DEPROTECTIONS") == expected);
+    CHECK(res->getProp<std::vector<std::string>>(common_properties::DEPROTECTIONS) == expected);
   }
   SECTION("test deprotection examples") {
     for (auto &data : getDeprotections()) {
@@ -60,9 +60,9 @@ TEST_CASE("Standard deprotections in place", "[deprotect]") {
     auto m = "N(C(=O)OC(C)(C)C)Cc1ccccc1NC(=O)OC(C)(C)C"_smiles;
     CHECK(deprotectInPlace(*m));
     CHECK(MolToSmiles(*m) == "NCc1ccccc1N");
-    CHECK(m->getProp<int>("DEPROTECTION_COUNT") == 2);
+    CHECK(m->getProp<int>(common_properties::DEPROTECTION_COUNT) == 2);
     std::vector<std::string> expected{"Boc", "Boc"};
-    CHECK(m->getProp<std::vector<std::string>>("DEPROTECTIONS") == expected);
+    CHECK(m->getProp<std::vector<std::string>>(common_properties::DEPROTECTIONS) == expected);
   }
   SECTION("test deprotection examples") {
     for (auto &data : getDeprotections()) {

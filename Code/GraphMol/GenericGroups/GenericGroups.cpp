@@ -700,7 +700,7 @@ void convertGenericQueriesToSubstanceGroups(ROMol &mol) {
     if (atom->getPropIfPresent(common_properties::_QueryAtomGenericLabel,
                                label)) {
       SubstanceGroup sg(&mol, "SUP");
-      sg.setProp("LABEL", label);
+      sg.setProp(common_properties::sgLABEL, label);
       sg.addAtomWithIdx(atom->getIdx());
       addSubstanceGroup(mol, sg);
       atom->clearProp(common_properties::_QueryAtomGenericLabel);
@@ -738,9 +738,9 @@ void setGenericQueriesFromProperties(ROMol &mol, bool useAtomLabels,
     auto iter = sgs.begin();
     while (iter != sgs.end()) {
       const auto &sgroup = *iter;
-      if (sgroup.getProp<std::string>("TYPE") == "SUP") {
+      if (sgroup.getProp<std::string>(common_properties::sgTYPE) == "SUP") {
         std::string label;
-        if (sgroup.getPropIfPresent("LABEL", label) &&
+        if (sgroup.getPropIfPresent(common_properties::sgLABEL, label) &&
             genericMatchers.find(label) != genericMatchers.end()) {
           for (auto aidx : sgroup.getAtoms()) {
             mol.getAtomWithIdx(aidx)->setProp(

@@ -80,7 +80,7 @@ void testSdf() {
     TEST_ASSERT(nmol || sdsup->atEnd());
     if (nmol) {
       TEST_ASSERT(nmol->hasProp(common_properties::_Name));
-      TEST_ASSERT(nmol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
+      TEST_ASSERT(nmol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
       i++;
     }
   }
@@ -96,7 +96,7 @@ void testSdf() {
     auto nmol = sdsupMulti->next();
     if (nmol) {
       TEST_ASSERT(nmol->hasProp(common_properties::_Name));
-      TEST_ASSERT(nmol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
+      TEST_ASSERT(nmol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
       i++;
     }
   }
@@ -112,7 +112,7 @@ void testSdf() {
     auto nmol = sdsup2->next();
     if (nmol) {
       TEST_ASSERT(nmol->hasProp(common_properties::_Name));
-      TEST_ASSERT(nmol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
+      TEST_ASSERT(nmol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
       i++;
     }
   }
@@ -140,7 +140,7 @@ void testSmi() {
     if (i == 3) {
       mol->getProp(common_properties::_Name, mname);
       CHECK_INVARIANT(mname == "4", "");
-      mol->getProp("TPSA", mname);
+      mol->getProp(internKey("TPSA"), mname);
       CHECK_INVARIANT(mname == "82.78", "");
     }
     if (mol) {
@@ -175,14 +175,14 @@ void testMae() {
 
   //! Test mol properties
   TEST_ASSERT(nmol->hasProp(common_properties::_Name));
-  TEST_ASSERT(nmol->hasProp("b_sd_chiral_flag"));
-  TEST_ASSERT(nmol->getProp<bool>("b_sd_chiral_flag") == false);
-  TEST_ASSERT(nmol->hasProp("i_sd_NSC"));
-  TEST_ASSERT(nmol->getProp<int>("i_sd_NSC") == 48);
-  TEST_ASSERT(nmol->hasProp("s_m_entry_name"));
-  TEST_ASSERT(nmol->getProp<std::string>("s_m_entry_name") == "NCI_aids_few.1");
-  TEST_ASSERT(nmol->hasProp("r_f3d_dummy"));
-  TEST_ASSERT(std::abs(nmol->getProp<double>("r_f3d_dummy") - 42.123) < 0.0001);
+  TEST_ASSERT(nmol->hasProp(internKey("b_sd_chiral_flag")));
+  TEST_ASSERT(nmol->getProp<bool>(internKey("b_sd_chiral_flag")) == false);
+  TEST_ASSERT(nmol->hasProp(internKey("i_sd_NSC")));
+  TEST_ASSERT(nmol->getProp<int>(internKey("i_sd_NSC")) == 48);
+  TEST_ASSERT(nmol->hasProp(internKey("s_m_entry_name")));
+  TEST_ASSERT(nmol->getProp<std::string>(internKey("s_m_entry_name")) == "NCI_aids_few.1");
+  TEST_ASSERT(nmol->hasProp(internKey("r_f3d_dummy")));
+  TEST_ASSERT(std::abs(nmol->getProp<double>(internKey("r_f3d_dummy")) - 42.123) < 0.0001);
 
   //! Test atom properties
   TEST_ASSERT(nmol->getNumAtoms() == 19);
@@ -190,29 +190,29 @@ void testMae() {
     const auto *atom = nmol->getAtomWithIdx(i);
 
     //! The integer property is present for all atoms
-    TEST_ASSERT(atom->hasProp("i_m_minimize_atom_index"));
-    TEST_ASSERT(atom->getProp<int>("i_m_minimize_atom_index") == 1 + i);
+    TEST_ASSERT(atom->hasProp(internKey("i_m_minimize_atom_index")));
+    TEST_ASSERT(atom->getProp<int>(internKey("i_m_minimize_atom_index")) == 1 + i);
 
     //! The bool property is only defined for i < 10
     if (i < 10) {
-      TEST_ASSERT(atom->hasProp("b_m_dummy"));
-      TEST_ASSERT(atom->getProp<bool>("b_m_dummy") == static_cast<bool>(i % 2));
+      TEST_ASSERT(atom->hasProp(internKey("b_m_dummy")));
+      TEST_ASSERT(atom->getProp<bool>(internKey("b_m_dummy")) == static_cast<bool>(i % 2));
     } else {
-      TEST_ASSERT(!atom->hasProp("b_m_dummy"));
+      TEST_ASSERT(!atom->hasProp(internKey("b_m_dummy")));
     }
 
     //! The real property is only defined for i >= 10
     if (i >= 10) {
-      TEST_ASSERT(atom->hasProp("r_f3d_dummy"));
-      TEST_ASSERT(std::abs(atom->getProp<double>("r_f3d_dummy") - (19.1 - i)) <
+      TEST_ASSERT(atom->hasProp(internKey("r_f3d_dummy")));
+      TEST_ASSERT(std::abs(atom->getProp<double>(internKey("r_f3d_dummy")) - (19.1 - i)) <
                   0.0001);
     } else {
-      TEST_ASSERT(!atom->hasProp("r_f3d_dummy"));
+      TEST_ASSERT(!atom->hasProp(internKey("r_f3d_dummy")));
     }
 
     //! All atoms have the string prop
-    TEST_ASSERT(atom->hasProp("s_m_dummy"));
-    TEST_ASSERT(atom->getProp<std::string>("s_m_dummy") ==
+    TEST_ASSERT(atom->hasProp(internKey("s_m_dummy")));
+    TEST_ASSERT(atom->getProp<std::string>(internKey("s_m_dummy")) ==
                 std::to_string(19 - i));
   }
   TEST_ASSERT(maesup->atEnd());
@@ -246,11 +246,11 @@ void testTdt() {
     if (nmol) {
       std::string prop1, prop2;
       TEST_ASSERT(nmol->getNumAtoms() > 0);
-      TEST_ASSERT(nmol->hasProp("PN"));
+      TEST_ASSERT(nmol->hasProp(internKey("PN")));
       TEST_ASSERT(nmol->hasProp(common_properties::_Name));
-      TEST_ASSERT(nmol->hasProp("MFCD"));
+      TEST_ASSERT(nmol->hasProp(internKey("MFCD")));
 
-      nmol->getProp("PN", prop1);
+      nmol->getProp(internKey("PN"), prop1);
       nmol->getProp(common_properties::_Name, prop2);
       TEST_ASSERT(prop1 == prop2);
 

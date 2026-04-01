@@ -192,7 +192,7 @@ RWMol *MultithreadedSmilesMolSupplier::processMoleculeRecord(
     }
 
     pval = recs[col];
-    res->setProp(pname, pval);
+    res->setProp(internKey(pname), pval);
   }
   return res.release();
 }

@@ -52,7 +52,7 @@ TEST_CASE("testMolSup") {
       ROMol *nmol = sdsup.next();
       if (nmol) {
         REQUIRE(nmol->hasProp(common_properties::_Name));
-        REQUIRE(nmol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
+        REQUIRE(nmol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
         delete nmol;
       }
       i++;
@@ -65,7 +65,7 @@ TEST_CASE("testMolSup") {
       ROMol *nmol = sdsup.next();
       if (nmol) {
         REQUIRE(nmol->hasProp(common_properties::_Name));
-        REQUIRE(nmol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
+        REQUIRE(nmol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
         delete nmol;
       }
     }
@@ -81,7 +81,7 @@ TEST_CASE("testMolSup") {
       ROMol *nmol = sdsup.next();
       if (nmol) {
         REQUIRE(nmol->hasProp(common_properties::_Name));
-        REQUIRE(nmol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
+        REQUIRE(nmol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
         delete nmol;
       }
       i++;
@@ -96,7 +96,7 @@ TEST_CASE("testMolSup") {
       ROMol *nmol = sdsup.next();
       if (nmol) {
         REQUIRE(nmol->hasProp(common_properties::_Name));
-        REQUIRE(nmol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
+        REQUIRE(nmol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
         delete nmol;
       }
       i++;
@@ -115,14 +115,14 @@ TEST_CASE("testMolSup") {
 
       // Test mol properties
       REQUIRE(nmol->hasProp(common_properties::_Name));
-      REQUIRE(nmol->hasProp("b_sd_chiral_flag"));
-      REQUIRE(nmol->getProp<bool>("b_sd_chiral_flag") == false);
-      REQUIRE(nmol->hasProp("i_sd_NSC"));
-      REQUIRE(nmol->getProp<int>("i_sd_NSC") == 48);
-      REQUIRE(nmol->hasProp("s_m_entry_name"));
-      REQUIRE(nmol->getProp<std::string>("s_m_entry_name") == "NCI_aids_few.1");
-      REQUIRE(nmol->hasProp("r_f3d_dummy"));
-      REQUIRE(std::abs(nmol->getProp<double>("r_f3d_dummy") - 42.123) < 0.0001);
+      REQUIRE(nmol->hasProp(internKey("b_sd_chiral_flag")));
+      REQUIRE(nmol->getProp<bool>(internKey("b_sd_chiral_flag")) == false);
+      REQUIRE(nmol->hasProp(internKey("i_sd_NSC")));
+      REQUIRE(nmol->getProp<int>(internKey("i_sd_NSC")) == 48);
+      REQUIRE(nmol->hasProp(internKey("s_m_entry_name")));
+      REQUIRE(nmol->getProp<std::string>(internKey("s_m_entry_name")) == "NCI_aids_few.1");
+      REQUIRE(nmol->hasProp(internKey("r_f3d_dummy")));
+      REQUIRE(std::abs(nmol->getProp<double>(internKey("r_f3d_dummy")) - 42.123) < 0.0001);
 
       // Test atom properties
       REQUIRE(nmol->getNumAtoms() == 19);
@@ -130,29 +130,29 @@ TEST_CASE("testMolSup") {
         const auto *atom = nmol->getAtomWithIdx(i);
 
         // The integer property is present for all atoms
-        REQUIRE(atom->hasProp("i_m_minimize_atom_index"));
-        REQUIRE(atom->getProp<int>("i_m_minimize_atom_index") == 1 + i);
+        REQUIRE(atom->hasProp(internKey("i_m_minimize_atom_index")));
+        REQUIRE(atom->getProp<int>(internKey("i_m_minimize_atom_index")) == 1 + i);
 
         // The bool property is only defined for i < 10
         if (i < 10) {
-          REQUIRE(atom->hasProp("b_m_dummy"));
-          REQUIRE(atom->getProp<bool>("b_m_dummy") == static_cast<bool>(i % 2));
+          REQUIRE(atom->hasProp(internKey("b_m_dummy")));
+          REQUIRE(atom->getProp<bool>(internKey("b_m_dummy")) == static_cast<bool>(i % 2));
         } else {
-          REQUIRE(!atom->hasProp("b_m_dummy"));
+          REQUIRE(!atom->hasProp(internKey("b_m_dummy")));
         }
 
         // The real property is only defined for i >= 10
         if (i >= 10) {
-          REQUIRE(atom->hasProp("r_f3d_dummy"));
-          REQUIRE(std::abs(atom->getProp<double>("r_f3d_dummy") - (19.1 - i)) <
+          REQUIRE(atom->hasProp(internKey("r_f3d_dummy")));
+          REQUIRE(std::abs(atom->getProp<double>(internKey("r_f3d_dummy")) - (19.1 - i)) <
                   0.0001);
         } else {
-          REQUIRE(!atom->hasProp("r_f3d_dummy"));
+          REQUIRE(!atom->hasProp(internKey("r_f3d_dummy")));
         }
 
         // All atoms have the string prop
-        REQUIRE(atom->hasProp("s_m_dummy"));
-        REQUIRE(atom->getProp<std::string>("s_m_dummy") ==
+        REQUIRE(atom->hasProp(internKey("s_m_dummy")));
+        REQUIRE(atom->getProp<std::string>(internKey("s_m_dummy")) ==
                 std::to_string(19 - i));
       }
 
@@ -383,7 +383,7 @@ TEST_CASE("testSmilesSup") {
 
     mol->getProp(common_properties::_Name, mname);
     REQUIRE(mname == "4");
-    mol->getProp("TPSA", mname);
+    mol->getProp(internKey("TPSA"), mname);
     REQUIRE(mname == "82.78");
     delete mol;
 
@@ -404,7 +404,7 @@ TEST_CASE("testSmilesSup") {
 
     mol->getProp(common_properties::_Name, mname);
     REQUIRE(mname == "4");
-    mol->getProp("TPSA", mname);
+    mol->getProp(internKey("TPSA"), mname);
     REQUIRE(mname == "82.78");
     delete mol;
 
@@ -422,12 +422,12 @@ TEST_CASE("testSmilesSup") {
 
   mol = smiSup[16];
 
-  mol->getProp("TPSA", mname);
+  mol->getProp(internKey("TPSA"), mname);
   REQUIRE(mname == "46.25");
   delete mol;
 
   mol = smiSup[8];
-  mol->getProp("TPSA", mname);
+  mol->getProp(internKey("TPSA"), mname);
   REQUIRE(mname == "65.18");
   delete mol;
 
@@ -461,7 +461,7 @@ TEST_CASE("testSmilesSup") {
 
   mol->getProp(common_properties::_Name, mname);
   REQUIRE(mname == "4");
-  mol->getProp("Column_2", mname);
+  mol->getProp(internKey("Column_2"), mname);
   REQUIRE(mname == "82.78");
 
   delete nSup;
@@ -572,7 +572,7 @@ TEST_CASE("testSmilesSupFromText") {
   REQUIRE(nSup2.length() == 4);
   mol->getProp(common_properties::_Name, mname);
   REQUIRE(mname == "mol-4");
-  mol->getProp("Column_2", mname);
+  mol->getProp(internKey("Column_2"), mname);
   REQUIRE(mname == "16.0");
   delete mol;
 
@@ -587,7 +587,7 @@ TEST_CASE("testSmilesSupFromText") {
   mol = nSup2[2];
   mol->getProp(common_properties::_Name, mname);
   REQUIRE(mname == "mol-3");
-  mol->getProp("Column_2", mname);
+  mol->getProp(internKey("Column_2"), mname);
   REQUIRE(mname == "9.0");
   delete mol;
 
@@ -604,7 +604,7 @@ TEST_CASE("testSmilesSupFromText") {
   REQUIRE(nSup2.length() == 4);
   mol->getProp(common_properties::_Name, mname);
   REQUIRE(mname == "mol-4");
-  mol->getProp("Column_2", mname);
+  mol->getProp(internKey("Column_2"), mname);
   REQUIRE(mname == "16.0");
   delete mol;
 
@@ -626,7 +626,7 @@ TEST_CASE("testSmilesSupFromText") {
   REQUIRE(mol);
   mol->getProp(common_properties::_Name, mname);
   REQUIRE(mname == "mol-4");
-  mol->getProp("Column_2", mname);
+  mol->getProp(internKey("Column_2"), mname);
   REQUIRE(mname == "16.0");
   REQUIRE(nSup2.atEnd());
   delete mol;
@@ -643,7 +643,7 @@ TEST_CASE("testSmilesSupFromText") {
   REQUIRE(mol);
   mol->getProp(common_properties::_Name, mname);
   REQUIRE(mname == "mol-4");
-  mol->getProp("Column_2", mname);
+  mol->getProp(internKey("Column_2"), mname);
   REQUIRE(mname == "16.0");
   REQUIRE(nSup2.atEnd());
   delete mol;
@@ -661,7 +661,7 @@ TEST_CASE("testSmilesSupFromText") {
   REQUIRE(mol);
   mol->getProp(common_properties::_Name, mname);
   REQUIRE(mname == "mol-4");
-  mol->getProp("Column_2", mname);
+  mol->getProp(internKey("Column_2"), mname);
   REQUIRE(mname == "16.0");
   delete mol;
 
@@ -726,14 +726,14 @@ TEST_CASE("testSmilesSupFromText") {
   mol = nSup2[2];
   mol->getProp(common_properties::_Name, mname);
   REQUIRE(mname == "mol-3");
-  mol->getProp("Column_2", mname);
+  mol->getProp(internKey("Column_2"), mname);
   REQUIRE(mname == "9.0");
   delete mol;
 
   mol = nSup2[1];
   mol->getProp(common_properties::_Name, mname);
   REQUIRE(mname == "mol-2");
-  mol->getProp("Column_2", mname);
+  mol->getProp(internKey("Column_2"), mname);
   REQUIRE(mname == "4.0");
   delete mol;
 
@@ -777,7 +777,7 @@ TEST_CASE("testSmilesWriter") {
   while (mol) {
     std::string mname, pval;
     mol->getProp(common_properties::_Name, mname);
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     names.push_back(mname);
     props.push_back(pval);
     writer->write(*mol);
@@ -798,7 +798,7 @@ TEST_CASE("testSmilesWriter") {
   while (mol) {
     std::string mname, pval;
     mol->getProp(common_properties::_Name, mname);
-    mol->getProp("Column_2", pval);
+    mol->getProp(internKey("Column_2"), pval);
     REQUIRE(mname == names[i]);
     REQUIRE(pval == props[i]);
     i++;
@@ -1007,14 +1007,14 @@ TEST_CASE("testIssue226") {
 
   mol = sdsup.next();
   REQUIRE(mol);
-  REQUIRE(mol->hasProp("E1"));
-  REQUIRE(mol->hasProp("E2"));
+  REQUIRE(mol->hasProp(internKey("E1")));
+  REQUIRE(mol->hasProp(internKey("E2")));
   delete mol;
 
   mol = sdsup.next();
   REQUIRE(mol);
-  REQUIRE(mol->hasProp("E1"));
-  REQUIRE(mol->hasProp("E2"));
+  REQUIRE(mol->hasProp(internKey("E1")));
+  REQUIRE(mol->hasProp(internKey("E2")));
   delete mol;
 }
 
@@ -1029,11 +1029,11 @@ TEST_CASE("testTDTSupplier1") {
       if (nmol) {
         std::string prop1, prop2;
         REQUIRE(nmol->getNumAtoms() > 0);
-        REQUIRE(nmol->hasProp("PN"));
+        REQUIRE(nmol->hasProp(internKey("PN")));
         REQUIRE(nmol->hasProp(common_properties::_Name));
-        REQUIRE(nmol->hasProp("MFCD"));
+        REQUIRE(nmol->hasProp(internKey("MFCD")));
 
-        nmol->getProp("PN", prop1);
+        nmol->getProp(internKey("PN"), prop1);
         nmol->getProp(common_properties::_Name, prop2);
         REQUIRE(prop1 == prop2);
 
@@ -1057,11 +1057,11 @@ TEST_CASE("testTDTSupplier1") {
       if (nmol) {
         std::string prop1, prop2;
         REQUIRE(nmol->getNumAtoms() > 0);
-        REQUIRE(nmol->hasProp("PN"));
+        REQUIRE(nmol->hasProp(internKey("PN")));
         REQUIRE(nmol->hasProp(common_properties::_Name));
-        REQUIRE(nmol->hasProp("MFCD"));
+        REQUIRE(nmol->hasProp(internKey("MFCD")));
 
-        nmol->getProp("PN", prop1);
+        nmol->getProp(internKey("PN"), prop1);
         nmol->getProp(common_properties::_Name, prop2);
         REQUIRE(prop1 == prop2);
 
@@ -1090,11 +1090,11 @@ TEST_CASE("testTDTSupplier2") {
     ROMol *nmol = suppl.next();
     if (nmol) {
       REQUIRE(nmol->getNumAtoms() > 0);
-      REQUIRE(nmol->hasProp("PN"));
+      REQUIRE(nmol->hasProp(internKey("PN")));
       REQUIRE(nmol->hasProp(common_properties::_Name));
-      REQUIRE(nmol->hasProp("MFCD"));
+      REQUIRE(nmol->hasProp(internKey("MFCD")));
 
-      nmol->getProp("PN", prop1);
+      nmol->getProp(internKey("PN"), prop1);
       nmol->getProp(common_properties::_Name, prop2);
       REQUIRE(prop1 == prop2);
 
@@ -1138,10 +1138,10 @@ TEST_CASE("testTDTSupplier3") {
     ROMol *nmol = suppl.next();
     if (nmol) {
       REQUIRE(nmol->getNumAtoms() > 0);
-      REQUIRE(nmol->hasProp("CAS"));
+      REQUIRE(nmol->hasProp(internKey("CAS")));
       REQUIRE(nmol->hasProp(common_properties::_Name));
 
-      nmol->getProp("CAS", prop1);
+      nmol->getProp(internKey("CAS"), prop1);
       nmol->getProp(common_properties::_Name, prop2);
       REQUIRE(prop1 == prop2);
 
@@ -1168,10 +1168,10 @@ TEST_CASE("testTDTSupplier3") {
     ROMol *nmol = suppl.next();
     if (nmol) {
       REQUIRE(nmol->getNumAtoms() > 0);
-      REQUIRE(nmol->hasProp("CAS"));
+      REQUIRE(nmol->hasProp(internKey("CAS")));
       REQUIRE(nmol->hasProp(common_properties::_Name));
 
-      nmol->getProp("CAS", prop1);
+      nmol->getProp(internKey("CAS"), prop1);
       nmol->getProp(common_properties::_Name, prop2);
       REQUIRE(prop1 == prop2);
 
@@ -1235,7 +1235,7 @@ TEST_CASE("testSDSupplierFromText") {
     ROMol *mol = reader.next();
     std::string mname;
     REQUIRE(mol->hasProp(common_properties::_Name));
-    REQUIRE(mol->hasProp("ID"));
+    REQUIRE(mol->hasProp(common_properties::sgID));
     i++;
     delete mol;
   }
@@ -1308,9 +1308,9 @@ TEST_CASE("testSDSupplierFromTextStrLax1") {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
       if (i == 0) {
-        REQUIRE(!mol->hasProp("ID"));
+        REQUIRE(!mol->hasProp(common_properties::sgID));
       }
-      REQUIRE(!mol->hasProp("ANOTHER_PROPERTY"));
+      REQUIRE(!mol->hasProp(internKey("ANOTHER_PROPERTY")));
       i++;
       delete mol;
     }
@@ -1326,8 +1326,8 @@ TEST_CASE("testSDSupplierFromTextStrLax1") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp("ID"));
-      REQUIRE(mol->hasProp("ANOTHER_PROPERTY"));
+      REQUIRE(mol->hasProp(common_properties::sgID));
+      REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       i++;
       delete mol;
     }
@@ -1391,12 +1391,12 @@ TEST_CASE("testSDSupplierFromTextStrLax2") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp("ID"));
-      REQUIRE(mol->hasProp("ANOTHER_PROPERTY"));
+      REQUIRE(mol->hasProp(common_properties::sgID));
+      REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       std::string s;
-      mol->getProp("ID", s);
+      mol->getProp(common_properties::sgID, s);
       REQUIRE(s == "Lig1");
-      mol->getProp("ANOTHER_PROPERTY", s);
+      mol->getProp(internKey("ANOTHER_PROPERTY"), s);
       REQUIRE(s ==
               "No blank line before dollars\n"
               "$$$$\n"
@@ -1417,12 +1417,12 @@ TEST_CASE("testSDSupplierFromTextStrLax2") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp("ID"));
-      REQUIRE(mol->hasProp("ANOTHER_PROPERTY"));
+      REQUIRE(mol->hasProp(common_properties::sgID));
+      REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       std::string s;
-      mol->getProp("ID", s);
+      mol->getProp(common_properties::sgID, s);
       REQUIRE(s == "Lig2");
-      mol->getProp("ANOTHER_PROPERTY", s);
+      mol->getProp(internKey("ANOTHER_PROPERTY"), s);
       REQUIRE(s == "Value2");
       i++;
       delete mol;
@@ -1443,9 +1443,9 @@ TEST_CASE("testSDSupplierStrLax1") {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
       if (i == 0) {
-        REQUIRE(!mol->hasProp("ID"));
+        REQUIRE(!mol->hasProp(common_properties::sgID));
       }
-      REQUIRE(!mol->hasProp("ANOTHER_PROPERTY"));
+      REQUIRE(!mol->hasProp(internKey("ANOTHER_PROPERTY")));
       i++;
       delete mol;
     }
@@ -1459,8 +1459,8 @@ TEST_CASE("testSDSupplierStrLax1") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp("ID"));
-      REQUIRE(mol->hasProp("ANOTHER_PROPERTY"));
+      REQUIRE(mol->hasProp(common_properties::sgID));
+      REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       i++;
       delete mol;
     }
@@ -1479,12 +1479,12 @@ TEST_CASE("testSDSupplierStrLax2") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp("ID"));
-      REQUIRE(mol->hasProp("ANOTHER_PROPERTY"));
+      REQUIRE(mol->hasProp(common_properties::sgID));
+      REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       std::string s;
-      mol->getProp("ID", s);
+      mol->getProp(common_properties::sgID, s);
       REQUIRE(s == "Lig1");
-      mol->getProp("ANOTHER_PROPERTY", s);
+      mol->getProp(internKey("ANOTHER_PROPERTY"), s);
       REQUIRE(s ==
               "No blank line before dollars\n"
               "$$$$\n"
@@ -1503,12 +1503,12 @@ TEST_CASE("testSDSupplierStrLax2") {
     while (!reader.atEnd()) {
       ROMol *mol = reader.next();
       REQUIRE(mol->hasProp(common_properties::_Name));
-      REQUIRE(mol->hasProp("ID"));
-      REQUIRE(mol->hasProp("ANOTHER_PROPERTY"));
+      REQUIRE(mol->hasProp(common_properties::sgID));
+      REQUIRE(mol->hasProp(internKey("ANOTHER_PROPERTY")));
       std::string s;
-      mol->getProp("ID", s);
+      mol->getProp(common_properties::sgID, s);
       REQUIRE(s == "Lig2");
-      mol->getProp("ANOTHER_PROPERTY", s);
+      mol->getProp(internKey("ANOTHER_PROPERTY"), s);
       REQUIRE(s == "Value2");
       i++;
       delete mol;
@@ -1538,7 +1538,7 @@ TEST_CASE("testSDErrorHandling") {
   REQUIRE(!sdsup->atEnd());
   nmol = sdsup->next();
   REQUIRE(nmol);
-  REQUIRE(!nmol->hasProp("ID"));
+  REQUIRE(!nmol->hasProp(common_properties::sgID));
   delete sdsup;
   delete nmol;
 
@@ -1662,7 +1662,7 @@ TEST_CASE("testMixIterAndRandom") {
   while (!sdsup->atEnd()) {
     mol = sdsup->next();
     if (mol) {
-      REQUIRE(mol->hasProp("ID"));
+      REQUIRE(mol->hasProp(common_properties::sgID));
       delete mol;
     }
     i++;
@@ -1677,29 +1677,29 @@ TEST_CASE("testMixIterAndRandom") {
 
   mol = sdsup->next();
   REQUIRE(mol);
-  REQUIRE(mol->hasProp("ID"));
-  mol->getProp("ID", name);
+  REQUIRE(mol->hasProp(common_properties::sgID));
+  mol->getProp(common_properties::sgID, name);
   REQUIRE(name == "Lig1");
   delete mol;
 
   mol = (*sdsup)[0];
   REQUIRE(mol);
-  REQUIRE(mol->hasProp("ID"));
-  mol->getProp("ID", name);
+  REQUIRE(mol->hasProp(common_properties::sgID));
+  mol->getProp(common_properties::sgID, name);
   REQUIRE(name == "Lig1");
   delete mol;
 
   sdsup->reset();
   mol = sdsup->next();
   REQUIRE(mol);
-  REQUIRE(mol->hasProp("ID"));
-  mol->getProp("ID", name);
+  REQUIRE(mol->hasProp(common_properties::sgID));
+  mol->getProp(common_properties::sgID, name);
   REQUIRE(name == "Lig1");
   delete mol;
   mol = sdsup->next();
   REQUIRE(mol);
-  REQUIRE(mol->hasProp("ID"));
-  mol->getProp("ID", name);
+  REQUIRE(mol->hasProp(common_properties::sgID));
+  mol->getProp(common_properties::sgID, name);
   REQUIRE(name == "Lig2");
   delete mol;
   delete sdsup;
@@ -2051,7 +2051,7 @@ TEST_CASE("testForwardSDSupplier") {
       REQUIRE((nmol || sdsup.atEnd()));
       if (nmol) {
         REQUIRE(nmol->hasProp(common_properties::_Name));
-        REQUIRE(nmol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
+        REQUIRE(nmol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
         delete nmol;
         i++;
       }
@@ -2102,7 +2102,7 @@ TEST_CASE("testForwardSDSupplier") {
       ROMol *nmol = sdsup.next();
       if (nmol) {
         REQUIRE(nmol->hasProp(common_properties::_Name));
-        REQUIRE(nmol->hasProp("NCI_AIDS_Antiviral_Screen_Conclusion"));
+        REQUIRE(nmol->hasProp(internKey("NCI_AIDS_Antiviral_Screen_Conclusion")));
         delete nmol;
         i++;
       }
@@ -2186,7 +2186,7 @@ TEST_CASE("testIssue3482695") {
   ROMol *nmol = reader.next();
   REQUIRE(nmol);
   REQUIRE(nmol->getNumAtoms() == 0);
-  REQUIRE(nmol->hasProp("test"));
+  REQUIRE(nmol->hasProp(internKey("test")));
   delete nmol;
 }
 
@@ -2247,12 +2247,12 @@ TEST_CASE("testBlankLinesInProps") {
   nmol = reader.next();
   REQUIRE(nmol);
   REQUIRE(nmol->getNumAtoms() == 19);
-  REQUIRE(nmol->hasProp("MultiLineProperty1"));
-  nmol->getProp("MultiLineProperty1", pval);
+  REQUIRE(nmol->hasProp(internKey("MultiLineProperty1")));
+  nmol->getProp(internKey("MultiLineProperty1"), pval);
   REQUIRE(pval == "foo\nbar\n \nbaz");
-  REQUIRE(nmol->hasProp("MultiLineProperty2"));
-  REQUIRE(!(nmol->hasProp("fooprop")));
-  nmol->getProp("MultiLineProperty2", pval);
+  REQUIRE(nmol->hasProp(internKey("MultiLineProperty2")));
+  REQUIRE(!(nmol->hasProp(internKey("fooprop"))));
+  nmol->getProp(internKey("MultiLineProperty2"), pval);
   REQUIRE(pval == "foo\n>  <fooprop>\nbaz\n ");
   delete nmol;
 }
@@ -2268,7 +2268,7 @@ TEST_CASE("testSkipLines") {
   nmol = reader.next();
   REQUIRE(nmol);
   REQUIRE(nmol->getNumAtoms() == 1);
-  REQUIRE(nmol->hasProp("prop1"));
+  REQUIRE(nmol->hasProp(internKey("prop1")));
   delete nmol;
 }
 
@@ -2281,7 +2281,7 @@ TEST_CASE("testGitHub23") {
   INT_VECT iv;
   iv.push_back(1);
   iv.push_back(2);
-  mol->setProp("pval", iv);
+  mol->setProp(internKey("pval"), iv);
   writer->write(*mol);
   delete mol;
 
@@ -2299,9 +2299,9 @@ TEST_CASE("testGitHub88") {
   nmol = reader.next();
   REQUIRE(nmol);
   REQUIRE(nmol->getNumAtoms() == 8);
-  REQUIRE(nmol->hasProp("prop1"));
+  REQUIRE(nmol->hasProp(internKey("prop1")));
   std::string pval;
-  nmol->getProp("prop1", pval);
+  nmol->getProp(internKey("prop1"), pval);
   REQUIRE(pval == "4");
   delete nmol;
 }
@@ -2693,7 +2693,7 @@ TEST_CASE("Read SD properties till last '>'") {
   REQUIRE(m);
 
   constexpr const char *prop_name = "654 > 321";
-  m->setProp(prop_name, "this is not important");
+  m->setProp(internKey(prop_name), "this is not important");
 
   auto molblock = SDWriter::getText(*m);
   REQUIRE_THAT(molblock, Catch::Matchers::ContainsSubstring(prop_name));
@@ -2703,7 +2703,7 @@ TEST_CASE("Read SD properties till last '>'") {
 
   std::unique_ptr<ROMol> m2{supplier.next()};
   REQUIRE(m2);
-  CHECK(m2->hasProp(prop_name));
+  CHECK(m2->hasProp(internKey(prop_name)));
 }
 
 TEST_CASE("github9101 - $$$$ at buffer end") {
@@ -2713,7 +2713,7 @@ TEST_CASE("github9101 - $$$$ at buffer end") {
   SDMolSupplier reader(infile);
   CHECK(reader.length() == 2);  // this causes the issue as we pre-index
   auto *mol = reader[0];
-  CHECK(mol->getProp<std::string>("comment").size() == 65369);
+  CHECK(mol->getProp<std::string>(internKey("comment")).size() == 65369);
   delete mol;
   mol = reader[1];
   REQUIRE(mol);

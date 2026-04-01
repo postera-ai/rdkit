@@ -943,7 +943,7 @@ void setStereoForBond(ROMol &mol, Bond *bond, Bond::BondStereo stereo,
     }
     bond->setStereoAtoms(begControl, endControl);
     bond->setStereo(stereo);
-    mol.setProp("_needsDetectBondStereo", 1);
+    mol.setProp(common_properties::_needsDetectBondStereo, 1);
   }
 }
 }  // namespace detail
@@ -2266,7 +2266,7 @@ std::ostream &operator<<(std::ostream &oss, const StereoSpecified &s) {
  */
 void legacyStereoPerception(ROMol &mol, bool cleanIt,
                             bool flagPossibleStereoCenters) {
-  mol.clearProp("_needsDetectBondStereo");
+  mol.clearProp(common_properties::_needsDetectBondStereo);
 
   // later we're going to need ring information, get it now if we don't
   // have it already:
@@ -3705,7 +3705,7 @@ void clearDirFlags(ROMol &mol, bool onlyWedgeTypeBondDirs) {
 void clearAllBondDirFlags(ROMol &mol) { clearDirFlags(mol, false); }
 
 void setBondStereoFromDirections(ROMol &mol) {
-  mol.clearProp("_needsDetectBondStereo");
+  mol.clearProp(common_properties::_needsDetectBondStereo);
   for (Bond *bond : mol.bonds()) {
     if (bond->getBondType() == Bond::DOUBLE &&
         bond->getStereo() != Bond::STEREOANY) {

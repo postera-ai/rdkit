@@ -494,7 +494,7 @@ void testCheckAtomFiles() {
 
     RWMOL_SPTR mol(MolFileToMol(testDataDir + substance_set[i]));
     //      std::string exp;
-    //      mol->getProp("EXPECTED", exp);
+    //      mol->getProp(internKey("EXPECTED"), exp);
     //      BOOST_LOG(rdInfoLog) << "EXPECTED RES: " << exp;
 
     TEST_ASSERT(mol.get());

@@ -60,12 +60,12 @@ void test1() {
     TEST_ASSERT(m->getNumConformers() == 0);
     TEST_ASSERT(m->getProp<std::string>(common_properties::_Name) ==
                 std::string("example 1"));
-    TEST_ASSERT(m->hasProp("prop1"));
-    TEST_ASSERT(m->getProp<int>("prop1") == 1);
-    TEST_ASSERT(m->hasProp("prop2"));
-    TEST_ASSERT(feq(m->getProp<double>("prop2"), 3.14));
-    TEST_ASSERT(m->hasProp("prop3"));
-    TEST_ASSERT(m->getProp<std::string>("prop3") == "foo");
+    TEST_ASSERT(m->hasProp(internKey("prop1")));
+    TEST_ASSERT(m->getProp<int>(internKey("prop1")) == 1);
+    TEST_ASSERT(m->hasProp(internKey("prop2")));
+    TEST_ASSERT(feq(m->getProp<double>(internKey("prop2")), 3.14));
+    TEST_ASSERT(m->hasProp(internKey("prop3")));
+    TEST_ASSERT(m->getProp<std::string>(internKey("prop3")) == "foo");
     TEST_ASSERT(m->getRingInfo()->isInitialized());
     TEST_ASSERT(m->getRingInfo()->atomRings().size() == 1);
     TEST_ASSERT(m->getRingInfo()->atomRings()[0].size() == 6);
@@ -147,7 +147,7 @@ void test1() {
 void roundtripSmi(const char *smi) {
   std::unique_ptr<RWMol> mol(SmilesToMol(smi));
   TEST_ASSERT(mol);
-  mol->setProp("_Name", "test mol");
+  mol->setProp(common_properties::_Name, "test mol");
   auto json = MolInterchange::MolToJSONData(*mol);
   std::cerr << json << std::endl;
   std::string smi1 = MolToSmiles(*mol);
@@ -168,7 +168,7 @@ void test2() {
   {
     std::unique_ptr<RWMol> mol(SmilesToMol("CC"));
     TEST_ASSERT(mol);
-    mol->setProp("_Name", "mol1 name");
+    mol->setProp(common_properties::_Name, "mol1 name");
     auto json = MolInterchange::MolToJSONData(*mol);
     std::cerr << json << std::endl;
   }
@@ -207,9 +207,9 @@ void test4() {
   {
     std::unique_ptr<RWMol> mol(SmilesToMol("CC"));
     TEST_ASSERT(mol);
-    mol->setProp("foo_string", "bar");
-    mol->setProp("foo_int", 1);
-    mol->setProp("foo_double", 1.2);
+    mol->setProp(internKey("foo_string"), "bar");
+    mol->setProp(internKey("foo_int"), 1);
+    mol->setProp(internKey("foo_double"), 1.2);
     auto json = MolInterchange::MolToJSONData(*mol);
     std::cerr << json << std::endl;
     TEST_ASSERT(json.find("foo_string") != std::string::npos);
@@ -217,12 +217,12 @@ void test4() {
     TEST_ASSERT(json.find("foo_double") != std::string::npos);
     auto newMols = MolInterchange::JSONDataToMols(json);
     TEST_ASSERT(newMols.size() == 1);
-    TEST_ASSERT(newMols[0]->hasProp("foo_string"));
-    TEST_ASSERT(newMols[0]->getProp<std::string>("foo_string") == "bar");
-    TEST_ASSERT(newMols[0]->hasProp("foo_int"));
-    TEST_ASSERT(newMols[0]->getProp<int>("foo_int") == 1);
-    TEST_ASSERT(newMols[0]->hasProp("foo_double"));
-    TEST_ASSERT(newMols[0]->getProp<double>("foo_double") == 1.2);
+    TEST_ASSERT(newMols[0]->hasProp(internKey("foo_string")));
+    TEST_ASSERT(newMols[0]->getProp<std::string>(internKey("foo_string")) == "bar");
+    TEST_ASSERT(newMols[0]->hasProp(internKey("foo_int")));
+    TEST_ASSERT(newMols[0]->getProp<int>(internKey("foo_int")) == 1);
+    TEST_ASSERT(newMols[0]->hasProp(internKey("foo_double")));
+    TEST_ASSERT(newMols[0]->getProp<double>(internKey("foo_double")) == 1.2);
   }
   BOOST_LOG(rdErrorLog) << "done" << std::endl;
 }
@@ -341,7 +341,7 @@ void test6() {
     TEST_ASSERT(m->getNumConformers() == 2);
     TEST_ASSERT(m->getProp<std::string>(common_properties::_Name) ==
                 std::string("example 2"));
-    TEST_ASSERT(m->hasProp("prop3"));
+    TEST_ASSERT(m->hasProp(internKey("prop3")));
     TEST_ASSERT(
         m->getAtomWithIdx(0)->hasProp(common_properties::_GasteigerCharge));
   }
@@ -357,7 +357,7 @@ void test6() {
     TEST_ASSERT(m->getNumConformers() == 0);
     TEST_ASSERT(m->getProp<std::string>(common_properties::_Name) ==
                 std::string("example 2"));
-    TEST_ASSERT(m->hasProp("prop3"));
+    TEST_ASSERT(m->hasProp(internKey("prop3")));
     TEST_ASSERT(
         m->getAtomWithIdx(0)->hasProp(common_properties::_GasteigerCharge));
   }
@@ -374,7 +374,7 @@ void test6() {
     TEST_ASSERT(m->getNumConformers() == 0);
     TEST_ASSERT(m->getProp<std::string>(common_properties::_Name) ==
                 std::string("example 2"));  // we always parse the name
-    TEST_ASSERT(!m->hasProp("prop3"));
+    TEST_ASSERT(!m->hasProp(internKey("prop3")));
     TEST_ASSERT(
         m->getAtomWithIdx(0)->hasProp(common_properties::_GasteigerCharge));
   }
@@ -390,7 +390,7 @@ void test6() {
     TEST_ASSERT(m->getNumConformers() == 2);
     TEST_ASSERT(m->getProp<std::string>(common_properties::_Name) ==
                 std::string("example 2"));  // we always parse the name
-    TEST_ASSERT(!m->hasProp("prop3"));
+    TEST_ASSERT(!m->hasProp(internKey("prop3")));
     TEST_ASSERT(
         m->getAtomWithIdx(0)->hasProp(common_properties::_GasteigerCharge));
   }
@@ -407,7 +407,7 @@ void testGithub2046() {
     UseLegacyStereoPerceptionFixture lf(true);
     std::unique_ptr<RWMol> mol(SmilesToMol("C1CCO[C@H]1F"));
     TEST_ASSERT(mol);
-    mol->setProp("_Name", "mol1 name");
+    mol->setProp(common_properties::_Name, "mol1 name");
     auto jsond = MolInterchange::MolToJSONData(*mol);
     auto mols = MolInterchange::JSONDataToMols(jsond);
     TEST_ASSERT(mols[0]->getAtomWithIdx(3)->getProp<unsigned int>(

@@ -65,18 +65,6 @@ class RDProps {
   }
 
   template <typename T>
-  void setProp(const std::string_view key, T val, bool computed = false) const {
-    if (key.empty()) {
-      throw ValueErrorException("Cannot set property with empty key");
-    }
-    DictKey dk = internKey(key);
-    if (computed) {
-      addComputedKey(dk);
-    }
-    d_props.setVal(dk, val);
-  }
-
-  template <typename T>
   void setProp(DictKey key, T val, bool computed = false) const {
     if (computed) {
       addComputedKey(key);
@@ -85,40 +73,22 @@ class RDProps {
   }
 
   template <typename T>
-  void getProp(const std::string_view key, T &res) const {
-    d_props.getVal(key, res);
-  }
-  template <typename T>
   void getProp(DictKey key, T &res) const {
     d_props.getVal(key, res);
   }
 
-  template <typename T>
-  T getProp(const std::string_view key) const {
-    return d_props.getVal<T>(key);
-  }
   template <typename T>
   T getProp(DictKey key) const {
     return d_props.getVal<T>(key);
   }
 
   template <typename T>
-  bool getPropIfPresent(const std::string_view key, T &res) const {
-    return d_props.getValIfPresent(key, res);
-  }
-  template <typename T>
   bool getPropIfPresent(DictKey key, T &res) const {
     return d_props.getValIfPresent(key, res);
   }
 
-  bool hasProp(const std::string_view key) const { return d_props.hasVal(key); }
   bool hasProp(DictKey key) const { return d_props.hasVal(key); }
 
-  void clearProp(const std::string_view key) const {
-    DictKey dk = internKey(key);
-    removeComputedKey(dk);
-    d_props.clearVal(dk);
-  }
   void clearProp(DictKey key) const {
     removeComputedKey(key);
     d_props.clearVal(key);

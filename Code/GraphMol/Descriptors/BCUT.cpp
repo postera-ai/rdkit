@@ -101,7 +101,7 @@ std::pair<double, double> BCUT2D(const ROMol &m,
   std::vector<double> props;
   props.reserve(m.getNumAtoms());
   for (auto &atom : m.atoms()) {
-    props.push_back(atom->getProp<double>(atom_double_prop));
+    props.push_back(atom->getProp<double>(internKey(atom_double_prop)));
   }
   return BCUT2D(m, props);
 }

@@ -1241,8 +1241,8 @@ TEST_CASE("CXSMILES for reactions", "[cxsmiles]") {
     CHECK(sgsProd[1].getAtoms() == std::vector<unsigned int>{4, 2, 1, 0});
 
     // Ensure properties are set on the rxn.
-    CHECK(sgsReact[0].getProp<unsigned int>("PARENT") == 2);
-    CHECK(sgsProd[0].getProp<unsigned int>("PARENT") == 2);
+    CHECK(sgsReact[0].getProp<unsigned int>(common_properties::sgPARENT) == 2);
+    CHECK(sgsProd[0].getProp<unsigned int>(common_properties::sgPARENT) == 2);
 
     // Now create the roundtrip and check the same properties.
     auto roundtrip = v2::ReactionParser::ReactionFromSmarts(output_cxsmarts);
@@ -1263,10 +1263,10 @@ TEST_CASE("CXSMILES for reactions", "[cxsmiles]") {
     CHECK(sgsRoundReact[1].getAtoms() == std::vector<unsigned int>{4, 2, 1, 0});
 
     // Check that the properties are set on the roundtrip rxn.
-    CHECK(sgsRoundProd[0].getProp<unsigned int>("PARENT") == 2);
+    CHECK(sgsRoundProd[0].getProp<unsigned int>(common_properties::sgPARENT) == 2);
     // Doesn't work because .... maybe because the substance groups are
     // intertwined react/prod? The sg hierarchy is not being written for the
-    // reactant... CHECK(sgsRoundReact[0].getProp<unsigned int>("PARENT") == 2);
+    // reactant... CHECK(sgsRoundReact[0].getProp<unsigned int>(common_properties::sgPARENT) == 2);
   }
   SECTION("link nodes") {
     // clang-format off
@@ -1340,11 +1340,9 @@ TEST_CASE("CXSMILES for reactions", "[cxsmiles]") {
     CHECK(rxn->getReactants().size() == 1);
     CHECK(rxn->getProducts().size() == 1);
     unsigned int bondcfg = 0;
-    CHECK(rxn->getReactants()[0]->getBondWithIdx(0)->getPropIfPresent(
-        "_MolFileBondCfg", bondcfg));
+    CHECK(rxn->getReactants()[0]->getBondWithIdx(0)->getPropIfPresent(common_properties::_MolFileBondCfg, bondcfg));
     CHECK(bondcfg == 2);
-    CHECK(rxn->getProducts()[0]->getBondWithIdx(1)->getPropIfPresent(
-        "_MolFileBondCfg", bondcfg));
+    CHECK(rxn->getProducts()[0]->getBondWithIdx(1)->getPropIfPresent(common_properties::_MolFileBondCfg, bondcfg));
     CHECK(bondcfg == 2);
 
     auto roundtrip = v2::ReactionParser::ReactionFromSmarts(
@@ -1353,11 +1351,9 @@ TEST_CASE("CXSMILES for reactions", "[cxsmiles]") {
     CHECK(roundtrip->getReactants().size() == 1);
     CHECK(roundtrip->getProducts().size() == 1);
     bondcfg = 0;
-    CHECK(roundtrip->getReactants()[0]->getBondWithIdx(0)->getPropIfPresent(
-        "_MolFileBondCfg", bondcfg));
+    CHECK(roundtrip->getReactants()[0]->getBondWithIdx(0)->getPropIfPresent(common_properties::_MolFileBondCfg, bondcfg));
     CHECK(bondcfg == 2);
-    CHECK(roundtrip->getProducts()[0]->getBondWithIdx(1)->getPropIfPresent(
-        "_MolFileBondCfg", bondcfg));
+    CHECK(roundtrip->getProducts()[0]->getBondWithIdx(1)->getPropIfPresent(common_properties::_MolFileBondCfg, bondcfg));
     CHECK(bondcfg == 2);
 
     SmilesWriteParams params;
@@ -1419,16 +1415,16 @@ TEST_CASE("CDXML Parser") {
     unsigned int i = 0;
     int count = 0;
     for (auto &mol : rxns[0]->getReactants()) {
-      CHECK(mol->getProp<unsigned int>("CDX_SCHEME_ID") == 397);
-      CHECK(mol->getProp<unsigned int>("CDX_STEP_ID") == 398);
-      CHECK(mol->getProp<unsigned int>("CDX_REAGENT_ID") == i++);
+      CHECK(mol->getProp<unsigned int>(common_properties::CDX_SCHEME_ID) == 397);
+      CHECK(mol->getProp<unsigned int>(common_properties::CDX_STEP_ID) == 398);
+      CHECK(mol->getProp<unsigned int>(common_properties::CDX_REAGENT_ID) == i++);
       CHECK(MolToSmiles(*mol) == expected[count++]);
     }
     i = 0;
     for (auto &mol : rxns[0]->getProducts()) {
-      CHECK(mol->getProp<unsigned int>("CDX_SCHEME_ID") == 397);
-      CHECK(mol->getProp<unsigned int>("CDX_STEP_ID") == 398);
-      CHECK(mol->getProp<unsigned int>("CDX_PRODUCT_ID") == i++);
+      CHECK(mol->getProp<unsigned int>(common_properties::CDX_SCHEME_ID) == 397);
+      CHECK(mol->getProp<unsigned int>(common_properties::CDX_STEP_ID) == 398);
+      CHECK(mol->getProp<unsigned int>(common_properties::CDX_PRODUCT_ID) == i++);
       CHECK(MolToSmiles(*mol) == expected[count++]);
     }
 
@@ -1706,8 +1702,7 @@ M  END
     CHECK(rxn->getNumReactantTemplates() == 1);
     CHECK(rxn->getNumProductTemplates() == 1);
     CHECK(rxn->getNumAgentTemplates() == 0);
-    CHECK(rxn->getProducts()[0]->getBondWithIdx(3)->getProp<int>(
-              "molReactStatus") == 4);
+    CHECK(rxn->getProducts()[0]->getBondWithIdx(3)->getProp<int>(common_properties::molReactStatus) == 4);
   }
 }
 
@@ -2071,13 +2066,13 @@ V    1 Amine.Cyclic
 M  END)RXN";
     auto rxn = v2::ReactionParser::ReactionFromRxnBlock(rxnb);
     REQUIRE(rxn);
-    REQUIRE(rxn->getReactants()[0]->getAtomWithIdx(0)->hasProp("molFileValue"));
+    REQUIRE(rxn->getReactants()[0]->getAtomWithIdx(0)->hasProp(common_properties::molFileValue));
     MolPickler::setDefaultPickleProperties(PicklerOps::AllProps);
     std::string pkl;
     ReactionPickler::pickleReaction(*rxn, pkl, PicklerOps::AllProps);
     ChemicalReaction rxn2;
     ReactionPickler::reactionFromPickle(pkl, rxn2);
-    CHECK(rxn2.getReactants()[0]->getAtomWithIdx(0)->hasProp("molFileValue"));
+    CHECK(rxn2.getReactants()[0]->getAtomWithIdx(0)->hasProp(common_properties::molFileValue));
   }
   MolPickler::setDefaultPickleProperties(pklOpts);
 }
@@ -2111,7 +2106,7 @@ M  END)RXN";
     ReactionPickler::pickleReaction(*rxn, pkl, PicklerOps::AllProps);
     ChemicalReaction rxn2;
     ReactionPickler::reactionFromPickle(pkl, rxn2);
-    CHECK(rxn2.getReactants()[0]->getAtomWithIdx(0)->hasProp("molFileValue"));
+    CHECK(rxn2.getReactants()[0]->getAtomWithIdx(0)->hasProp(common_properties::molFileValue));
   }
 }
 
@@ -2258,33 +2253,23 @@ TEST_CASE("Github #6015: react_idx property") {
     auto products = rxn->runReactants(reactants);
     REQUIRE(products.size() == 1);
 
-    CHECK(products[0][0]->getAtomWithIdx(0)->getProp<unsigned int>(
-              "react_idx") == 0);
-    CHECK(products[0][0]->getAtomWithIdx(0)->getProp<unsigned int>(
-              "react_atom_idx") == 0);
+    CHECK(products[0][0]->getAtomWithIdx(0)->getProp<unsigned int>(common_properties::reactantIdx) == 0);
+    CHECK(products[0][0]->getAtomWithIdx(0)->getProp<unsigned int>(common_properties::reactantAtomIdx) == 0);
 
-    CHECK(products[0][0]->getAtomWithIdx(1)->getProp<unsigned int>(
-              "react_idx") == 0);
-    CHECK(products[0][0]->getAtomWithIdx(1)->getProp<unsigned int>(
-              "react_atom_idx") == 1);
+    CHECK(products[0][0]->getAtomWithIdx(1)->getProp<unsigned int>(common_properties::reactantIdx) == 0);
+    CHECK(products[0][0]->getAtomWithIdx(1)->getProp<unsigned int>(common_properties::reactantAtomIdx) == 1);
 
-    CHECK(products[0][0]->getAtomWithIdx(2)->getProp<unsigned int>(
-              "react_idx") == 1);
-    CHECK(products[0][0]->getAtomWithIdx(2)->getProp<unsigned int>(
-              "react_atom_idx") == 0);
+    CHECK(products[0][0]->getAtomWithIdx(2)->getProp<unsigned int>(common_properties::reactantIdx) == 1);
+    CHECK(products[0][0]->getAtomWithIdx(2)->getProp<unsigned int>(common_properties::reactantAtomIdx) == 0);
 
-    CHECK(products[0][0]->getAtomWithIdx(3)->getProp<unsigned int>(
-              "react_idx") == 1);
-    CHECK(products[0][0]->getAtomWithIdx(3)->getProp<unsigned int>(
-              "react_atom_idx") == 1);
+    CHECK(products[0][0]->getAtomWithIdx(3)->getProp<unsigned int>(common_properties::reactantIdx) == 1);
+    CHECK(products[0][0]->getAtomWithIdx(3)->getProp<unsigned int>(common_properties::reactantAtomIdx) == 1);
 
-    CHECK(products[0][0]->getAtomWithIdx(4)->hasProp("react_atom_idx") ==
+    CHECK(products[0][0]->getAtomWithIdx(4)->hasProp(common_properties::reactantAtomIdx) ==
           false);
-    CHECK(products[0][0]->getAtomWithIdx(4)->hasProp("react_idx") == false);
+    CHECK(products[0][0]->getAtomWithIdx(4)->hasProp(common_properties::reactantIdx) == false);
 
-    CHECK(products[0][0]->getAtomWithIdx(5)->getProp<unsigned int>(
-              "react_idx") == 1);
-    CHECK(products[0][0]->getAtomWithIdx(5)->getProp<unsigned int>(
-              "react_atom_idx") == 2);
+    CHECK(products[0][0]->getAtomWithIdx(5)->getProp<unsigned int>(common_properties::reactantIdx) == 1);
+    CHECK(products[0][0]->getAtomWithIdx(5)->getProp<unsigned int>(common_properties::reactantAtomIdx) == 2);
   }
 }

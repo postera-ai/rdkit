@@ -2518,7 +2518,7 @@ void MarvinSuperatomSgroupExpanded::parseMoleculeSpecific(
 
   std::string typ = "SUP";
   sgroup.reset(new SubstanceGroup(mol, typ));
-  sgroup->setProp<unsigned int>("index", sequenceId);
+  sgroup->setProp<unsigned int>(common_properties::sgIndex, sequenceId);
 
   for (auto atomPtr : this->atoms) {
     sgroup->addAtomWithIdx(this->parent->getAtomIndex(atomPtr->id));
@@ -2528,7 +2528,7 @@ void MarvinSuperatomSgroupExpanded::parseMoleculeSpecific(
     sgroup->addBondWithIdx(this->parent->getBondIndex(bondPtr->id));
   }
 
-  sgroup->setProp("LABEL", this->title);
+  sgroup->setProp(common_properties::sgLABEL, this->title);
 }
 void MarvinMultipleSgroup::parseMoleculeSpecific(
     RDKit::RWMol *mol, std::unique_ptr<SubstanceGroup> &sgroup,
@@ -2540,7 +2540,7 @@ void MarvinMultipleSgroup::parseMoleculeSpecific(
 
   std::string typ = "MUL";
   sgroup.reset(new SubstanceGroup(mol, typ));
-  sgroup->setProp<unsigned int>("index", sequenceId);
+  sgroup->setProp<unsigned int>(common_properties::sgIndex, sequenceId);
 
   for (auto atomPtr : this->atoms) {
     sgroup->addAtomWithIdx(this->parent->getAtomIndex(atomPtr->id));
@@ -2556,7 +2556,7 @@ void MarvinMultipleSgroup::parseMoleculeSpecific(
     sgroup->addBondWithIdx(this->parent->getBondIndex(bondptr->id));
   }
 
-  sgroup->setProp("MULT", this->title);
+  sgroup->setProp(common_properties::sgMULT, this->title);
 }
 void MarvinSruCoModSgroup::parseMoleculeSpecific(
     RDKit::RWMol *mol, std::unique_ptr<SubstanceGroup> &sgroup,
@@ -2576,9 +2576,9 @@ void MarvinSruCoModSgroup::parseMoleculeSpecific(
   }
 
   sgroup.reset(new SubstanceGroup(mol, typ));
-  sgroup->setProp<unsigned int>("index", sequenceId);
+  sgroup->setProp<unsigned int>(common_properties::sgIndex, sequenceId);
 
-  sgroup->setProp("CONNECT", this->connect);
+  sgroup->setProp(common_properties::sgCONNECT, this->connect);
 
   for (auto atomPtr : this->atoms) {
     sgroup->addAtomWithIdx(this->parent->getAtomIndex(atomPtr->id));
@@ -2588,7 +2588,7 @@ void MarvinSruCoModSgroup::parseMoleculeSpecific(
     sgroup->addBondWithIdx(this->parent->getBondIndex(bondPtr->id));
   }
 
-  sgroup->setProp("LABEL", this->title);
+  sgroup->setProp(common_properties::sgLABEL, this->title);
 }
 
 void MarvinDataSgroup::parseMoleculeSpecific(
@@ -2599,19 +2599,19 @@ void MarvinDataSgroup::parseMoleculeSpecific(
 
   std::string typ = "DAT";
   sgroup.reset(new SubstanceGroup(mol, typ));
-  sgroup->setProp<unsigned int>("index", sequenceId);
+  sgroup->setProp<unsigned int>(common_properties::sgIndex, sequenceId);
 
   for (auto atomPtr : this->atoms) {
     sgroup->addAtomWithIdx(this->parent->getAtomIndex(atomPtr->id));
   }
 
-  sgroup->setProp("FIELDNAME", this->fieldName);
+  sgroup->setProp(common_properties::sgFIELDNAME, this->fieldName);
 
   if (this->queryType != "") {
-    sgroup->setProp("QUERYTYPE", this->queryType);
+    sgroup->setProp(common_properties::sgQUERYTYPE, this->queryType);
   }
   if (this->queryOp != "") {
-    sgroup->setProp("QUERYOP", this->queryOp);
+    sgroup->setProp(common_properties::sgQUERYOP, this->queryOp);
   }
 
   std::ostringstream out;
@@ -2619,21 +2619,21 @@ void MarvinDataSgroup::parseMoleculeSpecific(
       << std::fixed << std::setw(10) << std::setprecision(4) << this->y
       << "    DRU   ALL  0       0";
 
-  sgroup->setProp("FIELDDISP", out.str());  // really not used by RDKIT
+  sgroup->setProp(common_properties::sgFIELDDISP, out.str());  // really not used by RDKIT
 
   std::vector<std::string> fieldDatas;
   fieldDatas.push_back(this->fieldData);
-  sgroup->setProp("DATAFIELDS", fieldDatas);
+  sgroup->setProp(common_properties::sgDATAFIELDS, fieldDatas);
 
   // The following props are not part of the RDKit structure for MOL
   // files, but we save them so that we can round-trip the MRV
 
-  sgroup->setProp("UNITS", this->units);
-  sgroup->setProp("UNITSDISPLAYED", this->unitsDisplayed);
-  sgroup->setProp("CONTEXT", this->context);
-  sgroup->setProp("PLACEMENT", this->placement);
-  sgroup->setProp("X", this->x);
-  sgroup->setProp("Y", this->y);
+  sgroup->setProp(common_properties::sgUNITS, this->units);
+  sgroup->setProp(common_properties::sgUNITSDISPLAYED, this->unitsDisplayed);
+  sgroup->setProp(common_properties::sgCONTEXT, this->context);
+  sgroup->setProp(common_properties::sgPLACEMENT, this->placement);
+  sgroup->setProp(common_properties::sgX, this->x);
+  sgroup->setProp(common_properties::sgY, this->y);
 }
 
 void MarvinMulticenterSgroup::parseMoleculeSpecific(
@@ -2655,7 +2655,7 @@ void MarvinGenericSgroup::parseMoleculeSpecific(
 
   std::string typ = "GEN";
   sgroup.reset(new SubstanceGroup(mol, typ));
-  sgroup->setProp<unsigned int>("index", sequenceId);
+  sgroup->setProp<unsigned int>(common_properties::sgIndex, sequenceId);
 
   for (auto atomPtr : this->atoms) {
     sgroup->addAtomWithIdx(this->parent->getAtomIndex(atomPtr->id));
@@ -2674,13 +2674,13 @@ void MarvinMonomerSgroup::parseMoleculeSpecific(
 
   std::string typ = "MON";
   sgroup.reset(new SubstanceGroup(mol, typ));
-  sgroup->setProp<unsigned int>("index", sequenceId);
+  sgroup->setProp<unsigned int>(common_properties::sgIndex, sequenceId);
 
   for (auto atomPtr : this->parent->atoms) {
     int atomIndex = this->getAtomIndex(atomPtr->id);
     sgroup->addAtomWithIdx(atomIndex);
   }
-  sgroup->setProp("LABEL", this->title);
+  sgroup->setProp(common_properties::sgLABEL, this->title);
 
   // Note: RDKit does not have a place for the Bracket information nor
   // the charge="onAtoms" attr

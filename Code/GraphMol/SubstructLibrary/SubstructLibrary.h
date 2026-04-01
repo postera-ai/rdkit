@@ -387,7 +387,7 @@ class RDKIT_SUBSTRUCTLIBRARY_EXPORT KeyFromPropHolder : public KeyHolderBase {
 
   unsigned int addMol(const ROMol &m) override {
     std::string key;
-    if (m.getPropIfPresent(propname, key)) {
+    if (m.getPropIfPresent(internKey(propname), key)) {
       keys.push_back(std::move(key));
     } else {
       // XXX is this a warning? it could be verbose.  Should we push back the

@@ -85,8 +85,18 @@ unsigned int getSubstanceGroupCount(RDKit::ROMol &mol);
   }
 }
 
-%template(getStringProp) RDKit::SubstanceGroup::getProp<std::string>;
-%template(getUIntProp) RDKit::SubstanceGroup::getProp<unsigned int>;
-%template(getStringVectProp) RDKit::SubstanceGroup::getProp<RDKit::STR_VECT>;
-%template(getUIntVectProp) RDKit::SubstanceGroup::getProp<RDKit::UINT_VECT>;
+%extend RDKit::SubstanceGroup {
+  std::string getStringProp(const std::string &key) {
+    return self->getProp<std::string>(RDKit::internKey(key));
+  }
+  unsigned int getUIntProp(const std::string &key) {
+    return self->getProp<unsigned int>(RDKit::internKey(key));
+  }
+  RDKit::STR_VECT getStringVectProp(const std::string &key) {
+    return self->getProp<RDKit::STR_VECT>(RDKit::internKey(key));
+  }
+  RDKit::UINT_VECT getUIntVectProp(const std::string &key) {
+    return self->getProp<RDKit::UINT_VECT>(RDKit::internKey(key));
+  }
+}
 

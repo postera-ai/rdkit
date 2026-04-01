@@ -189,7 +189,7 @@ void testFilterCatalogEntry() {
 
   entry.setProp("foo", "foo");
   TEST_ASSERT(entry.getProp<std::string>("foo") == "foo");
-  entry.setProp(std::string("bar"), "bar");
+  entry.setProp("bar", "bar");
   TEST_ASSERT(entry.getProp<std::string>("bar") == "bar");
 
   RWMol *newM = SmilesToMol("c1ccccc1", 0, true);

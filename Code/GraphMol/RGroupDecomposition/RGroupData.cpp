@@ -112,7 +112,7 @@ std::map<int, int> RGroupData::getNumBondsToRlabels() const {
 
   for (const auto atom : combinedMol->atoms()) {
     int rlabel;
-    if (atom->getPropIfPresent<int>(RLABEL, rlabel)) {
+    if (atom->getPropIfPresent<int>(common_properties::rgd_RLABEL, rlabel)) {
       ++rlabelsUsedCount[rlabel];
     }
   }
@@ -141,7 +141,7 @@ bool RGroupData::isMolHydrogen(const ROMol &mol) {
   auto atoms = mol.atoms();
   return std::all_of(atoms.begin(), atoms.end(), [](const auto &atom) {
     return (atom->getAtomicNum() == 1 ||
-            (atom->getAtomicNum() == 0 && atom->hasProp(SIDECHAIN_RLABELS)));
+            (atom->getAtomicNum() == 0 && atom->hasProp(common_properties::rgd_SIDECHAIN_RLABELS)));
   });
 }
 

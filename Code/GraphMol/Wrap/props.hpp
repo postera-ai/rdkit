@@ -67,7 +67,7 @@ template <class T, class U>
 bool AddToDict(const U &ob, boost::python::dict &dict, const std::string &key) {
   T res;
   try {
-    if (ob.getPropIfPresent(key, res)) {
+    if (ob.getPropIfPresent(internKey(key), res)) {
       dict[key] = res;
     }
   } catch (std::bad_any_cast &) {
@@ -200,7 +200,7 @@ template <class RDOb, class T>
 PyObject *GetProp(const RDOb *ob, const std::string &key) {
   T res;
   try {
-    if (!ob->getPropIfPresent(key, res)) {
+    if (!ob->getPropIfPresent(internKey(key), res)) {
       PyErr_SetString(PyExc_KeyError, key.c_str());
       return nullptr;
     }
@@ -219,11 +219,11 @@ python::object autoConvertString(const RDOb *ob, const std::string &key) {
   double dvalue;
   std::string svalue;
 
-  if (ob->getPropIfPresent(key, ivalue)) {
+  if (ob->getPropIfPresent(internKey(key), ivalue)) {
     return python::object(ivalue);
-  } else if (ob->getPropIfPresent(key, dvalue)) {
+  } else if (ob->getPropIfPresent(internKey(key), dvalue)) {
     return python::object(dvalue);
-  } else if (ob->getPropIfPresent(key, svalue)) {
+  } else if (ob->getPropIfPresent(internKey(key), svalue)) {
     return python::object(svalue);
   }
 
@@ -235,7 +235,7 @@ PyObject *GetPyProp(const RDOb *obj, const std::string &key, bool autoConvert) {
   python::object pobj;
   if (!autoConvert) {
     std::string res;
-    if (obj->getPropIfPresent(key, res)) {
+    if (obj->getPropIfPresent(internKey(key), res)) {
       return rawPy(res);
     } else {
       PyErr_SetString(PyExc_KeyError, key.c_str());
@@ -335,7 +335,7 @@ struct return_pyobject_passthrough {
 
 template <class RDOb>
 int MolHasProp(const RDOb &mol, const std::string &key) {
-  int res = mol.hasProp(key);
+  int res = mol.hasProp(internKey(key));
   // std::cout << "key: "  << key << ": " << res << std::endl;
   return res;
 }
@@ -343,15 +343,15 @@ int MolHasProp(const RDOb &mol, const std::string &key) {
 template <class RDOb, class T>
 void MolSetProp(const RDOb &mol, const std::string &key, const T &val,
                 bool computed = false) {
-  mol.setProp(key, val, computed);
+  mol.setProp(internKey(key), val, computed);
 }
 
 template <class RDOb>
 void MolClearProp(const RDOb &mol, const std::string &key) {
-  if (!mol.hasProp(key)) {
+  if (!mol.hasProp(internKey(key))) {
     return;
   }
-  mol.clearProp(key);
+  mol.clearProp(internKey(key));
 }
 
 template <class RDOb>

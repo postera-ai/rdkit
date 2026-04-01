@@ -186,7 +186,7 @@ TEST_CASE("Missing exact match") {
   synthonspace.buildSynthonFingerprints(*fpGen);
   CHECK_NOTHROW(results = synthonspace.fingerprintSearch(*queryMol, *fpGen));
   CHECK(results.getHitMolecules().size() == 1);
-  CHECK(results.getHitMolecules()[0]->getProp<double>("Similarity") == 1.0);
+  CHECK(results.getHitMolecules()[0]->getProp<double>(common_properties::Similarity) == 1.0);
 }
 
 TEST_CASE("Hit Filters") {

@@ -26,8 +26,8 @@ void writeAtom(const ROMol &mol, unsigned int atomId,
   dest << " " << atom->getSymbol();
   dest << " " << atom->getFormalCharge();
   std::string propVal;
-  if (atom->hasProp(partialChargeProp)) {
-    atom->getProp(partialChargeProp, propVal);
+  if (atom->hasProp(internKey(partialChargeProp))) {
+    atom->getProp(internKey(partialChargeProp), propVal);
   } else {
     propVal = "0.0";
   }

@@ -38,8 +38,8 @@ TEST_CASE("xyz file parser") {
         RDGeom::Point3D{-2.65909, 2.05702, -0.34025},
         RDGeom::Point3D{-2.63413, -0.18702, -0.48679}};
 
-    CHECK(mol->hasProp("_FileComments"));
-    CHECK(mol->getProp<std::string>("_FileComments") == "charge=-1=");
+    CHECK(mol->hasProp(common_properties::_FileComments));
+    CHECK(mol->getProp<std::string>(common_properties::_FileComments) == "charge=-1=");
 
     auto conf = &mol->getConformer();
     REQUIRE(conf);
@@ -79,7 +79,7 @@ TEST_CASE("xyz file parser") {
         RDGeom::Point3D{-2.75998, 1.86075, -0.45608},
         RDGeom::Point3D{-2.75998, 0.06509, -0.58064}};
 
-    CHECK(!mol->hasProp("_FileComments"));
+    CHECK(!mol->hasProp(common_properties::_FileComments));
 
     auto conf = &mol->getConformer();
     REQUIRE(conf);
@@ -141,8 +141,8 @@ TEST_CASE("xyz block parser") {
                                       RDGeom::Point3D{0.635, -0.635, -0.635},
                                       RDGeom::Point3D{0.635, 0.635, 0.635}};
 
-    CHECK(mol->hasProp("_FileComments"));
-    CHECK(mol->getProp<std::string>("_FileComments") == "        methane");
+    CHECK(mol->hasProp(common_properties::_FileComments));
+    CHECK(mol->getProp<std::string>(common_properties::_FileComments) == "        methane");
 
     auto conf = &mol->getConformer();
     REQUIRE(conf);

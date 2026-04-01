@@ -432,7 +432,7 @@ TEST_CASE("nontetrahedral stereo", "[nontetrahedral]") {
     {
       auto m = "Cl[Pt@SP1](<-N)(<-N)[Cl]"_smiles;
       REQUIRE(m);
-      m->setProp("_Name", "cis platin");
+      m->setProp(common_properties::_Name, "cis platin");
       MolOps::addHs(*m);
       CHECK(DGeomHelpers::EmbedMolecule(*m) == 0);
       auto mb = MolToV3KMolBlock(*m);
@@ -449,7 +449,7 @@ TEST_CASE("nontetrahedral stereo", "[nontetrahedral]") {
     {
       auto m = "Cl[Pt@SP3](<-N)(<-N)[Cl]"_smiles;
       REQUIRE(m);
-      m->setProp("_Name", "trans platin");
+      m->setProp(common_properties::_Name, "trans platin");
       MolOps::addHs(*m);
       CHECK(DGeomHelpers::EmbedMolecule(*m) == 0);
       auto mb = MolToV3KMolBlock(*m);
@@ -909,12 +909,12 @@ TEST_CASE("atropisomers bulk") {
   for (auto i = 0u; i < sdsup.length(); ++i) {
     std::unique_ptr<RWMol> mol(static_cast<RWMol *>(sdsup[i]));
     REQUIRE(mol);
-    auto bondIdx = mol->getProp<unsigned int>("atrop bond");
+    auto bondIdx = mol->getProp<unsigned int>(internKey("atrop bond"));
     REQUIRE((mol->getBondWithIdx(bondIdx)->getStereo() ==
                  Bond::BondStereo::STEREOATROPCCW ||
              mol->getBondWithIdx(bondIdx)->getStereo() ==
                  Bond::BondStereo::STEREOATROPCW));
-    auto atropInfo = mol->getProp<std::string>("atrop volume");
+    auto atropInfo = mol->getProp<std::string>(internKey("atrop volume"));
     std::vector<std::string> tokens;
     boost::split(tokens, atropInfo, boost::is_any_of(" \t"));
     REQUIRE(tokens.size() == 5);

@@ -55,7 +55,7 @@
 %extend RDKit::Bond {
   std::string getProp(const std::string key){
     std::string res;
-    ($self)->getProp(key, res);
+    ($self)->getProp(RDKit::internKey(key), res);
     return res;
   }
 

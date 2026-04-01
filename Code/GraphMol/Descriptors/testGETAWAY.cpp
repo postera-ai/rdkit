@@ -59,7 +59,7 @@ void testGETAWAY() {
     RDKit::ROMol *m = reader.next();
     TEST_ASSERT(m);
     std::string nm;
-    m->getProp("_Name", nm);
+    m->getProp(RDKit::common_properties::_Name, nm);
 
     std::vector<double> dgetaway;
 

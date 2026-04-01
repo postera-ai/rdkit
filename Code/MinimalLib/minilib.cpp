@@ -409,7 +409,7 @@ std::string JSMolBase::get_new_coords(bool useCoordGen) const {
 }
 
 bool JSMolBase::has_prop(const std::string &key) const {
-  return get().hasProp(key);
+  return get().hasProp(internKey(key));
 }
 
 std::vector<std::string> JSMolBase::get_prop_list(bool includePrivate,
@@ -419,23 +419,25 @@ std::vector<std::string> JSMolBase::get_prop_list(bool includePrivate,
 
 bool JSMolBase::set_prop(const std::string &key, const std::string &val,
                          bool computed) {
-  get().setProp(key, val, computed);
+  get().setProp(internKey(key), val, computed);
   return true;
 }
 
 std::string JSMolBase::get_prop(const std::string &key) const {
-  if (!get().hasProp(key)) {
+  auto dk = internKey(key);
+  if (!get().hasProp(dk)) {
     return "";
   }
   std::string val;
-  get().getProp(key, val);
+  get().getProp(dk, val);
   return val;
 }
 
 bool JSMolBase::clear_prop(const std::string &key) {
-  bool res = get().hasProp(key);
+  auto dk = internKey(key);
+  bool res = get().hasProp(dk);
   if (res) {
-    get().clearProp(key);
+    get().clearProp(dk);
   }
   return res;
 }

@@ -64,7 +64,7 @@ std::string BuildV2000STYLines(const ROMol &mol);
 
 std::string BuildV2000StringPropLines(const unsigned int entriesPerLine,
                                       const ROMol &mol,
-                                      const std::string &propName,
+                                      DictKey propName,
                                       const std::string &propCode,
                                       const unsigned int fieldWitdh);
 
@@ -116,7 +116,7 @@ std::string BuildV3000IdxVectorDataBlock(const std::string &key,
  * bonds vector to prevent reordering of original vector */
 std::string BuildV3000BondsBlock(const SubstanceGroup &sgroup);
 
-std::string FormatV3000StringPropertyBlock(const std::string &prop,
+std::string FormatV3000StringPropertyBlock(DictKey prop,
                                            const SubstanceGroup &sgroup);
 
 std::string FormatV3000ParentBlock(const SubstanceGroup &sgroup);

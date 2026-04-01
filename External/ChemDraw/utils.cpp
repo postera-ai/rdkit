@@ -71,16 +71,16 @@ void scaleBonds(const ROMol &mol, Conformer &conf, double targetBondLength,
 unsigned int get_fuse_label(Atom *atm) {
   // return atm->getAtomMapNum(); easier debugging
   unsigned int label = 0;  // default is no label
-  atm->getPropIfPresent<unsigned int>(FUSE_LABEL, label);
+  atm->getPropIfPresent<unsigned int>(common_properties::CDX_NODE_ID, label);
   return label;
 }
 
 void set_fuse_label(Atom *atm, unsigned int idx) {
   // atm->setAtomMapNum(idx); //for debugging
   if (idx) {
-    atm->setProp<unsigned int>(FUSE_LABEL, idx);
+    atm->setProp<unsigned int>(common_properties::CDX_NODE_ID, idx);
   } else {
-    atm->clearProp(FUSE_LABEL);
+    atm->clearProp(common_properties::CDX_NODE_ID);
   }
 }
 
@@ -106,7 +106,7 @@ struct FragmentReplacement {
     }
 
     auto bond_ordering =
-        replacement_atom->getProp<std::vector<int>>(CDX_BOND_ORDERING);
+        replacement_atom->getProp<std::vector<int>>(common_properties::CDX_BOND_ORDERING);
 
     // The "addBond" lower in the loop potentially modifies the atomBonds
     // iterator. To ensure safety, we copy the bonds first.
@@ -120,7 +120,7 @@ struct FragmentReplacement {
     for (auto bond : replacement_bonds) {
       // find the position of the attachment bonds in the bond ordering
       unsigned bond_id = 0;
-      if (!bond->getPropIfPresent<unsigned int>(CDX_BOND_ID, bond_id)) {
+      if (!bond->getPropIfPresent<unsigned int>(common_properties::_CDX_BOND_ID, bond_id)) {
         BOOST_LOG(rdWarningLog)
             << "bond missing internal CDX BOND id, can't attach fragment at bond:"
             << std::endl;
@@ -177,7 +177,7 @@ bool replaceFragments(RWMol &mol) {
   for (auto &atom : mol.atoms()) {
     auto label = get_fuse_label(atom);
     if (label) {
-      if (atom->hasProp(CDX_BOND_ORDERING)) {
+      if (atom->hasProp(common_properties::CDX_BOND_ORDERING)) {
         auto &frag = replacements[label];
         frag.label = label;
         frag.replacement_atom = atom;
@@ -198,9 +198,9 @@ bool replaceFragments(RWMol &mol) {
 }
 namespace {
 Atom::ChiralType getChirality(ROMol &mol, Atom *center_atom, Conformer &conf) {
-  if (center_atom->hasProp(CDX_BOND_ORDERING)) {
+  if (center_atom->hasProp(common_properties::CDX_BOND_ORDERING)) {
     auto bond_ordering =
-        center_atom->getProp<std::vector<int>>(CDX_BOND_ORDERING);
+        center_atom->getProp<std::vector<int>>(common_properties::CDX_BOND_ORDERING);
     if (bond_ordering.size() < 3) {
       return Atom::ChiralType::CHI_UNSPECIFIED;
     }
@@ -216,7 +216,7 @@ Atom::ChiralType getChirality(ROMol &mol, Atom *center_atom, Conformer &conf) {
 
       for (auto bond : mol.atomBonds(center_atom)) {
         int bond_id;
-        if (bond->getPropIfPresent<int>(CDX_BOND_ID, bond_id)) {
+        if (bond->getPropIfPresent<int>(common_properties::_CDX_BOND_ID, bond_id)) {
         } else {
           return Atom::ChiralType::CHI_UNSPECIFIED;
         }
@@ -251,8 +251,8 @@ Atom::ChiralType getChirality(ROMol &mol, Atom *center_atom, Conformer &conf) {
     }
     // This is supports the HDot and HDash available in chemdraw
     //  one is an implicit wedged hydrogen and one is a dashed hydrogen
-    if (center_atom->hasProp(CDX_IMPLICIT_HYDROGEN_STEREO) &&
-        center_atom->getProp<char>(CDX_IMPLICIT_HYDROGEN_STEREO) == 'w') {
+    if (center_atom->hasProp(common_properties::CDX_ATOM_STEREO) &&
+        center_atom->getProp<char>(common_properties::CDX_ATOM_STEREO) == 'w') {
       nswaps++;
     }
 
@@ -276,7 +276,7 @@ void checkChemDrawTetrahedralGeometries(RWMol &mol) {
   for (auto atom : mol.atoms()) {
     // only deal with unspecified chiralities
     if (atom->getChiralTag() != Atom::ChiralType::CHI_UNSPECIFIED) {
-      atom->clearProp(CDX_CIP);
+      atom->clearProp(common_properties::CDX_CIP);
       continue;
     }
     if (conf && !conf->is3D()) {
@@ -287,7 +287,7 @@ void checkChemDrawTetrahedralGeometries(RWMol &mol) {
     }
     // If we have a cip code, might as well check it too
     CDXAtomCIPType cip;
-    if (atom->getPropIfPresent<CDXAtomCIPType>(CDX_CIP, cip)) {
+    if (atom->getPropIfPresent<CDXAtomCIPType>(common_properties::CDX_CIP, cip)) {
       // assign, possibly wrong, initial stereo.
       // note: we can probably deduce this through CDX_BOND_ORDERING, but
       //  I currently don't understand that well enough.

@@ -41,8 +41,8 @@ std::map<int, Atom *> getRlabels(const RWMol &mol) {
   std::map<int, Atom *> atoms;
 
   for (auto atom : mol.atoms()) {
-    if (atom->hasProp(RLABEL)) {
-      int rlabel = atom->getProp<int>(RLABEL);  // user label
+    if (atom->hasProp(common_properties::rgd_RLABEL)) {
+      int rlabel = atom->getProp<int>(common_properties::rgd_RLABEL);  // user label
       CHECK_INVARIANT(atoms.find(rlabel) == atoms.end(),
                       "Duplicate labels in rgroup core!");
       atoms[rlabel] = atom;
@@ -88,8 +88,8 @@ bool setLabel(Atom *atom, int label, std::set<int> &labels, int &maxLabel,
       }
     }
 
-    atom->setProp<int>(RLABEL, label);
-    atom->setProp<int>(RLABEL_TYPE, static_cast<int>(type));
+    atom->setProp<int>(common_properties::rgd_RLABEL, label);
+    atom->setProp<int>(common_properties::rgd_RLABEL_TYPE, static_cast<int>(type));
     labels.insert(label);
     maxLabel = (std::max)(maxLabel, label + 1);
     return true;
@@ -98,8 +98,8 @@ bool setLabel(Atom *atom, int label, std::set<int> &labels, int &maxLabel,
 }
 
 bool isUserRLabel(const Atom &atom) {
-  return atom.hasProp(RLABEL) && atom.hasProp(RLABEL_TYPE) &&
-         static_cast<Labelling>(atom.getProp<int>(RLABEL_TYPE)) !=
+  return atom.hasProp(common_properties::rgd_RLABEL) && atom.hasProp(common_properties::rgd_RLABEL_TYPE) &&
+         static_cast<Labelling>(atom.getProp<int>(common_properties::rgd_RLABEL_TYPE)) !=
              Labelling::INDEX_LABELS;
 }
 
@@ -111,7 +111,7 @@ bool isDummyRGroupAttachment(const Atom &atom) {
     return true;
   }
   bool unlabeled_core_attachment = false;
-  if (atom.getPropIfPresent(UNLABELED_CORE_ATTACHMENT,
+  if (atom.getPropIfPresent(common_properties::rgd_UNLABELED_CORE_ATTACHMENT,
                             unlabeled_core_attachment) &&
       unlabeled_core_attachment) {
     return true;

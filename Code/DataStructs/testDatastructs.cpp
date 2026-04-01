@@ -1403,8 +1403,8 @@ TEST_CASE("ExplicitBitVect round-trips through streamWriteProps/streamReadProps"
       new DataStructsExplicitBitVecPropHandler));
 
   RDProps src;
-  src.setProp<ExplicitBitVect>("bv", bv);
-  src.setProp<int>("num", 42);
+  src.setProp<ExplicitBitVect>(internKey("bv"), bv);
+  src.setProp<int>(internKey("num"), 42);
 
   std::stringstream ss;
   streamWriteProps(ss, src, false, false, handlers);
@@ -1412,8 +1412,8 @@ TEST_CASE("ExplicitBitVect round-trips through streamWriteProps/streamReadProps"
   RDProps dst;
   streamReadProps(ss, dst, handlers);
 
-  REQUIRE(dst.getProp<int>("num") == 42);
-  REQUIRE(dst.getProp<ExplicitBitVect>("bv") == bv);
+  REQUIRE(dst.getProp<int>(internKey("num")) == 42);
+  REQUIRE(dst.getProp<ExplicitBitVect>(internKey("bv")) == bv);
 }
 
 TEST_CASE("test17Github3994") {

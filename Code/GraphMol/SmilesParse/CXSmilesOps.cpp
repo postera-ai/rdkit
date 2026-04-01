@@ -62,7 +62,7 @@ void addquery(Q *qry, std::string symbol, RDKit::RWMol &mol, unsigned int idx) {
 }
 
 void processCXSmilesLabels(RWMol &mol) {
-  if (mol.hasProp("_cxsmilesLabelsProcessed")) {
+  if (mol.hasProp(common_properties::_cxsmilesLabelsProcessed)) {
     return;
   }
   for (auto atom : mol.atoms()) {
@@ -106,7 +106,7 @@ void processCXSmilesLabels(RWMol &mol) {
       addquery(makeAAtomQuery(), "", mol, atom->getIdx());
     }
   }
-  mol.setProp("_cxsmilesLabelsProcessed", 1, true);
+  mol.setProp(common_properties::_cxsmilesLabelsProcessed, 1, true);
 }
 
 namespace parser {
@@ -252,7 +252,7 @@ void setupUnmarkedPolymerSGroup(RWMol &mol, SubstanceGroup &sgroup,
 void finalizePolymerSGroup(RWMol &mol, SubstanceGroup &sgroup) {
   bool isFlipped = false;
   std::string connect = "EU";
-  if (sgroup.getPropIfPresent("CONNECT", connect)) {
+  if (sgroup.getPropIfPresent(common_properties::sgCONNECT, connect)) {
     if (connect.find(",f") != std::string::npos) {
       isFlipped = true;
       boost::replace_all(connect, ",f", "");
@@ -269,14 +269,14 @@ void finalizePolymerSGroup(RWMol &mol, SubstanceGroup &sgroup) {
                             << connect << "'. Assuming 'eu'" << std::endl;
     connect = "EU";
   }
-  sgroup.setProp("CONNECT", connect);
+  sgroup.setProp(common_properties::sgCONNECT, connect);
 
   std::vector<unsigned int> headCrossings;
   std::vector<unsigned int> tailCrossings;
-  sgroup.getPropIfPresent(_headCrossings, headCrossings);
-  sgroup.clearProp(_headCrossings);
-  sgroup.getPropIfPresent(_tailCrossings, tailCrossings);
-  sgroup.clearProp(_tailCrossings);
+  sgroup.getPropIfPresent(common_properties::_headCrossings, headCrossings);
+  sgroup.clearProp(common_properties::_headCrossings);
+  sgroup.getPropIfPresent(common_properties::_tailCrossings, tailCrossings);
+  sgroup.clearProp(common_properties::_tailCrossings);
   if (headCrossings.empty() && tailCrossings.empty()) {
     setupUnmarkedPolymerSGroup(mol, sgroup, headCrossings, tailCrossings);
   }
@@ -288,7 +288,7 @@ void finalizePolymerSGroup(RWMol &mol, SubstanceGroup &sgroup) {
   for (auto &bondIdx : headCrossings) {
     sgroup.addBondWithIdx(bondIdx);
   }
-  sgroup.setProp("XBHEAD", headCrossings);
+  sgroup.setProp(common_properties::sgXBHEAD, headCrossings);
 
   for (auto &bondIdx : tailCrossings) {
     sgroup.addBondWithIdx(bondIdx);
@@ -306,13 +306,13 @@ void finalizePolymerSGroup(RWMol &mol, SubstanceGroup &sgroup) {
     xbcorr.push_back(headIdx);
     xbcorr.push_back(tailIdx);
   }
-  sgroup.setProp("XBCORR", xbcorr);
+  sgroup.setProp(common_properties::sgXBCORR, xbcorr);
 }
 
 Bond *get_bond_with_smiles_idx(const ROMol &mol, unsigned idx) {
   for (auto bnd : mol.bonds()) {
     unsigned int smilesIdx;
-    if (bnd->getPropIfPresent("_cxsmilesBondIdx", smilesIdx) &&
+    if (bnd->getPropIfPresent(common_properties::_cxsmilesBondIdx, smilesIdx) &&
         smilesIdx == idx) {
       return bnd;
     }
@@ -377,7 +377,7 @@ bool parse_atom_props(Iterator &first, Iterator last, RDKit::RWMol &mol,
         ++first;
         std::string pval = read_text_to(first, last, ":|,");
         if (VALID_ATIDX(atIdx) && !pval.empty()) {
-          mol.getAtomWithIdx(atIdx - startAtomIdx)->setProp(pname, pval);
+          mol.getAtomWithIdx(atIdx - startAtomIdx)->setProp(internKey(pname), pval);
         }
       }
     }
@@ -739,9 +739,9 @@ void parse_data_sgroup_attr(Iterator &first, Iterator last,
     if (!data.empty() && keepSGroup) {
       if (fieldIsArray) {
         std::vector<std::string> dataFields = {data};
-        sgroup.setProp(fieldName, dataFields);
+        sgroup.setProp(internKey(fieldName), dataFields);
       } else {
-        sgroup.setProp(fieldName, data);
+        sgroup.setProp(internKey(fieldName), data);
       }
     }
   }
@@ -767,7 +767,7 @@ bool parse_data_sgroup(Iterator &first, Iterator last, RDKit::RWMol &mol,
     return false;
   }
   SubstanceGroup sgroup(&mol, std::string("DAT"));
-  sgroup.setProp(cxsmilesindex, nSGroups);
+  sgroup.setProp(common_properties::_cxsmilesindex, nSGroups);
   bool keepSGroup = false;
   for (auto idx : atoms) {
     if (VALID_ATIDX(idx)) {
@@ -780,7 +780,7 @@ bool parse_data_sgroup(Iterator &first, Iterator last, RDKit::RWMol &mol,
 
   // FIX:
   if (keepSGroup) {
-    sgroup.setProp("FIELDDISP", "    0.0000    0.0000    DR    ALL  0       0");
+    sgroup.setProp(common_properties::sgFIELDDISP, "    0.0000    0.0000    DR    ALL  0       0");
   }
 
   parse_data_sgroup_attr(first, last, sgroup, keepSGroup, "DATAFIELDS", true);
@@ -796,14 +796,14 @@ bool parse_data_sgroup(Iterator &first, Iterator last, RDKit::RWMol &mol,
     std::string coords = read_text_to(first, last, ")");
     ++first;
     if (keepSGroup) {
-      sgroup.setProp("COORDS", coords);
+      sgroup.setProp(common_properties::sgCOORDS, coords);
     }
   }
   // the label processing can destroy sgroup info, so do that now
   // (the function will immediately return if already called)
   if (keepSGroup) {
     processCXSmilesLabels(mol);
-    sgroup.setProp<unsigned int>("index", getSubstanceGroups(mol).size() + 1);
+    sgroup.setProp<unsigned int>(common_properties::sgIndex, getSubstanceGroups(mol).size() + 1);
     addSubstanceGroup(mol, sgroup);
   }
   return true;
@@ -814,7 +814,7 @@ std::vector<RDKit::SubstanceGroup>::iterator find_matching_sgroup(
     std::vector<RDKit::SubstanceGroup> &sgs, unsigned int targetId) {
   return std::find_if(sgs.begin(), sgs.end(), [targetId](const auto &sg) {
     unsigned int pval;
-    if (sg.getPropIfPresent(cxsmilesindex, pval)) {
+    if (sg.getPropIfPresent(common_properties::_cxsmilesindex, pval)) {
       if (pval == targetId) {
         return true;
       }
@@ -845,7 +845,7 @@ bool parse_sgroup_hierarchy(Iterator &first, Iterator last, RDKit::RWMol &mol) {
     if (psg == sgs.end()) {
       validParent = false;
     } else {
-      psg->getPropIfPresent("index", parentId);
+      psg->getPropIfPresent(common_properties::sgIndex, parentId);
     }
     if (first <= last && *first == ':') {
       ++first;
@@ -862,8 +862,8 @@ bool parse_sgroup_hierarchy(Iterator &first, Iterator last, RDKit::RWMol &mol) {
           auto csg = find_matching_sgroup(sgs, childId);
           if (csg != sgs.end()) {
             unsigned int cid;
-            csg->getProp("index", cid);
-            csg->setProp("PARENT", parentId);
+            csg->getProp(common_properties::sgIndex, cid);
+            csg->setProp(common_properties::sgPARENT, parentId);
           }
         }
       }
@@ -909,13 +909,13 @@ bool parse_polymer_sgroup(Iterator &first, Iterator last, RDKit::RWMol &mol,
   }
   bool keepSGroup = false;
   SubstanceGroup sgroup(&mol, type->second);
-  sgroup.setProp(cxsmilesindex, nSGroups);
+  sgroup.setProp(common_properties::_cxsmilesindex, nSGroups);
   if (type_code == "alt") {
-    sgroup.setProp("SUBTYPE", std::string("ALT"));
+    sgroup.setProp(common_properties::sgSUBTYPE, std::string("ALT"));
   } else if (type_code == "ran") {
-    sgroup.setProp("SUBTYPE", std::string("RAN"));
+    sgroup.setProp(common_properties::sgSUBTYPE, std::string("RAN"));
   } else if (type_code == "blk") {
-    sgroup.setProp("SUBTYPE", std::string("BLO"));
+    sgroup.setProp(common_properties::sgSUBTYPE, std::string("BLO"));
   }
 
   std::vector<unsigned int> atoms;
@@ -935,13 +935,13 @@ bool parse_polymer_sgroup(Iterator &first, Iterator last, RDKit::RWMol &mol,
     ++first;
     std::string subscript = read_text_to(first, last, ":|");
     if (keepSGroup && !subscript.empty()) {
-      sgroup.setProp("LABEL", subscript);
+      sgroup.setProp(common_properties::sgLABEL, subscript);
     }
     if (first <= last && *first == ':') {
       ++first;
       std::string superscript = read_text_to(first, last, ":|,");
       if (keepSGroup && !superscript.empty()) {
-        sgroup.setProp("CONNECT", superscript);
+        sgroup.setProp(common_properties::sgCONNECT, superscript);
       }
 
       if (first <= last && *first == ':') {
@@ -958,7 +958,7 @@ bool parse_polymer_sgroup(Iterator &first, Iterator last, RDKit::RWMol &mol,
               break;
             }
           }
-          sgroup.setProp(_headCrossings, headCrossing, true);
+          sgroup.setProp(common_properties::_headCrossings, headCrossing, true);
         }
         if (first <= last && *first == ':') {
           ++first;
@@ -975,7 +975,7 @@ bool parse_polymer_sgroup(Iterator &first, Iterator last, RDKit::RWMol &mol,
               break;
             }
           }
-          sgroup.setProp("_tailCrossings", tailCrossing, true);
+          sgroup.setProp(common_properties::_tailCrossings, tailCrossing, true);
         }
       }
     }
@@ -986,7 +986,7 @@ bool parse_polymer_sgroup(Iterator &first, Iterator last, RDKit::RWMol &mol,
     processCXSmilesLabels(mol);
 
     finalizePolymerSGroup(mol, sgroup);
-    sgroup.setProp<unsigned int>("index", getSubstanceGroups(mol).size() + 1);
+    sgroup.setProp<unsigned int>(common_properties::sgIndex, getSubstanceGroups(mol).size() + 1);
 
     addSubstanceGroup(mol, sgroup);
   }
@@ -1151,10 +1151,10 @@ bool parse_wedged_bonds(Iterator &first, Iterator last, RDKit::RWMol &mol,
       bond->setBondDir(state);
       if (cfg == 2 && canHaveDirection(*bond)) {
         bond->getBeginAtom()->setChiralTag(Atom::ChiralType::CHI_UNSPECIFIED);
-        mol.setProp(detail::_needsDetectBondStereo, 1);
+        mol.setProp(common_properties::_needsDetectBondStereo, 1);
       }
       if ((cfg == 1 || cfg == 3) && canHaveDirection(*bond)) {
-        mol.setProp(detail::_needsDetectAtomStereo, 1);
+        mol.setProp(common_properties::_needsDetectAtomStereo, 1);
       }
     }
     if (first < last && *first == ',') {
@@ -1380,7 +1380,7 @@ bool parse_enhanced_stereo(Iterator &first, Iterator last, RDKit::RWMol &mol,
     const auto group_hash =
         10 * group_id + static_cast<unsigned int>(group_type);
     std::vector<unsigned int> sgTracker;
-    mol.getPropIfPresent(cxsgTracker, sgTracker);
+    mol.getPropIfPresent(common_properties::_sgTracker, sgTracker);
     std::vector<StereoGroup> mol_stereo_groups(mol.getStereoGroups());
     TEST_ASSERT(mol_stereo_groups.size() == sgTracker.size());
 
@@ -1397,7 +1397,7 @@ bool parse_enhanced_stereo(Iterator &first, Iterator last, RDKit::RWMol &mol,
       mol_stereo_groups.emplace_back(group_type, std::move(atoms),
                                      std::move(bonds), group_id);
       sgTracker.push_back(group_hash);
-      mol.setProp(cxsgTracker, sgTracker);
+      mol.setProp(common_properties::_sgTracker, sgTracker);
     }
 
     mol.setStereoGroups(std::move(mol_stereo_groups));
@@ -1546,8 +1546,8 @@ void parseCXExtensions(RDKit::RWMol &mol, const std::string &extText,
     throw RDKit::SmilesParseException("failure parsing CXSMILES extensions");
   }
   processCXSmilesLabels(mol);
-  mol.clearProp("_cxsmilesLabelsProcessed");
-  mol.clearProp(cxsgTracker);
+  mol.clearProp(common_properties::_cxsmilesLabelsProcessed);
+  mol.clearProp(common_properties::_sgTracker);
 }
 }  // end of namespace SmilesParseOps
 
@@ -1688,13 +1688,13 @@ std::string get_sgroup_hierarchy_block(const ROMol &mol) {
   std::map<unsigned int, unsigned int> sgroupOrder;
   bool parentPresent = false;
   for (const auto &sg : sgs) {
-    if (sg.hasProp("_cxsmilesOutputIndex")) {
+    if (sg.hasProp(common_properties::_cxsmilesOutputIndex)) {
       unsigned int sgidx = sg.getIndexInMol();
-      sg.getPropIfPresent("index", sgidx);
-      sgroupOrder[sgidx] = sg.getProp<unsigned int>("_cxsmilesOutputIndex");
-      sg.clearProp("_cxsmilesOutputIndex");
+      sg.getPropIfPresent(common_properties::sgIndex, sgidx);
+      sgroupOrder[sgidx] = sg.getProp<unsigned int>(common_properties::_cxsmilesOutputIndex);
+      sg.clearProp(common_properties::_cxsmilesOutputIndex);
     }
-    if (sg.hasProp("PARENT")) {
+    if (sg.hasProp(common_properties::sgPARENT)) {
       parentPresent = true;
     }
   }
@@ -1704,10 +1704,10 @@ std::string get_sgroup_hierarchy_block(const ROMol &mol) {
     std::map<unsigned int, std::vector<unsigned int>> accum;
     for (const auto &sg : sgs) {
       unsigned pidx;
-      if (sg.getPropIfPresent("PARENT", pidx) &&
+      if (sg.getPropIfPresent(common_properties::sgPARENT, pidx) &&
           sgroupOrder.find(pidx) != sgroupOrder.end()) {
         unsigned int sgidx = sg.getIndexInMol();
-        sg.getPropIfPresent("index", sgidx);
+        sg.getPropIfPresent(common_properties::sgIndex, sgidx);
         if (sgroupOrder.find(sgidx) != sgroupOrder.end()) {
           accum[sgroupOrder[pidx]].push_back(sgroupOrder[sgidx]);
         }
@@ -1743,7 +1743,7 @@ std::string get_sgroup_polymer_block(
     return "";
   }
   unsigned int sgroupOutputIndex = 0;
-  mol.getPropIfPresent("_cxsmilesOutputIndex", sgroupOutputIndex);
+  mol.getPropIfPresent(common_properties::_cxsmilesOutputIndex, sgroupOutputIndex);
   std::stringstream res;
   // we need a map from original atom idx to output idx:
   std::vector<unsigned int> revAtomOrder(mol.getNumAtoms());
@@ -1765,14 +1765,14 @@ std::string get_sgroup_polymer_block(
 
   for (const auto &sg : sgs) {
     std::string typ;
-    if (sg.getPropIfPresent("TYPE", typ) &&
+    if (sg.getPropIfPresent(common_properties::sgTYPE, typ) &&
         reverseTypemap.find(typ) != reverseTypemap.end()) {
-      sg.setProp("_cxsmilesOutputIndex", sgroupOutputIndex);
+      sg.setProp(common_properties::_cxsmilesOutputIndex, sgroupOutputIndex);
       ++sgroupOutputIndex;
 
       res << "Sg:";
       std::string subtype;
-      if (typ == "COP" && sg.getPropIfPresent("SUBTYPE", subtype)) {
+      if (typ == "COP" && sg.getPropIfPresent(common_properties::sgSUBTYPE, subtype)) {
         if (subtype == "ALT") {
           res << "alt";
         } else if (subtype == "RAN") {
@@ -1793,18 +1793,18 @@ std::string get_sgroup_polymer_block(
       res.seekp(-1, res.cur);
       res << ":";
       std::string label;
-      if (sg.getPropIfPresent("LABEL", label)) {
+      if (sg.getPropIfPresent(common_properties::sgLABEL, label)) {
         res << label;
       }
       res << ":";
       std::string connect;
-      if (sg.getPropIfPresent("CONNECT", connect)) {
+      if (sg.getPropIfPresent(common_properties::sgCONNECT, connect)) {
         boost::algorithm::to_lower(connect);
         res << connect;
       }
       res << ":";
       std::vector<unsigned int> headCrossings;
-      if (sg.getPropIfPresent("XBHEAD", headCrossings) &&
+      if (sg.getPropIfPresent(common_properties::sgXBHEAD, headCrossings) &&
           headCrossings.size() > 1) {
         for (auto v : headCrossings) {
           res << bondOrder[v] << ",";
@@ -1814,7 +1814,7 @@ std::string get_sgroup_polymer_block(
       }
       res << ":";
       std::vector<unsigned int> tailCrossings;
-      if (sg.getPropIfPresent("XBCORR", tailCrossings) &&
+      if (sg.getPropIfPresent(common_properties::sgXBCORR, tailCrossings) &&
           tailCrossings.size() > 2) {
         for (unsigned int i = 1; i < tailCrossings.size(); i += 2) {
           res << bondOrder[tailCrossings[i]] << ",";
@@ -1831,7 +1831,7 @@ std::string get_sgroup_polymer_block(
   while (!resStr.empty() && resStr.back() == ',') {
     resStr.pop_back();
   }
-  mol.setProp("_cxsmilesOutputIndex", sgroupOutputIndex);
+  mol.setProp(common_properties::_cxsmilesOutputIndex, sgroupOutputIndex);
 
   return resStr;
 }
@@ -1844,7 +1844,7 @@ std::string get_sgroup_data_block(const ROMol &mol,
   }
 
   unsigned int sgroupOutputIndex = 0;
-  mol.getPropIfPresent("_cxsmilesOutputIndex", sgroupOutputIndex);
+  mol.getPropIfPresent(common_properties::_cxsmilesOutputIndex, sgroupOutputIndex);
 
   std::stringstream res;
   // we need a map from original atom idx to output idx:
@@ -1854,8 +1854,8 @@ std::string get_sgroup_data_block(const ROMol &mol,
   }
 
   for (const auto &sg : sgs) {
-    if (sg.hasProp("TYPE") && sg.getProp<std::string>("TYPE") == "DAT") {
-      sg.setProp("_cxsmilesOutputIndex", sgroupOutputIndex);
+    if (sg.hasProp(common_properties::sgTYPE) && sg.getProp<std::string>(common_properties::sgTYPE) == "DAT") {
+      sg.setProp(common_properties::_cxsmilesOutputIndex, sgroupOutputIndex);
       ++sgroupOutputIndex;
 
       res << "SgD:";
@@ -1868,12 +1868,12 @@ std::string get_sgroup_data_block(const ROMol &mol,
       res.seekp(-1, res.cur);
       res << ":";
       std::string prop;
-      if (sg.getPropIfPresent("FIELDNAME", prop) && !prop.empty()) {
+      if (sg.getPropIfPresent(common_properties::sgFIELDNAME, prop) && !prop.empty()) {
         res << prop;
       }
       res << ":";
       std::vector<std::string> vprop;
-      if (sg.getPropIfPresent("DATAFIELDS", vprop) && !vprop.empty()) {
+      if (sg.getPropIfPresent(common_properties::sgDATAFIELDS, vprop) && !vprop.empty()) {
         for (const auto &pv : vprop) {
           res << pv << ",";
         }
@@ -1881,15 +1881,15 @@ std::string get_sgroup_data_block(const ROMol &mol,
         res.seekp(-1, res.cur);
       }
       res << ":";
-      if (sg.getPropIfPresent("QUERYOP", prop) && !prop.empty()) {
+      if (sg.getPropIfPresent(common_properties::sgQUERYOP, prop) && !prop.empty()) {
         res << prop;
       }
       res << ":";
-      if (sg.getPropIfPresent("FIELDINFO", prop) && !prop.empty()) {
+      if (sg.getPropIfPresent(common_properties::sgFIELDINFO, prop) && !prop.empty()) {
         res << prop;
       }
       res << ":";
-      if (sg.getPropIfPresent("FIELDTAG", prop) && !prop.empty()) {
+      if (sg.getPropIfPresent(common_properties::sgFIELDTAG, prop) && !prop.empty()) {
         res << prop;
       }
       res << ":";
@@ -1902,7 +1902,7 @@ std::string get_sgroup_data_block(const ROMol &mol,
   if (!resStr.empty() && resStr.back() == ',') {
     resStr.pop_back();
   }
-  mol.setProp("_cxsmilesOutputIndex", sgroupOutputIndex);
+  mol.setProp(common_properties::_cxsmilesOutputIndex, sgroupOutputIndex);
 
   return resStr;
 }
@@ -1955,7 +1955,7 @@ std::string get_value_block(const ROMol &mol,
       first = false;
     }
     std::string lbl;
-    if (mol.getAtomWithIdx(idx)->getPropIfPresent(prop, lbl)) {
+    if (mol.getAtomWithIdx(idx)->getPropIfPresent(internKey(prop), lbl)) {
       res += quote_string(lbl);
     }
   }
@@ -2041,7 +2041,7 @@ std::string get_atom_props_block(const ROMol &mol,
     bool includePrivate = false, includeComputed = false;
     for (const auto &pn : atom->getPropList(includePrivate, includeComputed)) {
       if (std::find(skip.begin(), skip.end(), pn) == skip.end()) {
-        std::string pv = atom->getProp<std::string>(pn);
+        std::string pv = atom->getProp<std::string>(internKey(pn));
         if (pn == "dummyLabel" &&
             (isAttachmentPoint || pv == "*" ||
              std::find(SmilesParseOps::pseudoatoms.begin(),
@@ -2452,7 +2452,7 @@ void checkCXFeatures(const ROMol &mol) {
   const auto &sgs = getSubstanceGroups(mol);
   auto parent_check =
       std::any_of(sgs.cbegin(), sgs.cend(), [&](const SubstanceGroup &sg) {
-        if (sg.hasProp("PARENT")) {
+        if (sg.hasProp(common_properties::sgPARENT)) {
           return true;
         }
         return false;
@@ -2637,7 +2637,7 @@ std::string getCXExtensions(const ROMol &mol, std::uint32_t flags) {
     const auto sgrouphierarchyblock = get_sgroup_hierarchy_block(mol);
     appendToCXExtension(sgrouphierarchyblock, res);
   }
-  mol.clearProp("_cxsmilesOutputIndex");
+  mol.clearProp(common_properties::_cxsmilesOutputIndex);
   if (res.size() > 1) {
     res += "|";
   } else {

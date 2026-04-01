@@ -876,7 +876,7 @@ class HasPropQuery : public Queries::EqualityQuery<int, TargetPtr, true> {
   }
 
   bool Match(const TargetPtr what) const override {
-    bool res = what->hasProp(propname);
+    bool res = what->hasProp(internKey(propname));
     if (this->getNegation()) {
       res = !res;
     }
@@ -947,10 +947,10 @@ class HasPropWithValueQuery
   }
 
   bool Match(const TargetPtr what) const override {
-    bool res = what->hasProp(propname);
+    bool res = what->hasProp(internKey(propname));
     if (res) {
       try {
-        T atom_val = what->template getProp<T>(propname);
+        T atom_val = what->template getProp<T>(internKey(propname));
         res = Queries::queryCmp(atom_val, this->val,
                                 static_cast<T>(this->tolerance)) == 0;
       } catch (KeyErrorException &) {
@@ -1020,10 +1020,10 @@ class HasPropWithValueQuery<TargetPtr, std::string>
   double getTolerance() const override { return 0.0; }
 
   bool Match(const TargetPtr what) const override {
-    bool res = what->hasProp(propname);
+    bool res = what->hasProp(internKey(propname));
     if (res) {
       try {
-        std::string atom_val = what->template getProp<std::string>(propname);
+        std::string atom_val = what->template getProp<std::string>(internKey(propname));
         res = atom_val == this->val;
       } catch (KeyErrorException &) {
         res = false;
@@ -1094,11 +1094,11 @@ class HasPropWithValueQuery<TargetPtr, ExplicitBitVect>
   double getTolerance() const override { return tol; }
 
   bool Match(const TargetPtr what) const override {
-    bool res = what->hasProp(propname);
+    bool res = what->hasProp(internKey(propname));
     if (res) {
       try {
         const ExplicitBitVect &bv =
-            what->template getProp<const ExplicitBitVect &>(propname);
+            what->template getProp<const ExplicitBitVect &>(internKey(propname));
         const double tani = TanimotoSimilarity(val, bv);
         res = (1.0 - tani) <= tol;
       } catch (KeyErrorException &) {
